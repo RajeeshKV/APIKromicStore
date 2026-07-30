@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "3fCmrBKvW7YJFwfZ8AfZUvFjnTipiGNCGu5BzpLfgAE=",
+  "Source": "KromicStore.API",
+  "BasePath": "_content/KromicStore.API",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

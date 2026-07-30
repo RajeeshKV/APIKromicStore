@@ -1,0 +1,78 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{93686A9E-494D-40B3-9856-C16DFAF4813F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KromicStore.Domain", "src\KromicStore.Domain\KromicStore.Domain.csproj", "{05A4DC81-3558-4F2F-9732-D025BD80CA0B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KromicStore.Application", "src\KromicStore.Application\KromicStore.Application.csproj", "{22683C53-1F3C-4F1D-837E-5DA7C17808E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KromicStore.Infrastructure", "src\KromicStore.Infrastructure\KromicStore.Infrastructure.csproj", "{6ECAE624-10A6-4AF9-9BEF-62E4074BBB31}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KromicStore.API", "src\KromicStore.API\KromicStore.API.csproj", "{B3452FE6-AD92-4A9C-BDBA-098B6E775371}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{7535F169-569E-4834-A452-7911EFB3F083}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KromicStore.Domain.Tests", "tests\KromicStore.Domain.Tests\KromicStore.Domain.Tests.csproj", "{8C6DB0D0-B0A8-4890-B100-FC1EC6906C27}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KromicStore.Infrastructure.Tests", "tests\KromicStore.Infrastructure.Tests\KromicStore.Infrastructure.Tests.csproj", "{AEFE8816-6809-4D55-B649-4B04083BAB4C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KromicStore.Application.Tests", "tests\KromicStore.Application.Tests\KromicStore.Application.Tests.csproj", "{37EAE207-F952-4435-BAD5-17ACB3EF3736}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KromicStore.API.IntegrationTests", "tests\KromicStore.API.IntegrationTests\KromicStore.API.IntegrationTests.csproj", "{53B62D0C-80BE-4580-AAE9-84ECFBE0C0D8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{05A4DC81-3558-4F2F-9732-D025BD80CA0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05A4DC81-3558-4F2F-9732-D025BD80CA0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05A4DC81-3558-4F2F-9732-D025BD80CA0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05A4DC81-3558-4F2F-9732-D025BD80CA0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22683C53-1F3C-4F1D-837E-5DA7C17808E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22683C53-1F3C-4F1D-837E-5DA7C17808E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22683C53-1F3C-4F1D-837E-5DA7C17808E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22683C53-1F3C-4F1D-837E-5DA7C17808E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6ECAE624-10A6-4AF9-9BEF-62E4074BBB31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6ECAE624-10A6-4AF9-9BEF-62E4074BBB31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6ECAE624-10A6-4AF9-9BEF-62E4074BBB31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6ECAE624-10A6-4AF9-9BEF-62E4074BBB31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3452FE6-AD92-4A9C-BDBA-098B6E775371}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3452FE6-AD92-4A9C-BDBA-098B6E775371}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3452FE6-AD92-4A9C-BDBA-098B6E775371}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3452FE6-AD92-4A9C-BDBA-098B6E775371}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C6DB0D0-B0A8-4890-B100-FC1EC6906C27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C6DB0D0-B0A8-4890-B100-FC1EC6906C27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C6DB0D0-B0A8-4890-B100-FC1EC6906C27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C6DB0D0-B0A8-4890-B100-FC1EC6906C27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEFE8816-6809-4D55-B649-4B04083BAB4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEFE8816-6809-4D55-B649-4B04083BAB4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEFE8816-6809-4D55-B649-4B04083BAB4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEFE8816-6809-4D55-B649-4B04083BAB4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37EAE207-F952-4435-BAD5-17ACB3EF3736}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37EAE207-F952-4435-BAD5-17ACB3EF3736}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37EAE207-F952-4435-BAD5-17ACB3EF3736}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37EAE207-F952-4435-BAD5-17ACB3EF3736}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53B62D0C-80BE-4580-AAE9-84ECFBE0C0D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53B62D0C-80BE-4580-AAE9-84ECFBE0C0D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53B62D0C-80BE-4580-AAE9-84ECFBE0C0D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53B62D0C-80BE-4580-AAE9-84ECFBE0C0D8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{05A4DC81-3558-4F2F-9732-D025BD80CA0B} = {93686A9E-494D-40B3-9856-C16DFAF4813F}
+		{22683C53-1F3C-4F1D-837E-5DA7C17808E0} = {93686A9E-494D-40B3-9856-C16DFAF4813F}
+		{6ECAE624-10A6-4AF9-9BEF-62E4074BBB31} = {93686A9E-494D-40B3-9856-C16DFAF4813F}
+		{B3452FE6-AD92-4A9C-BDBA-098B6E775371} = {93686A9E-494D-40B3-9856-C16DFAF4813F}
+		{8C6DB0D0-B0A8-4890-B100-FC1EC6906C27} = {7535F169-569E-4834-A452-7911EFB3F083}
+		{AEFE8816-6809-4D55-B649-4B04083BAB4C} = {7535F169-569E-4834-A452-7911EFB3F083}
+		{37EAE207-F952-4435-BAD5-17ACB3EF3736} = {7535F169-569E-4834-A452-7911EFB3F083}
+		{53B62D0C-80BE-4580-AAE9-84ECFBE0C0D8} = {7535F169-569E-4834-A452-7911EFB3F083}
+	EndGlobalSection
+EndGlobal

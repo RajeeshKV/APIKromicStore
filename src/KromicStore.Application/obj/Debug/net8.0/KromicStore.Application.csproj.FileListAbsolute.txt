@@ -1,0 +1,15 @@
+C:\Personal\KromicStore\Backend\src\KromicStore.Application\bin\Debug\net8.0\KromicStore.Application.deps.json
+C:\Personal\KromicStore\Backend\src\KromicStore.Application\bin\Debug\net8.0\KromicStore.Application.dll
+C:\Personal\KromicStore\Backend\src\KromicStore.Application\bin\Debug\net8.0\KromicStore.Application.pdb
+C:\Personal\KromicStore\Backend\src\KromicStore.Application\bin\Debug\net8.0\KromicStore.Domain.dll
+C:\Personal\KromicStore\Backend\src\KromicStore.Application\bin\Debug\net8.0\KromicStore.Domain.pdb
+C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\KromicStore.Application.csproj.AssemblyReference.cache
+C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\KromicStore.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\KromicStore.Application.AssemblyInfoInputs.cache
+C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\KromicStore.Application.AssemblyInfo.cs
+C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\KromicStore.Application.csproj.CoreCompileInputs.cache
+C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\KromicSt.45751C89.Up2Date
+C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\KromicStore.Application.dll
+C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\refint\KromicStore.Application.dll
+C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\KromicStore.Application.pdb
+C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\ref\KromicStore.Application.dll
