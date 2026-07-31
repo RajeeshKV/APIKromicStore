@@ -161,6 +161,9 @@ namespace KromicStore.Infrastructure.Persistence.Migrations
                 oldClrType: typeof(Dictionary<string, string>),
                 oldType: "hstore",
                 oldNullable: true);
+            
+            // Raw SQL for PostgreSQL to properly cast hstore to jsonb
+            migrationBuilder.Sql("ALTER TABLE public.\"email_outbox\" ALTER COLUMN \"TemplateVariables\" TYPE jsonb USING CASE WHEN \"TemplateVariables\" IS NOT NULL THEN jsonb(hstore_to_json(\"TemplateVariables\")) ELSE NULL END;");
 
             migrationBuilder.AlterColumn<string>(
                 name: "CustomHeaders",
@@ -171,6 +174,9 @@ namespace KromicStore.Infrastructure.Persistence.Migrations
                 oldClrType: typeof(Dictionary<string, string>),
                 oldType: "hstore",
                 oldNullable: true);
+            
+            // Raw SQL for PostgreSQL to properly cast hstore to jsonb
+            migrationBuilder.Sql("ALTER TABLE public.\"email_outbox\" ALTER COLUMN \"CustomHeaders\" TYPE jsonb USING CASE WHEN \"CustomHeaders\" IS NOT NULL THEN jsonb(hstore_to_json(\"CustomHeaders\")) ELSE NULL END;");
 
             migrationBuilder.CreateTable(
                 name: "CMSPageSet",
