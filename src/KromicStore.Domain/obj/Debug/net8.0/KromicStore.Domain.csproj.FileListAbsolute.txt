@@ -5,6 +5,7 @@ C:\Personal\KromicStore\Backend\src\KromicStore.Domain\obj\Debug\net8.0\KromicSt
 C:\Personal\KromicStore\Backend\src\KromicStore.Domain\obj\Debug\net8.0\KromicStore.Domain.AssemblyInfoInputs.cache
 C:\Personal\KromicStore\Backend\src\KromicStore.Domain\obj\Debug\net8.0\KromicStore.Domain.AssemblyInfo.cs
 C:\Personal\KromicStore\Backend\src\KromicStore.Domain\obj\Debug\net8.0\KromicStore.Domain.csproj.CoreCompileInputs.cache
+C:\Personal\KromicStore\Backend\src\KromicStore.Domain\obj\Debug\net8.0\KromicStore.Domain.sourcelink.json
 C:\Personal\KromicStore\Backend\src\KromicStore.Domain\obj\Debug\net8.0\KromicStore.Domain.dll
 C:\Personal\KromicStore\Backend\src\KromicStore.Domain\obj\Debug\net8.0\refint\KromicStore.Domain.dll
 C:\Personal\KromicStore\Backend\src\KromicStore.Domain\obj\Debug\net8.0\KromicStore.Domain.pdb

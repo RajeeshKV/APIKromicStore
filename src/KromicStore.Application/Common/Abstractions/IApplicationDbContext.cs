@@ -1,6 +1,10 @@
 ﻿using KromicStore.Domain.Catalog.Entities;
 using KromicStore.Domain.Identity;
+using KromicStore.Domain.Orders.Entities;
+using KromicStore.Domain.Promotions.Entities;
+using KromicStore.Domain.Shipping.Entities;
 using KromicStore.Domain.Shopping.Entities;
+using KromicStore.Domain.Taxes.Entities;
 using KromicStore.Domain.Tenants;
 
 namespace KromicStore.Application.Common.Abstractions;
@@ -28,6 +32,30 @@ public interface IApplicationDbContext
     IQueryable<WishlistItem> WishlistItems { get; }
     IQueryable<CheckoutSession> CheckoutSessions { get; }
     IQueryable<CheckoutItem> CheckoutItems { get; }
+
+    // Orders
+    IQueryable<Order> Orders { get; }
+    IQueryable<OrderItem> OrderItems { get; }
+    IQueryable<OrderTimeline> OrderTimelines { get; }
+    IQueryable<OrderNote> OrderNotes { get; }
+
+    // Payments
+    IQueryable<Payment> Payments { get; }
+    IQueryable<PaymentTransaction> PaymentTransactions { get; }
+
+    // Shipping
+    IQueryable<ShippingZone> ShippingZones { get; }
+    IQueryable<ShippingMethod> ShippingMethods { get; }
+    IQueryable<ShippingRate> ShippingRates { get; }
+
+    // Tax
+    IQueryable<TaxRegion> TaxRegions { get; }
+    IQueryable<TaxRule> TaxRules { get; }
+
+    // Promotions
+    IQueryable<Coupon> Coupons { get; }
+    IQueryable<Discount> Discounts { get; }
+    IQueryable<Campaign> Campaigns { get; }
 
     void AddEntity<T>(T entity) where T : class;
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

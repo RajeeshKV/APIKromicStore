@@ -482,3 +482,60 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# dotnet specific
+.dotnet/
+.nuget/
+NuGetFallbackFolder/
+*.dcproj.user
+
+# Test Results
+TestResults/
+coverage.xml
+coverage/
+*.trx
+*.coverage
+
+# IDE specific
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+appsettings.local.json
+appsettings.*.local.json
+
+# Package specific
+*.nupkg
+*.snupkg
+
+# Rider
+.idea/
+*.sln.iml
+.idea/**/shelf
+.idea/**/workspace.xml
+
+# Common backup files
+*.bak
+*.backup
+*.tmp
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Jetbrains
+.idea/
+*.iml

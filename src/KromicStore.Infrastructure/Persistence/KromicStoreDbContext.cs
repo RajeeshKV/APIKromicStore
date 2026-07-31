@@ -2,7 +2,11 @@
 using KromicStore.Domain.Catalog.Entities;
 using KromicStore.Domain.Common;
 using KromicStore.Domain.Identity;
+using KromicStore.Domain.Orders.Entities;
+using KromicStore.Domain.Promotions.Entities;
+using KromicStore.Domain.Shipping.Entities;
 using KromicStore.Domain.Shopping.Entities;
+using KromicStore.Domain.Taxes.Entities;
 using KromicStore.Domain.Tenants;
 using Microsoft.EntityFrameworkCore;
 
@@ -75,6 +79,53 @@ public sealed class KromicStoreDbContext : DbContext, IApplicationDbContext
     public DbSet<CheckoutItem> CheckoutItemSet => Set<CheckoutItem>();
     public IQueryable<CheckoutItem> CheckoutItems => CheckoutItemSet;
 
+    // Orders DbSets
+    public DbSet<Order> OrderSet => Set<Order>();
+    public IQueryable<Order> Orders => OrderSet;
+
+    public DbSet<OrderItem> OrderItemSet => Set<OrderItem>();
+    public IQueryable<OrderItem> OrderItems => OrderItemSet;
+
+    public DbSet<OrderTimeline> OrderTimelineSet => Set<OrderTimeline>();
+    public IQueryable<OrderTimeline> OrderTimelines => OrderTimelineSet;
+
+    public DbSet<OrderNote> OrderNoteSet => Set<OrderNote>();
+    public IQueryable<OrderNote> OrderNotes => OrderNoteSet;
+
+    // Payments DbSets
+    public DbSet<Payment> PaymentSet => Set<Payment>();
+    public IQueryable<Payment> Payments => PaymentSet;
+
+    public DbSet<PaymentTransaction> PaymentTransactionSet => Set<PaymentTransaction>();
+    public IQueryable<PaymentTransaction> PaymentTransactions => PaymentTransactionSet;
+
+    // Shipping DbSets
+    public DbSet<ShippingZone> ShippingZoneSet => Set<ShippingZone>();
+    public IQueryable<ShippingZone> ShippingZones => ShippingZoneSet;
+
+    public DbSet<ShippingMethod> ShippingMethodSet => Set<ShippingMethod>();
+    public IQueryable<ShippingMethod> ShippingMethods => ShippingMethodSet;
+
+    public DbSet<ShippingRate> ShippingRateSet => Set<ShippingRate>();
+    public IQueryable<ShippingRate> ShippingRates => ShippingRateSet;
+
+    // Tax DbSets
+    public DbSet<TaxRegion> TaxRegionSet => Set<TaxRegion>();
+    public IQueryable<TaxRegion> TaxRegions => TaxRegionSet;
+
+    public DbSet<TaxRule> TaxRuleSet => Set<TaxRule>();
+    public IQueryable<TaxRule> TaxRules => TaxRuleSet;
+
+    // Promotions DbSets
+    public DbSet<Coupon> CouponSet => Set<Coupon>();
+    public IQueryable<Coupon> Coupons => CouponSet;
+
+    public DbSet<Discount> DiscountSet => Set<Discount>();
+    public IQueryable<Discount> Discounts => DiscountSet;
+
+    public DbSet<Campaign> CampaignSet => Set<Campaign>();
+    public IQueryable<Campaign> Campaigns => CampaignSet;
+
     public void AddEntity<T>(T entity) where T : class => Set<T>().Add(entity);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -132,6 +183,23 @@ public sealed class KromicStoreDbContext : DbContext, IApplicationDbContext
         modelBuilder.Entity<Cart>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
         modelBuilder.Entity<Wishlist>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
         modelBuilder.Entity<CheckoutSession>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
+
+        // Orders query filters
+        modelBuilder.Entity<Order>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
+        
+        // Payments query filters
+        modelBuilder.Entity<Payment>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
+
+        // Shipping query filters
+        modelBuilder.Entity<ShippingZone>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
+
+        // Tax query filters
+        modelBuilder.Entity<TaxRegion>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
+
+        // Promotions query filters
+        modelBuilder.Entity<Coupon>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
+        modelBuilder.Entity<Discount>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
+        modelBuilder.Entity<Campaign>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
     }
 }
 

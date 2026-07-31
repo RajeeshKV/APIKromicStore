@@ -130,19 +130,15 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
             variant.ToTable("ProductVariants");
             variant.WithOwner().HasForeignKey("ProductId");
             variant.HasKey("Id");
+            variant.Property(v => v.ProductId).IsRequired();
             variant.Property(v => v.Sku).IsRequired().HasMaxLength(50);
             variant.Property(v => v.Name).IsRequired().HasMaxLength(200);
             variant.Property(v => v.PriceAdjustment).HasPrecision(18, 2).HasDefaultValue(0m);
             variant.Property(v => v.StockQuantity).HasDefaultValue(0);
             variant.Property(v => v.IsActive).HasDefaultValue(true);
             
-            // Variant attributes as JSON
-            variant.OwnsMany(v => v.Attributes, attr =>
-            {
-                attr.ToJson();
-                attr.Property(a => a.Name).HasMaxLength(100);
-                attr.Property(a => a.Value).HasMaxLength(100);
-            });
+            // Ignore Attributes navigation - managed by domain logic, not persisted separately
+            variant.Ignore(v => v.Attributes);
 
             variant.HasIndex(v => new { v.ProductId, v.IsActive });
         });

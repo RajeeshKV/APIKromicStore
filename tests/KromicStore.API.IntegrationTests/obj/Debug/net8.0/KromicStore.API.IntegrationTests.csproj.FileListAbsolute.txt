@@ -450,6 +450,7 @@ C:\Personal\KromicStore\Backend\tests\KromicStore.API.IntegrationTests\obj\Debug
 C:\Personal\KromicStore\Backend\tests\KromicStore.API.IntegrationTests\obj\Debug\net8.0\KromicStore.API.IntegrationTests.AssemblyInfoInputs.cache
 C:\Personal\KromicStore\Backend\tests\KromicStore.API.IntegrationTests\obj\Debug\net8.0\KromicStore.API.IntegrationTests.AssemblyInfo.cs
 C:\Personal\KromicStore\Backend\tests\KromicStore.API.IntegrationTests\obj\Debug\net8.0\KromicStore.API.IntegrationTests.csproj.CoreCompileInputs.cache
+C:\Personal\KromicStore\Backend\tests\KromicStore.API.IntegrationTests\obj\Debug\net8.0\KromicStore.API.IntegrationTests.sourcelink.json
 C:\Personal\KromicStore\Backend\tests\KromicStore.API.IntegrationTests\obj\Debug\net8.0\KromicSt.DBC3D3B8.Up2Date
 C:\Personal\KromicStore\Backend\tests\KromicStore.API.IntegrationTests\obj\Debug\net8.0\KromicStore.API.IntegrationTests.dll
 C:\Personal\KromicStore\Backend\tests\KromicStore.API.IntegrationTests\obj\Debug\net8.0\refint\KromicStore.API.IntegrationTests.dll

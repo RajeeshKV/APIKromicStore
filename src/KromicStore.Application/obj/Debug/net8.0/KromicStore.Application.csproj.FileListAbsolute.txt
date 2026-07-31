@@ -8,6 +8,7 @@ C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\Kro
 C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\KromicStore.Application.AssemblyInfoInputs.cache
 C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\KromicStore.Application.AssemblyInfo.cs
 C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\KromicStore.Application.csproj.CoreCompileInputs.cache
+C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\KromicStore.Application.sourcelink.json
 C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\KromicSt.45751C89.Up2Date
 C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\KromicStore.Application.dll
 C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Debug\net8.0\refint\KromicStore.Application.dll

@@ -117,6 +117,7 @@ C:\Personal\KromicStore\Backend\src\KromicStore.API\obj\Debug\net8.0\KromicStore
 C:\Personal\KromicStore\Backend\src\KromicStore.API\obj\Debug\net8.0\KromicStore.API.csproj.CoreCompileInputs.cache
 C:\Personal\KromicStore\Backend\src\KromicStore.API\obj\Debug\net8.0\KromicStore.API.MvcApplicationPartsAssemblyInfo.cs
 C:\Personal\KromicStore\Backend\src\KromicStore.API\obj\Debug\net8.0\KromicStore.API.MvcApplicationPartsAssemblyInfo.cache
+C:\Personal\KromicStore\Backend\src\KromicStore.API\obj\Debug\net8.0\KromicStore.API.sourcelink.json
 C:\Personal\KromicStore\Backend\src\KromicStore.API\obj\Debug\net8.0\staticwebassets.build.json
 C:\Personal\KromicStore\Backend\src\KromicStore.API\obj\Debug\net8.0\staticwebassets.development.json
 C:\Personal\KromicStore\Backend\src\KromicStore.API\obj\Debug\net8.0\staticwebassets\msbuild.KromicStore.API.Microsoft.AspNetCore.StaticWebAssets.props

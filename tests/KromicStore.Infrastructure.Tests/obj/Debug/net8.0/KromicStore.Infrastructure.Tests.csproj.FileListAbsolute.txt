@@ -122,6 +122,7 @@ C:\Personal\KromicStore\Backend\tests\KromicStore.Infrastructure.Tests\obj\Debug
 C:\Personal\KromicStore\Backend\tests\KromicStore.Infrastructure.Tests\obj\Debug\net8.0\KromicStore.Infrastructure.Tests.AssemblyInfoInputs.cache
 C:\Personal\KromicStore\Backend\tests\KromicStore.Infrastructure.Tests\obj\Debug\net8.0\KromicStore.Infrastructure.Tests.AssemblyInfo.cs
 C:\Personal\KromicStore\Backend\tests\KromicStore.Infrastructure.Tests\obj\Debug\net8.0\KromicStore.Infrastructure.Tests.csproj.CoreCompileInputs.cache
+C:\Personal\KromicStore\Backend\tests\KromicStore.Infrastructure.Tests\obj\Debug\net8.0\KromicStore.Infrastructure.Tests.sourcelink.json
 C:\Personal\KromicStore\Backend\tests\KromicStore.Infrastructure.Tests\obj\Debug\net8.0\KromicSt.EA57142F.Up2Date
 C:\Personal\KromicStore\Backend\tests\KromicStore.Infrastructure.Tests\obj\Debug\net8.0\KromicStore.Infrastructure.Tests.dll
 C:\Personal\KromicStore\Backend\tests\KromicStore.Infrastructure.Tests\obj\Debug\net8.0\refint\KromicStore.Infrastructure.Tests.dll
