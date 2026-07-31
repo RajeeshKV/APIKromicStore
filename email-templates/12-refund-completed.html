@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refund Completed - {{ORDER_NUMBER}}</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9; }
+        .header { background: #4CAF50; padding: 30px; text-align: center; color: white; border-radius: 8px 8px 0 0; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .content { background: white; padding: 30px; }
+        .refund-info { background: #E8F5E9; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #4CAF50; }
+        .refund-info h2 { margin-top: 0; color: #2E7D32; font-size: 20px; }
+        .refund-amount { font-size: 28px; font-weight: 700; color: #2E7D32; margin: 15px 0; font-family: monospace; }
+        .refund-details { background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label { color: #666; }
+        .detail-value { font-weight: 600; color: #333; }
+        .section { margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 5px; }
+        .section h3 { margin-top: 0; color: #333; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; }
+        .item { padding: 10px 0; border-bottom: 1px solid #eee; }
+        .item:last-child { border-bottom: none; }
+        .item strong { display: block; color: #333; }
+        .item-meta { color: #999; font-size: 12px; margin-top: 3px; }
+        .button { display: inline-block; background: #4CAF50; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: 600; }
+        .button:hover { background: #45a049; }
+        .timeline { margin: 20px 0; }
+        .timeline-item { padding: 12px; margin: 10px 0; background: white; border-left: 3px solid #4CAF50; }
+        .timeline-item.done { border-left-color: #4CAF50; }
+        .timeline-item.pending { border-left-color: #FFB300; }
+        .timeline-item h4 { margin: 0 0 3px 0; color: #333; font-size: 14px; }
+        .timeline-item p { margin: 0; color: #666; font-size: 12px; }
+        .footer { background: #f9f9f9; padding: 20px; text-align: center; font-size: 12px; color: #999; border-radius: 0 0 8px 8px; border-top: 1px solid #eee; }
+        .footer a { color: #4CAF50; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✓ Refund Completed</h1>
+        </div>
+        <div class="content">
+            <p>Hi {{CUSTOMER_NAME}},</p>
+            <p>We're pleased to inform you that your refund has been processed and completed!</p>
+
+            <div class="refund-info">
+                <h2>Refund Confirmed</h2>
+                <div class="refund-amount">₹{{REFUND_AMOUNT}}</div>
+                <p style="margin: 0; color: #666; font-size: 14px;">
+                    Order #{{ORDER_NUMBER}}<br>
+                    Refunded on {{REFUND_DATE}} at {{REFUND_TIME}}
+                </p>
+            </div>
+
+            <div class="refund-details">
+                <div class="detail-row">
+                    <span class="detail-label">Order Total:</span>
+                    <span class="detail-value">₹{{ORDER_TOTAL}}</span>
+                </div>
+                {{#RETURN_SHIPPING_DEDUCTED}}
+                <div class="detail-row">
+                    <span class="detail-label">Return Shipping:</span>
+                    <span class="detail-value">-₹{{RETURN_SHIPPING_AMOUNT}}</span>
+                </div>
+                {{/RETURN_SHIPPING_DEDUCTED}}
+                {{#RESTOCKING_FEE}}
+                <div class="detail-row">
+                    <span class="detail-label">Restocking Fee:</span>
+                    <span class="detail-value">-₹{{RESTOCKING_FEE_AMOUNT}}</span>
+                </div>
+                {{/RESTOCKING_FEE}}
+                <div class="detail-row">
+                    <span class="detail-label"><strong>Refund Amount:</strong></span>
+                    <span class="detail-value"><strong>₹{{REFUND_AMOUNT}}</strong></span>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>📦 Refunded Items</h3>
+                {{#ITEMS}}
+                <div class="item">
+                    <strong>{{ITEM_NAME}}</strong>
+                    <div class="item-meta">
+                        Quantity: {{ITEM_QUANTITY}} | ₹{{ITEM_PRICE}} each | Total: ₹{{ITEM_TOTAL}}
+                    </div>
+                </div>
+                {{/ITEMS}}
+            </div>
+
+            <h3 style="color: #333;">💳 Refund Timeline</h3>
+            <div class="timeline">
+                <div class="timeline-item done">
+                    <h4>✓ Return Received</h4>
+                    <p>{{RETURN_RECEIVED_DATE}}</p>
+                </div>
+                <div class="timeline-item done">
+                    <h4>✓ Inspection Completed</h4>
+                    <p>{{INSPECTION_DATE}}</p>
+                </div>
+                <div class="timeline-item done">
+                    <h4>✓ Refund Processed</h4>
+                    <p>{{REFUND_PROCESSED_DATE}}</p>
+                </div>
+                <div class="timeline-item {{#REFUND_PENDING}}pending{{/REFUND_PENDING}}{{^REFUND_PENDING}}done{{/REFUND_PENDING}}">
+                    <h4>{{#REFUND_PENDING}}In Progress{{/REFUND_PENDING}}{{^REFUND_PENDING}}✓{{/REFUND_PENDING}} Refund in Your Account</h4>
+                    <p>Expected by {{REFUND_VISIBLE_DATE}} (depending on your bank)</p>
+                </div>
+            </div>
+
+            <h3 style="color: #333;">📊 Refund Method</h3>
+            <p style="background: #f9f9f9; padding: 15px; border-radius: 5px; color: #555;">
+                <strong>Payment Method:</strong> {{PAYMENT_METHOD}}<br>
+                <strong>Last 4 Digits:</strong> {{CARD_LAST_4}}<br>
+                <strong>Processing Time:</strong> {{REFUND_PROCESSING_TIME}}
+            </p>
+
+            <p style="color: #666; font-size: 14px; margin-top: 15px;">
+                <strong>Note:</strong> Depending on your financial institution, the refund may take {{BANK_PROCESSING_DAYS}} to {{BANK_PROCESSING_DAYS_MAX}} business days to appear in your account. If you don't see the refund within this time, please contact your bank.
+            </p>
+
+            <h3 style="color: #333;">Thank You</h3>
+            <p>We appreciate your business and hope to serve you better in the future. If you have any feedback about your return experience, please let us know.</p>
+
+            <p style="text-align: center;">
+                <a href="{{STORE_URL}}" class="button">Continue Shopping</a>
+            </p>
+
+            <h3 style="color: #333;">Need Help?</h3>
+            <p>If you have questions about your refund or don't see it in your account:</p>
+            <ul style="color: #555;">
+                <li><a href="{{CONTACT_URL}}" style="color: #4CAF50;">Contact our support team</a></li>
+                <li>Reply to this email</li>
+                <li>Include your Order Number: {{ORDER_NUMBER}}</li>
+            </ul>
+
+            <p>Best regards,<br><strong>{{STORE_NAME}} Team</strong></p>
+        </div>
+        <div class="footer">
+            <p>© {{YEAR}} {{STORE_NAME}}. All rights reserved.<br>
+            <a href="{{SUPPORT_URL}}">Support</a> | <a href="{{RETURNS_URL}}">Returns</a> | <a href="{{PRIVACY_URL}}">Privacy</a></p>
+        </div>
+    </div>
+</body>
+</html>

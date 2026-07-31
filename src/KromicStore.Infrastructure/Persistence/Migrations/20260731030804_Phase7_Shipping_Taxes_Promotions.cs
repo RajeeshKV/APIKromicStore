@@ -430,7 +430,7 @@ namespace KromicStore.Infrastructure.Persistence.Migrations
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Slug = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     ShortDescription = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: true),
                     ProductType = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     Price = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false, defaultValue: 0m),
@@ -604,7 +604,7 @@ namespace KromicStore.Infrastructure.Persistence.Migrations
                     Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     ResponseCode = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     ResponseMessage = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    RawResponse = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RawResponse = table.Column<string>(type: "text", nullable: true),
                     CreatedOnUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     PaymentId1 = table.Column<Guid>(type: "uuid", nullable: true)
                 },

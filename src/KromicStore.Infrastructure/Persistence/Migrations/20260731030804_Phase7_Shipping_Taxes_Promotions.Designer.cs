@@ -170,7 +170,7 @@ namespace KromicStore.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<decimal?>("Height")
                         .HasColumnType("numeric");
@@ -1026,7 +1026,7 @@ namespace KromicStore.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(256)");
 
                     b.Property<string>("RawResponse")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ResponseCode")
                         .HasMaxLength(100)

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Order is On the Way - {{ORDER_NUMBER}}</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9; }
+        .header { background: #2196F3; padding: 30px; text-align: center; color: white; border-radius: 8px 8px 0 0; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .content { background: white; padding: 30px; }
+        .shipment-info { background: #E3F2FD; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #2196F3; }
+        .shipment-info h2 { margin-top: 0; color: #1565C0; font-size: 18px; }
+        .tracking-badge { display: inline-block; background: #2196F3; color: white; padding: 8px 15px; border-radius: 20px; font-weight: 600; font-size: 14px; margin: 10px 0; }
+        .section { margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 5px; }
+        .section h3 { margin-top: 0; color: #333; border-bottom: 2px solid #2196F3; padding-bottom: 10px; }
+        .item { padding: 10px 0; border-bottom: 1px solid #eee; }
+        .item:last-child { border-bottom: none; }
+        .item strong { display: block; color: #333; }
+        .item-meta { color: #999; font-size: 12px; margin-top: 3px; }
+        .timeline { margin: 20px 0; }
+        .timeline-item { padding: 15px; margin: 10px 0; background: #f9f9f9; border-left: 4px solid #2196F3; border-radius: 3px; }
+        .timeline-item h4 { margin: 0 0 5px 0; color: #333; }
+        .timeline-item p { margin: 0; color: #666; font-size: 14px; }
+        .button { display: inline-block; background: #2196F3; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: 600; }
+        .button:hover { background: #1976D2; }
+        .footer { background: #f9f9f9; padding: 20px; text-align: center; font-size: 12px; color: #999; border-radius: 0 0 8px 8px; border-top: 1px solid #eee; }
+        .footer a { color: #2196F3; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚚 Your Order is On the Way!</h1>
+        </div>
+        <div class="content">
+            <p>Hi {{CUSTOMER_NAME}},</p>
+            <p>Great news! Your order has been shipped and is on its way to you.</p>
+
+            <div class="shipment-info">
+                <h2>Order #{{ORDER_NUMBER}}</h2>
+                <p style="margin: 10px 0 0 0; color: #666;">
+                    <strong>Tracking Number:</strong><br>
+                    <span class="tracking-badge">{{TRACKING_NUMBER}}</span>
+                </p>
+                <p style="margin: 15px 0 0 0; color: #666; font-size: 14px;">
+                    <strong>Carrier:</strong> {{CARRIER_NAME}}<br>
+                    <strong>Shipped Date:</strong> {{SHIPPED_DATE}}
+                </p>
+            </div>
+
+            <div class="section">
+                <h3>📦 Shipped Items</h3>
+                {{#ITEMS}}
+                <div class="item">
+                    <strong>{{ITEM_NAME}}</strong>
+                    <div class="item-meta">
+                        Quantity: {{ITEM_QUANTITY}} | SKU: {{ITEM_SKU}}
+                    </div>
+                </div>
+                {{/ITEMS}}
+            </div>
+
+            <p style="text-align: center;">
+                <a href="{{TRACKING_URL}}" class="button">Track Your Shipment</a>
+            </p>
+
+            <h3 style="color: #333;">📬 Estimated Delivery</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h4>✓ Shipped</h4>
+                    <p>{{SHIPPED_DATE}}</p>
+                </div>
+                <div class="timeline-item" style="border-left-color: #FFB300;">
+                    <h4>In Transit</h4>
+                    <p>Your package is on the way</p>
+                </div>
+                <div class="timeline-item" style="border-left-color: #4CAF50;">
+                    <h4>Out for Delivery</h4>
+                    <p>Estimated {{DELIVERY_DATE}}</p>
+                </div>
+                <div class="timeline-item" style="border-left-color: #4CAF50;">
+                    <h4>Delivered</h4>
+                    <p>We'll notify you when delivered</p>
+                </div>
+            </div>
+
+            <h3 style="color: #333;">📍 Shipping Address</h3>
+            <p style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 0; color: #555;">
+                {{SHIPPING_NAME}}<br>
+                {{SHIPPING_ADDRESS}}<br>
+                {{SHIPPING_CITY}}, {{SHIPPING_STATE}} {{SHIPPING_ZIP}}<br>
+                {{SHIPPING_COUNTRY}}
+            </p>
+
+            <h3 style="color: #333;">💡 Tips</h3>
+            <ul style="color: #555;">
+                <li>Track your shipment regularly using the tracking number above</li>
+                <li>Make sure someone is available to receive the package</li>
+                <li>Keep this email for your records</li>
+                <li>Contact us if you notice any issues with the shipment</li>
+            </ul>
+
+            <p style="background: #E8F5E9; padding: 15px; border-radius: 5px; border-left: 4px solid #4CAF50;">
+                <strong>📞 Need Help?</strong><br>
+                If you have any questions about your shipment, please <a href="{{CONTACT_URL}}" style="color: #2196F3;">contact us</a> or reply to this email.
+            </p>
+
+            <p>Thank you for your order!<br><strong>{{STORE_NAME}} Team</strong></p>
+        </div>
+        <div class="footer">
+            <p>© {{YEAR}} {{STORE_NAME}}. All rights reserved.<br>
+            <a href="{{SUPPORT_URL}}">Support</a> | <a href="{{RETURNS_URL}}">Returns</a></p>
+        </div>
+    </div>
+</body>
+</html>

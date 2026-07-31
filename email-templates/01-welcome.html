@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to KromicStore</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; color: white; border-radius: 8px 8px 0 0; }
+        .header h1 { margin: 0; font-size: 28px; font-weight: 600; }
+        .content { background: white; padding: 30px; }
+        .content h2 { color: #667eea; font-size: 20px; margin-top: 0; }
+        .content p { color: #555; margin: 15px 0; }
+        .button { display: inline-block; background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: 600; }
+        .button:hover { background: #764ba2; }
+        .benefits { background: #f0f4ff; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        .benefit-item { margin: 10px 0; padding-left: 20px; position: relative; }
+        .benefit-item:before { content: "✓"; position: absolute; left: 0; color: #667eea; font-weight: bold; }
+        .footer { background: #f9f9f9; padding: 20px; text-align: center; font-size: 12px; color: #999; border-radius: 0 0 8px 8px; border-top: 1px solid #eee; }
+        .footer a { color: #667eea; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Welcome to KromicStore!</h1>
+        </div>
+        <div class="content">
+            <p>Hi {{USER_NAME}},</p>
+            <p>Welcome! We're thrilled to have you join the KromicStore community. Your account has been successfully created and is ready to use.</p>
+            
+            <h2>Get Started in 3 Steps</h2>
+            <div class="benefits">
+                <div class="benefit-item">Complete your profile with store details</div>
+                <div class="benefit-item">Configure your products and inventory</div>
+                <div class="benefit-item">Launch your online store</div>
+            </div>
+
+            <p>Our platform makes it easy to manage your e-commerce business with powerful tools for inventory, orders, and customer management.</p>
+
+            <a href="{{STORE_URL}}" class="button">Go to Dashboard</a>
+
+            <h2>What You Can Do Now</h2>
+            <ul style="color: #555;">
+                <li><strong>Manage Products:</strong> Add, edit, and organize your inventory</li>
+                <li><strong>Track Orders:</strong> Monitor sales and manage fulfillment</li>
+                <li><strong>Engage Customers:</strong> Send campaigns and promotions</li>
+                <li><strong>Analyze Performance:</strong> View detailed analytics and reports</li>
+            </ul>
+
+            <p>If you have any questions, our support team is here to help. Don't hesitate to reach out!</p>
+            
+            <p>Best regards,<br><strong>The KromicStore Team</strong></p>
+        </div>
+        <div class="footer">
+            <p>© {{YEAR}} KromicStore. All rights reserved.<br>
+            <a href="{{SUPPORT_URL}}">Help Center</a> | <a href="{{DOCUMENTATION_URL}}">Documentation</a></p>
+        </div>
+    </div>
+</body>
+</html>

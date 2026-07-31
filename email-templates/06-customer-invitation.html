@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Out {{STORE_NAME}}</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; color: white; border-radius: 8px 8px 0 0; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .content { background: white; padding: 30px; }
+        .store-banner { background: #f0f4ff; padding: 20px; border-radius: 5px; text-align: center; margin: 20px 0; }
+        .store-banner h2 { margin: 0; color: #667eea; font-size: 20px; }
+        .store-banner p { margin: 10px 0 0 0; color: #666; font-size: 14px; }
+        .button { display: inline-block; background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: 600; }
+        .button:hover { background: #764ba2; }
+        .button-secondary { display: inline-block; background: transparent; color: #667eea; padding: 12px 30px; text-decoration: none; border-radius: 5px; border: 2px solid #667eea; margin: 20px 0; font-weight: 600; }
+        .button-secondary:hover { background: #f0f4ff; }
+        .features { background: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        .feature { margin: 15px 0; padding: 15px; background: white; border-radius: 3px; border-left: 4px solid #667eea; }
+        .feature h4 { margin: 0 0 5px 0; color: #333; }
+        .feature p { margin: 0; color: #666; font-size: 14px; }
+        .footer { background: #f9f9f9; padding: 20px; text-align: center; font-size: 12px; color: #999; border-radius: 0 0 8px 8px; border-top: 1px solid #eee; }
+        .footer a { color: #667eea; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛍️ Discover {{STORE_NAME}}</h1>
+        </div>
+        <div class="content">
+            <p>Hi {{CUSTOMER_NAME}},</p>
+            <p>{{REFERRER_NAME}} thought you might like {{STORE_NAME}}. Check out their amazing products and exclusive offers!</p>
+
+            <div class="store-banner">
+                <h2>{{STORE_NAME}}</h2>
+                <p>{{STORE_DESCRIPTION}}</p>
+            </div>
+
+            <p style="text-align: center;">
+                <a href="{{STORE_URL}}" class="button">Visit Store</a>
+            </p>
+
+            <h3 style="color: #333;">Why Check Them Out?</h3>
+            <div class="features">
+                <div class="feature">
+                    <h4>Quality Products</h4>
+                    <p>Curated selection of high-quality items</p>
+                </div>
+                <div class="feature">
+                    <h4>Great Prices</h4>
+                    <p>Competitive pricing and special offers</p>
+                </div>
+                <div class="feature">
+                    <h4>Fast Shipping</h4>
+                    <p>Quick and reliable delivery</p>
+                </div>
+                <div class="feature">
+                    <h4>Customer Service</h4>
+                    <p>Friendly support team ready to help</p>
+                </div>
+            </div>
+
+            <h3 style="color: #333;">Exclusive Offer</h3>
+            {{#PROMO_CODE}}
+            <div style="background: #FFF8DC; padding: 20px; border-radius: 5px; text-align: center; border: 2px dashed #FFB347;">
+                <p style="margin: 0 0 10px 0; color: #333; font-size: 14px;">Use code at checkout:</p>
+                <p style="margin: 0; font-size: 24px; font-weight: 700; color: #FF6B35; font-family: monospace;">{{PROMO_CODE}}</p>
+                <p style="margin: 10px 0 0 0; color: #666; font-size: 12px;">{{PROMO_DESCRIPTION}}</p>
+            </div>
+            {{/PROMO_CODE}}
+
+            <p style="text-align: center; margin-top: 25px;">
+                <a href="{{STORE_URL}}" class="button">Start Shopping</a>
+            </p>
+
+            <p style="text-align: center; color: #999; font-size: 12px;">Questions? <a href="{{SUPPORT_URL}}" style="color: #667eea;">Contact Support</a></p>
+
+            <p>Happy shopping!<br><strong>The KromicStore Team</strong></p>
+        </div>
+        <div class="footer">
+            <p>© {{YEAR}} KromicStore. All rights reserved.<br>
+            <a href="{{PRIVACY_URL}}">Privacy Policy</a> | <a href="{{TERMS_URL}}">Terms of Service</a></p>
+        </div>
+    </div>
+</body>
+</html>

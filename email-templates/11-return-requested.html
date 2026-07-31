@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Return Request Confirmed - {{RMA_NUMBER}}</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9; }
+        .header { background: #2196F3; padding: 30px; text-align: center; color: white; border-radius: 8px 8px 0 0; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .content { background: white; padding: 30px; }
+        .rma-info { background: #E3F2FD; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #2196F3; }
+        .rma-info h2 { margin-top: 0; color: #1565C0; font-size: 18px; }
+        .rma-badge { display: inline-block; background: #2196F3; color: white; padding: 8px 15px; border-radius: 20px; font-weight: 600; font-size: 14px; margin: 10px 0; font-family: monospace; }
+        .section { margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 5px; }
+        .section h3 { margin-top: 0; color: #333; border-bottom: 2px solid #2196F3; padding-bottom: 10px; }
+        .item { padding: 10px 0; border-bottom: 1px solid #eee; }
+        .item:last-child { border-bottom: none; }
+        .item strong { display: block; color: #333; }
+        .item-meta { color: #999; font-size: 12px; margin-top: 3px; }
+        .return-reason { background: #f9f9f9; padding: 12px; border-radius: 3px; color: #555; font-size: 14px; margin: 10px 0; }
+        .button { display: inline-block; background: #2196F3; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: 600; }
+        .button:hover { background: #1976D2; }
+        .steps { margin: 20px 0; }
+        .step { padding: 15px; margin: 10px 0; background: #f9f9f9; border-left: 4px solid #2196F3; border-radius: 3px; }
+        .step-number { display: inline-block; background: #2196F3; color: white; width: 30px; height: 30px; border-radius: 50%; text-align: center; line-height: 30px; font-weight: 600; margin-right: 10px; }
+        .step h4 { display: inline-block; margin: 0; color: #333; }
+        .step p { margin: 8px 0 0 40px; color: #666; font-size: 14px; }
+        .shipping-label { background: #FFF8E1; padding: 15px; border-radius: 5px; margin: 20px 0; border: 2px dashed #FBC02D; }
+        .shipping-label strong { color: #F57F17; }
+        .footer { background: #f9f9f9; padding: 20px; text-align: center; font-size: 12px; color: #999; border-radius: 0 0 8px 8px; border-top: 1px solid #eee; }
+        .footer a { color: #2196F3; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📬 Return Authorized</h1>
+        </div>
+        <div class="content">
+            <p>Hi {{CUSTOMER_NAME}},</p>
+            <p>Your return request has been approved! We've provided you with a return shipping label and instructions below.</p>
+
+            <div class="rma-info">
+                <h2>RMA Number</h2>
+                <div class="rma-badge">{{RMA_NUMBER}}</div>
+                <p style="margin: 15px 0 0 0; color: #666; font-size: 14px;">
+                    <strong>Original Order:</strong> #{{ORDER_NUMBER}}<br>
+                    <strong>Return Status:</strong> {{RETURN_STATUS}}<br>
+                    <strong>Deadline:</strong> {{RETURN_DEADLINE}}
+                </p>
+            </div>
+
+            <div class="section">
+                <h3>📦 Items Being Returned</h3>
+                {{#ITEMS}}
+                <div class="item">
+                    <strong>{{ITEM_NAME}}</strong>
+                    <div class="item-meta">
+                        Quantity: {{ITEM_QUANTITY}} | Reason: {{RETURN_REASON}}
+                    </div>
+                </div>
+                {{/ITEMS}}
+            </div>
+
+            <h3 style="color: #333;">📋 Return Instructions</h3>
+            <div class="steps">
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h4>Pack Your Items</h4>
+                    <p>Carefully pack all items in their original packaging if possible. Include all accessories and documentation.</p>
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <h4>Print Shipping Label</h4>
+                    <p><a href="{{SHIPPING_LABEL_URL}}" style="color: #2196F3;">Download and print your return shipping label</a> (or copy the label from the attachment)</p>
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <h4>Attach Label & Ship</h4>
+                    <p>Attach the label to the outside of the package and drop it off at {{CARRIER_NAME}}.</p>
+                </div>
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <h4>Track Your Return</h4>
+                    <p><a href="{{RETURN_TRACKING_URL}}" style="color: #2196F3;">Track your return shipment</a> using the tracking number on the label.</p>
+                </div>
+            </div>
+
+            {{#SHIPPING_LABEL_URL}}
+            <div class="shipping-label">
+                <strong>🏷️ Return Shipping Label</strong><br>
+                <p style="margin: 10px 0 0 0; color: #666; font-size: 13px;">
+                    <a href="{{SHIPPING_LABEL_URL}}" style="color: #2196F3;">Download Shipping Label PDF</a><br>
+                    Return Address:<br>
+                    {{RETURN_ADDRESS}}<br>
+                    {{RETURN_CITY}}, {{RETURN_STATE}} {{RETURN_ZIP}}
+                </p>
+            </div>
+            {{/SHIPPING_LABEL_URL}}
+
+            <h3 style="color: #333;">💰 Refund Information</h3>
+            <p>Once we receive and inspect your return:</p>
+            <ul style="color: #555;">
+                <li>We'll process your refund within {{REFUND_PROCESSING_DAYS}} business days</li>
+                <li>Refund will be issued to your original payment method</li>
+                <li>We'll send you a confirmation email with refund details</li>
+                <li>Return shipping costs are {{RETURN_SHIPPING_COST}}</li>
+            </ul>
+
+            <h3 style="color: #333;">Important Notes</h3>
+            <ul style="color: #555;">
+                <li>Keep the {{CARRIER_NAME}} tracking number for your records</li>
+                <li>Items must arrive within {{RETURN_WINDOW_DAYS}} days of approval</li>
+                <li>Include your RMA number ({{RMA_NUMBER}}) on the outside of the package</li>
+                <li>Items must be in original condition for full refund</li>
+            </ul>
+
+            <p style="text-align: center;">
+                <a href="{{RETURN_STATUS_URL}}" class="button">Check Return Status</a>
+            </p>
+
+            <h3 style="color: #333;">Questions?</h3>
+            <p>If you have any questions about your return:</p>
+            <ul style="color: #555;">
+                <li><a href="{{CONTACT_URL}}" style="color: #2196F3;">Contact our support team</a></li>
+                <li>Reply to this email with your RMA number ({{RMA_NUMBER}})</li>
+                <li>Call us at {{SUPPORT_PHONE}}</li>
+            </ul>
+
+            <p>Thank you for giving us the opportunity to make things right!</p>
+
+            <p>Best regards,<br><strong>{{STORE_NAME}} Team</strong></p>
+        </div>
+        <div class="footer">
+            <p>© {{YEAR}} {{STORE_NAME}}. All rights reserved.<br>
+            <a href="{{SUPPORT_URL}}">Support</a> | <a href="{{RETURNS_URL}}">Returns Policy</a></p>
+        </div>
+    </div>
+</body>
+</html>

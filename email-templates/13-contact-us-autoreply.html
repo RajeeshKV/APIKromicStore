@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>We've Received Your Message</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9; }
+        .header { background: #2196F3; padding: 30px; text-align: center; color: white; border-radius: 8px 8px 0 0; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .content { background: white; padding: 30px; }
+        .receipt-info { background: #E3F2FD; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #2196F3; }
+        .receipt-info h2 { margin-top: 0; color: #1565C0; font-size: 18px; }
+        .ticket-badge { display: inline-block; background: #2196F3; color: white; padding: 8px 15px; border-radius: 20px; font-weight: 600; font-size: 14px; margin: 10px 0; font-family: monospace; }
+        .section { margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 5px; }
+        .section h3 { margin-top: 0; color: #333; border-bottom: 2px solid #2196F3; padding-bottom: 10px; }
+        .detail-row { padding: 8px 0; border-bottom: 1px solid #eee; }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label { color: #666; font-size: 13px; }
+        .detail-value { font-weight: 600; color: #333; margin-top: 3px; }
+        .message-box { background: white; padding: 15px; border-radius: 5px; border-left: 4px solid #2196F3; margin: 15px 0; }
+        .message-box p { margin: 0; color: #555; line-height: 1.6; }
+        .timeline { margin: 20px 0; }
+        .timeline-item { padding: 12px; margin: 10px 0; background: white; border-left: 3px solid #2196F3; }
+        .timeline-item h4 { margin: 0 0 3px 0; color: #333; font-size: 14px; font-weight: 600; }
+        .timeline-item p { margin: 0; color: #666; font-size: 12px; }
+        .footer { background: #f9f9f9; padding: 20px; text-align: center; font-size: 12px; color: #999; border-radius: 0 0 8px 8px; border-top: 1px solid #eee; }
+        .footer a { color: #2196F3; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📬 We've Got Your Message</h1>
+        </div>
+        <div class="content">
+            <p>Hi {{CONTACT_NAME}},</p>
+            <p>Thank you for reaching out to us! We've received your message and our support team will review it shortly.</p>
+
+            <div class="receipt-info">
+                <h2>Ticket Confirmation</h2>
+                <div class="ticket-badge">{{TICKET_NUMBER}}</div>
+                <p style="margin: 15px 0 0 0; color: #666; font-size: 14px;">
+                    <strong>Received:</strong> {{SUBMISSION_DATE}} at {{SUBMISSION_TIME}}<br>
+                    <strong>Priority:</strong> {{PRIORITY_LEVEL}}
+                </p>
+            </div>
+
+            <div class="section">
+                <h3>📋 Your Message Details</h3>
+                <div class="detail-row">
+                    <div class="detail-label">Name</div>
+                    <div class="detail-value">{{CONTACT_NAME}}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value">{{CONTACT_EMAIL}}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Phone</div>
+                    <div class="detail-value">{{CONTACT_PHONE}}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Category</div>
+                    <div class="detail-value">{{CONTACT_CATEGORY}}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Subject</div>
+                    <div class="detail-value">{{CONTACT_SUBJECT}}</div>
+                </div>
+            </div>
+
+            <div class="message-box">
+                <p><strong>Your Message:</strong></p>
+                {{CONTACT_MESSAGE}}
+            </div>
+
+            <h3 style="color: #333;">⏱️ What Happens Next?</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h4>✓ Message Received</h4>
+                    <p>{{SUBMISSION_DATE}} - We've logged your inquiry</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>👀 Under Review</h4>
+                    <p>Our team is reviewing your message</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>📧 We'll Respond</h4>
+                    <p>Expected response within {{RESPONSE_TIME_HOURS}} hours</p>
+                </div>
+            </div>
+
+            <h3 style="color: #333;">📝 Your Ticket Number</h3>
+            <p style="background: #FFF9E6; padding: 15px; border-radius: 5px; text-align: center; border: 2px dashed #FFB300;">
+                <strong style="color: #F57F17; font-size: 18px;">{{TICKET_NUMBER}}</strong><br>
+                <span style="color: #666; font-size: 12px;">Please reference this number in future correspondence</span>
+            </p>
+
+            <h3 style="color: #333;">🔍 Frequently Asked Questions</h3>
+            <ul style="color: #555;">
+                <li><strong>How long will it take to get a response?</strong> We typically respond within {{RESPONSE_TIME_HOURS}} hours during business hours.</li>
+                <li><strong>How can I track my inquiry?</strong> Use your ticket number {{TICKET_NUMBER}} to check the status anytime.</li>
+                <li><strong>What if I need to add more information?</strong> Reply to this email with your ticket number and we'll update your inquiry.</li>
+                <li><strong>Can I call you?</strong> Yes! Our support team is available at {{SUPPORT_PHONE}} during business hours.</li>
+            </ul>
+
+            <p style="background: #E3F2FD; padding: 15px; border-radius: 5px; border-left: 4px solid #2196F3;">
+                <strong>💡 Tip:</strong> Save this email or your ticket number ({{TICKET_NUMBER}}) for your records. You can use it to track your inquiry status anytime.
+            </p>
+
+            <h3 style="color: #333;">Thank You</h3>
+            <p>We appreciate you taking the time to reach out. Your feedback helps us improve our products and services. We look forward to assisting you!</p>
+
+            <p>Best regards,<br><strong>{{STORE_NAME}} Support Team</strong></p>
+        </div>
+        <div class="footer">
+            <p>© {{YEAR}} {{STORE_NAME}}. All rights reserved.<br>
+            <a href="{{SUPPORT_URL}}">Support Portal</a> | <a href="{{FAQ_URL}}">FAQ</a> | <a href="{{PRIVACY_URL}}">Privacy</a></p>
+        </div>
+    </div>
+</body>
+</html>
