@@ -16,4 +16,29 @@ public interface ITenantRepository
     Task AddAsync(Tenant tenant, CancellationToken cancellationToken = default);
     void Update(Tenant tenant);
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get all tenants with optional filtering and pagination.
+    /// </summary>
+    Task<(List<Tenant> Tenants, int TotalCount)> GetAllWithPaginationAsync(
+        int skip = 0,
+        int take = 20,
+        TenantStatus? statusFilter = null,
+        string? searchTerm = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Count tenants by status.
+    /// </summary>
+    Task<int> CountByStatusAsync(TenantStatus status, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get count of all tenants.
+    /// </summary>
+    Task<int> CountAllAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get all tenants (no pagination).
+    /// </summary>
+    Task<List<Tenant>> GetAllAsync(CancellationToken cancellationToken = default);
 }

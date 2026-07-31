@@ -2,7 +2,9 @@
 using KromicStore.Domain.Catalog.Entities;
 using KromicStore.Domain.Common;
 using KromicStore.Domain.CustomerPortal.Entities;
+using KromicStore.Domain.Email.Entities;
 using KromicStore.Domain.Identity;
+using KromicStore.Domain.Media.Entities;
 using KromicStore.Domain.Orders.Entities;
 using KromicStore.Domain.Promotions.Entities;
 using KromicStore.Domain.Shipping.Entities;
@@ -100,6 +102,14 @@ public sealed class KromicStoreDbContext : DbContext, IApplicationDbContext
 
     public DbSet<PaymentTransaction> PaymentTransactionSet => Set<PaymentTransaction>();
     public IQueryable<PaymentTransaction> PaymentTransactions => PaymentTransactionSet;
+
+    // Email DbSets
+    public DbSet<EmailOutbox> EmailOutboxSet => Set<EmailOutbox>();
+    public IQueryable<EmailOutbox> EmailOutbox => EmailOutboxSet;
+
+    // Media DbSets
+    public DbSet<ProductImageArchive> ProductImageArchiveSet => Set<ProductImageArchive>();
+    public IQueryable<ProductImageArchive> ProductImageArchives => ProductImageArchiveSet;
 
     // Shipping DbSets
     public DbSet<ShippingZone> ShippingZoneSet => Set<ShippingZone>();
@@ -217,6 +227,12 @@ public sealed class KromicStoreDbContext : DbContext, IApplicationDbContext
         
         // Payments query filters
         modelBuilder.Entity<Payment>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
+
+        // Email query filters
+        modelBuilder.Entity<EmailOutbox>().HasQueryFilter(entity => _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
+
+        // Media query filters
+        modelBuilder.Entity<ProductImageArchive>().HasQueryFilter(entity => _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
 
         // Shipping query filters
         modelBuilder.Entity<ShippingZone>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);

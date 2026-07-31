@@ -3,62 +3,47 @@ using KromicStore.Domain.Common;
 namespace KromicStore.Domain.Orders.Entities;
 
 /// <summary>
-/// Payment aggregate root representing a payment transaction.
-/// Manages payment lifecycle, retries, and failure handling.
-/// Supports multiple payment methods and providers.
+/// Represents a payment transaction with full lifecycle, retry logic, and refund handling.
+/// Tenant-scoped aggregate root that supports multiple payment methods and providers.
 /// </summary>
-public sealed class Payment : TenantEntity, IAuditable, ISoftDeletable
+public class Payment : TenantEntity, IAuditable, ISoftDeletable
 {
     public Guid OrderId { get; private set; }
     public Guid CustomerId { get; private set; }
     public string PaymentMethod { get; private set; } = string.Empty;
-    public string? Provider { get; private set; } // e.g., "Stripe", "PayPal", "Bank"
-    public string? ProviderTransactionId { get; private set; }
-    public PaymentStatus Status { get; private set; }
-    
-    // Amounts
     public decimal Amount { get; private set; }
-    public decimal? RefundedAmount { get; private set; }
     public string Currency { get; private set; } = "USD";
-    
-    // Retry logic
+    public string Provider { get; private set; } = string.Empty;
+    public PaymentStatus Status { get; private set; } = PaymentStatus.Pending;
     public int AttemptCount { get; private set; }
-    public int MaxAttempts { get; private set; } = 3;
+    public const int MaxAttempts = 3;
     public DateTime? NextRetryAtUtc { get; private set; }
-    
-    // Failure info
+    public string? ProviderTransactionId { get; private set; }
     public string? FailureReason { get; private set; }
-    public string? FailureCode { get; private set; }
-    
-    // Timestamps
-    public DateTime InitiatedOnUtc { get; private set; }
-    public DateTime? ProcessedOnUtc { get; private set; }
+    public decimal RefundedAmount { get; private set; }
     public DateTime? RefundedOnUtc { get; private set; }
-    
-    // Relationships
-    private readonly List<PaymentTransaction> _transactions = [];
+    public string? IdempotencyKey { get; private set; }
+
+    private readonly List<PaymentTransaction> _transactions = new();
     public IReadOnlyList<PaymentTransaction> Transactions => _transactions.AsReadOnly();
-    
+
     // Auditing
-    public DateTime ModifiedAtUtc { get; private set; }
+    public DateTime CreatedOnUtc { get; private set; }
     public string CreatedBy { get; private set; } = string.Empty;
-    public string ModifiedBy { get; private set; } = string.Empty;
-    
+    public DateTime? ModifiedOnUtc { get; private set; }
+    public string? ModifiedBy { get; private set; }
+
     // Soft delete
     public bool IsDeleted { get; private set; }
     public DateTime? DeletedOnUtc { get; private set; }
     public string? DeletedBy { get; private set; }
-    
-    private Payment()
-    {
-    }
-    
-    private Payment(Guid id, Guid tenantId) : base(id, tenantId)
-    {
-    }
-    
+
+    private Payment() { }
+
+    private Payment(Guid id, Guid tenantId) : base(id, tenantId) { }
+
     /// <summary>
-    /// Create a new payment.
+    /// Creates a new payment entity for an order.
     /// </summary>
     public static Payment Create(
         Guid tenantId,
@@ -66,156 +51,157 @@ public sealed class Payment : TenantEntity, IAuditable, ISoftDeletable
         Guid customerId,
         string paymentMethod,
         decimal amount,
-        string currency = "USD",
-        string? provider = null)
+        string currency,
+        string provider)
     {
-        if (tenantId == Guid.Empty)
-            throw new ArgumentException("TenantId cannot be empty", nameof(tenantId));
-        
         if (orderId == Guid.Empty)
-            throw new ArgumentException("OrderId cannot be empty", nameof(orderId));
-        
+            throw new ArgumentException("Order ID is required.", nameof(orderId));
+
         if (customerId == Guid.Empty)
-            throw new ArgumentException("CustomerId cannot be empty", nameof(customerId));
-        
-        if (string.IsNullOrWhiteSpace(paymentMethod))
-            throw new ArgumentException("PaymentMethod cannot be empty", nameof(paymentMethod));
-        
+            throw new ArgumentException("Customer ID is required.", nameof(customerId));
+
         if (amount <= 0)
-            throw new ArgumentException("Amount must be greater than 0", nameof(amount));
-        
-        if (string.IsNullOrWhiteSpace(currency) || currency.Length != 3)
-            throw new ArgumentException("Currency must be a valid ISO 4217 code (3 characters)", nameof(currency));
-        
+            throw new ArgumentException("Amount must be greater than 0.", nameof(amount));
+
+        if (string.IsNullOrWhiteSpace(currency))
+            throw new ArgumentException("Currency is required.", nameof(currency));
+
+        if (currency.Length != 3)
+            throw new ArgumentException("Currency must be a 3-letter ISO code.", nameof(currency));
+
+        if (string.IsNullOrWhiteSpace(paymentMethod))
+            throw new ArgumentException("Payment method is required.", nameof(paymentMethod));
+
+        if (string.IsNullOrWhiteSpace(provider))
+            throw new ArgumentException("Provider is required.", nameof(provider));
+
         var payment = new Payment(Guid.NewGuid(), tenantId)
         {
             OrderId = orderId,
             CustomerId = customerId,
-            PaymentMethod = paymentMethod.Trim(),
-            Provider = provider?.Trim(),
+            PaymentMethod = paymentMethod,
             Amount = amount,
-            Currency = currency.ToUpperInvariant(),
+            Currency = currency.ToUpper(),
+            Provider = provider,
             Status = PaymentStatus.Pending,
-            InitiatedOnUtc = DateTime.UtcNow,
-            AttemptCount = 0
+            AttemptCount = 0,
+            IdempotencyKey = Guid.NewGuid().ToString()
         };
-        
+
+        payment.MarkCreated(DateTime.UtcNow, "system");
         return payment;
     }
-    
+
     /// <summary>
-    /// Initialize payment processing.
+    /// Transition payment to Processing status.
     /// </summary>
     public void InitializeProcessing()
     {
         if (Status != PaymentStatus.Pending)
-            throw new InvalidOperationException($"Can only process pending payments. Current status: {Status}");
-        
+            throw new InvalidOperationException("Only pending payments can be processed.");
+
         Status = PaymentStatus.Processing;
+        AttemptCount++;
+        MarkModified(DateTime.UtcNow, "system");
     }
-    
+
     /// <summary>
-    /// Mark payment as successfully processed.
+    /// Mark payment as successfully completed.
     /// </summary>
     public void MarkAsSuccessful(string? providerTransactionId = null)
     {
         if (Status != PaymentStatus.Processing)
-            throw new InvalidOperationException($"Can only succeed processing payments. Current status: {Status}");
-        
+            throw new InvalidOperationException("Only processing payments can be marked as successful.");
+
         Status = PaymentStatus.Completed;
-        ProcessedOnUtc = DateTime.UtcNow;
         ProviderTransactionId = providerTransactionId;
-        AttemptCount++;
         FailureReason = null;
-        FailureCode = null;
+        MarkModified(DateTime.UtcNow, "system");
     }
-    
+
     /// <summary>
     /// Mark payment as failed and schedule retry if attempts remain.
     /// </summary>
-    public void MarkAsFailed(string failureReason, string? failureCode = null)
+    public void MarkAsFailed(string failureReason)
     {
-        if (Status != PaymentStatus.Processing)
-            throw new InvalidOperationException($"Can only fail processing payments. Current status: {Status}");
-        
-        AttemptCount++;
-        FailureReason = failureReason?.Trim();
-        FailureCode = failureCode?.Trim();
-        
+        if (string.IsNullOrWhiteSpace(failureReason))
+            throw new ArgumentException("Failure reason is required.", nameof(failureReason));
+
+        FailureReason = failureReason;
+
         if (AttemptCount < MaxAttempts)
         {
-            // Schedule retry - exponential backoff (2 min, 5 min, 10 min)
-            var delayMinutes = (int)Math.Pow(2, AttemptCount);
-            NextRetryAtUtc = DateTime.UtcNow.AddMinutes(delayMinutes);
             Status = PaymentStatus.RetryScheduled;
+            NextRetryAtUtc = DateTime.UtcNow.AddSeconds(Math.Pow(2, AttemptCount) * 60); // Exponential backoff
         }
         else
         {
             Status = PaymentStatus.Failed;
         }
+
+        MarkModified(DateTime.UtcNow, "system");
     }
-    
+
     /// <summary>
     /// Cancel the payment.
     /// </summary>
-    public void Cancel(string reason = "")
+    public void Cancel(string? reason = null)
     {
         if (Status == PaymentStatus.Completed || Status == PaymentStatus.Refunded)
-            throw new InvalidOperationException($"Cannot cancel {Status} payments");
-        
+            throw new InvalidOperationException("Cannot cancel a completed or refunded payment.");
+
         Status = PaymentStatus.Cancelled;
         FailureReason = reason;
+        MarkModified(DateTime.UtcNow, "system");
     }
-    
+
     /// <summary>
-    /// Process refund for the payment.
+    /// Process a refund (full or partial).
     /// </summary>
     public void ProcessRefund(decimal refundAmount)
     {
         if (Status != PaymentStatus.Completed)
-            throw new InvalidOperationException($"Can only refund completed payments. Current status: {Status}");
-        
-        if (refundAmount <= 0 || refundAmount > Amount)
-            throw new ArgumentException($"Refund amount must be between 0 and {Amount}", nameof(refundAmount));
-        
-        RefundedAmount = (RefundedAmount ?? 0) + refundAmount;
-        
-        if (RefundedAmount >= Amount)
+            throw new InvalidOperationException("Only completed payments can be refunded.");
+
+        if (refundAmount <= 0)
+            throw new ArgumentException("Refund amount must be greater than 0.", nameof(refundAmount));
+
+        if (RefundedAmount + refundAmount > Amount)
+            throw new ArgumentException("Refund amount exceeds available refundable amount.", nameof(refundAmount));
+
+        RefundedAmount += refundAmount;
+        RefundedOnUtc = DateTime.UtcNow;
+
+        if (RefundedAmount == Amount)
         {
             Status = PaymentStatus.Refunded;
         }
-        else
+        else if (RefundedAmount > 0 && RefundedAmount < Amount)
         {
             Status = PaymentStatus.PartiallyRefunded;
         }
-        
-        RefundedOnUtc = DateTime.UtcNow;
+
+        MarkModified(DateTime.UtcNow, "system");
     }
-    
+
     /// <summary>
-    /// Add a transaction record.
+    /// Get the remaining amount available for refund.
+    /// </summary>
+    public decimal GetRemainderForRefund()
+    {
+        return Amount - RefundedAmount;
+    }
+
+    /// <summary>
+    /// Add a transaction record to this payment.
     /// </summary>
     public void AddTransaction(PaymentTransaction transaction)
     {
         if (transaction == null)
-            throw new ArgumentNullException(nameof(transaction));
-        
+            throw new ArgumentNullException(nameof(transaction), "Transaction cannot be null.");
+
         _transactions.Add(transaction);
-    }
-    
-    /// <summary>
-    /// Check if payment can be retried.
-    /// </summary>
-    public bool CanRetry => Status == PaymentStatus.RetryScheduled && 
-                            NextRetryAtUtc.HasValue && 
-                            DateTime.UtcNow >= NextRetryAtUtc.Value;
-    
-    /// <summary>
-    /// Get remaining refundable amount.
-    /// </summary>
-    public decimal GetRemainderForRefund()
-    {
-        return Amount - (RefundedAmount ?? 0);
+        MarkModified(DateTime.UtcNow, "system");
     }
 }
 
@@ -224,12 +210,26 @@ public sealed class Payment : TenantEntity, IAuditable, ISoftDeletable
 /// </summary>
 public enum PaymentStatus
 {
-    Pending = 0,             // Awaiting processing
-    Processing = 1,          // Currently processing
-    Completed = 2,           // Successfully processed
-    Failed = 3,              // Failed after all retries
-    RetryScheduled = 4,      // Failed but retry scheduled
-    Cancelled = 5,           // Cancelled by user/system
-    Refunded = 6,            // Fully refunded
-    PartiallyRefunded = 7    // Partially refunded
+    Pending = 0,
+    Processing = 1,
+    Completed = 2,
+    Failed = 3,
+    Cancelled = 4,
+    RetryScheduled = 5,
+    Refunded = 6,
+    PartiallyRefunded = 7
+}
+
+/// <summary>
+/// Payment method enumeration for gateway results.
+/// </summary>
+public enum PaymentMethod
+{
+    Unknown = 0,
+    CreditCard = 1,
+    DebitCard = 2,
+    NetBanking = 3,
+    UPI = 4,
+    Wallet = 5,
+    EMI = 6
 }

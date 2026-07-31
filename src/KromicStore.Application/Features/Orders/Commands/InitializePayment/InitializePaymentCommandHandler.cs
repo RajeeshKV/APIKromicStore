@@ -45,7 +45,7 @@ public sealed class InitializePaymentCommandHandler : IRequestHandler<Initialize
             paymentMethod: request.PaymentMethod,
             amount: request.Amount,
             currency: request.Currency,
-            provider: request.Provider);
+            provider: request.Provider ?? "Unknown");
 
         // Link payment to order
         order.LinkPayment(payment.Id);
@@ -64,7 +64,7 @@ public sealed class InitializePaymentCommandHandler : IRequestHandler<Initialize
             Amount = payment.Amount,
             Currency = payment.Currency,
             Status = payment.Status.ToString(),
-            InitiatedOnUtc = payment.InitiatedOnUtc
+            InitiatedOnUtc = payment.CreatedOnUtc
         };
     }
 }

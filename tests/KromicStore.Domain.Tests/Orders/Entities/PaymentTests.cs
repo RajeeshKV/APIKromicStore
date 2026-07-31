@@ -149,7 +149,7 @@ public sealed class PaymentTests
         // Assert
         Assert.Equal(PaymentStatus.RetryScheduled, payment.Status);
         Assert.Equal(1, payment.AttemptCount);
-        Assert.True(payment.AttemptCount < payment.MaxAttempts);
+        Assert.True(payment.AttemptCount < Payment.MaxAttempts);
         Assert.NotNull(payment.NextRetryAtUtc);
     }
 

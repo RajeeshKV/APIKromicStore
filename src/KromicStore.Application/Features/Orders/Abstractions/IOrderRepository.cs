@@ -73,4 +73,39 @@ public interface IOrderRepository
     /// Save changes to the repository.
     /// </summary>
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get all orders for a tenant (used for platform analytics).
+    /// </summary>
+    Task<IEnumerable<Order>> GetByTenantIdAsync(Guid tenantId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get count of all orders in the system.
+    /// </summary>
+    Task<int> GetTotalOrderCountAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get count of orders for a specific tenant.
+    /// </summary>
+    Task<int> GetOrderCountByTenantIdAsync(Guid tenantId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get total revenue across all orders in the system.
+    /// </summary>
+    Task<decimal> GetTotalRevenueAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get total revenue for a specific tenant.
+    /// </summary>
+    Task<decimal> GetRevenueBytTenantIdAsync(Guid tenantId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get distinct customer count across all orders in the system.
+    /// </summary>
+    Task<int> GetTotalUniqueCustomerCountAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get distinct customer count for a specific tenant.
+    /// </summary>
+    Task<int> GetUniqueCustomerCountByTenantIdAsync(Guid tenantId, CancellationToken cancellationToken = default);
 }

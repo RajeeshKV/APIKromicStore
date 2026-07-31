@@ -42,7 +42,7 @@ public sealed class PaymentRepository : IPaymentRepository
         return await _dbContext.Payments
             .Where(p => p.CustomerId == customerId)
             .Include(p => p.Transactions)
-            .OrderByDescending(p => p.InitiatedOnUtc)
+            .OrderByDescending(p => p.CreatedOnUtc)
             .ToListAsync(cancellationToken);
     }
 
@@ -51,7 +51,7 @@ public sealed class PaymentRepository : IPaymentRepository
         return await _dbContext.Payments
             .Where(p => p.Status == status)
             .Include(p => p.Transactions)
-            .OrderByDescending(p => p.InitiatedOnUtc)
+            .OrderByDescending(p => p.CreatedOnUtc)
             .ToListAsync(cancellationToken);
     }
 
@@ -96,7 +96,7 @@ public sealed class PaymentRepository : IPaymentRepository
             .Where(p => p.CustomerId == customerId && 
                        (p.Status == PaymentStatus.Failed || p.Status == PaymentStatus.RetryScheduled))
             .Include(p => p.Transactions)
-            .OrderByDescending(p => p.InitiatedOnUtc)
+            .OrderByDescending(p => p.CreatedOnUtc)
             .ToListAsync(cancellationToken);
     }
 

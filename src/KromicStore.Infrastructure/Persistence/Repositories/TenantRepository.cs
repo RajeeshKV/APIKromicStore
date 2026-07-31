@@ -70,6 +70,60 @@ public sealed class TenantRepository : ITenantRepository
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         => await _context.SaveChangesAsync(cancellationToken);
 
+    public async Task<(List<Tenant> Tenants, int TotalCount)> GetAllWithPaginationAsync(
+        int skip = 0,
+        int take = 20,
+        TenantStatus? statusFilter = null,
+        string? searchTerm = null,
+        CancellationToken cancellationToken = default)
+    {
+        // Normalize take to reasonable limits
+        if (take <= 0) take = 20;
+        if (take > 100) take = 100;
+        if (skip < 0) skip = 0;
+
+        var query = _context.Tenants.AsQueryable();
+
+        // Apply status filter if provided
+        if (statusFilter.HasValue)
+        {
+            query = query.Where(t => t.Status == statusFilter.Value);
+        }
+
+        // Apply search filter if provided
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var searchLower = searchTerm.ToLower().Trim();
+            query = query.Where(t => 
+                t.Name.ToLower().Contains(searchLower) || 
+                t.StoreName.ToLower().Contains(searchLower) ||
+                t.Slug.ToLower().Contains(searchLower));
+        }
+
+        // Get total count before pagination
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        // Apply pagination and order
+        var tenants = await query
+            .OrderByDescending(t => t.CreatedOnUtc)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+
+        return (tenants, totalCount);
+    }
+
+    public async Task<int> CountByStatusAsync(TenantStatus status, CancellationToken cancellationToken = default)
+        => await _context.Tenants.CountAsync(t => t.Status == status, cancellationToken);
+
+    public async Task<int> CountAllAsync(CancellationToken cancellationToken = default)
+        => await _context.Tenants.CountAsync(cancellationToken);
+
+    public async Task<List<Tenant>> GetAllAsync(CancellationToken cancellationToken = default)
+        => await _context.Tenants
+            .OrderByDescending(t => t.CreatedOnUtc)
+            .ToListAsync(cancellationToken);
+
     private static string NormalizeSubdomain(string subdomain)
         => subdomain.Trim().ToLowerInvariant();
 

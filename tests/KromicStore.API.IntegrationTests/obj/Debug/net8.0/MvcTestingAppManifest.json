@@ -1,6 +1,0 @@
-{
-  "KromicStore.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Personal\\KromicStore\\Backend\\src\\KromicStore.API",
-  "KromicStore.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Personal\\KromicStore\\Backend\\src\\KromicStore.Application",
-  "KromicStore.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Personal\\KromicStore\\Backend\\src\\KromicStore.Domain",
-  "KromicStore.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Personal\\KromicStore\\Backend\\src\\KromicStore.Infrastructure"
-}

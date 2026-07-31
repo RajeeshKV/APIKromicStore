@@ -26,6 +26,21 @@ public sealed class Tenant : AuditableEntity
     public string Slug { get; private set; }
     public TenantStatus Status { get; private set; }
     public Guid? OwnerUserId { get; private set; }
+    
+    // Subscription & Billing
+    public Guid? SubscriptionPlanId { get; private set; }
+    public DateTime? SubscriptionStartDate { get; private set; }
+    public DateTime? SubscriptionEndDate { get; private set; }
+    public bool IsOnTrial { get; private set; }
+    public DateTime? TrialEndsOn { get; private set; }
+    public long StorageUsedBytes { get; private set; }
+    public int EmailsSentThisMonth { get; private set; }
+    public int ApiCallsUsedToday { get; private set; }
+    
+    // Revenue Tracking
+    public decimal TotalRevenue { get; private set; }
+    public decimal MonthlyRecurringRevenue { get; private set; }
+    
     public IReadOnlyCollection<TenantDomain> Domains => _domains.AsReadOnly();
 
     public static Tenant Create(string name, string slug, string? storeName = null)
@@ -55,6 +70,51 @@ public sealed class Tenant : AuditableEntity
         if (string.IsNullOrWhiteSpace(storeName)) throw new ArgumentException("Store name is required.", nameof(storeName));
         StoreName = storeName.Trim();
     }
+
+    public void AssignSubscriptionPlan(Guid planId, bool isTrialPlan = false, int trialDays = 14)
+    {
+        if (planId == Guid.Empty) throw new ArgumentException("Plan ID is required.", nameof(planId));
+        
+        SubscriptionPlanId = planId;
+        SubscriptionStartDate = DateTime.UtcNow;
+        SubscriptionEndDate = DateTime.UtcNow.AddMonths(1);
+        IsOnTrial = isTrialPlan;
+        
+        if (isTrialPlan)
+            TrialEndsOn = DateTime.UtcNow.AddDays(trialDays);
+    }
+
+    public void UpgradeSubscriptionPlan(Guid newPlanId)
+    {
+        if (newPlanId == Guid.Empty) throw new ArgumentException("Plan ID is required.", nameof(newPlanId));
+        SubscriptionPlanId = newPlanId;
+    }
+
+    public void CancelSubscription()
+    {
+        SubscriptionPlanId = null;
+        SubscriptionEndDate = DateTime.UtcNow;
+        IsOnTrial = false;
+        TrialEndsOn = null;
+    }
+
+    public void RecordRevenue(decimal amount)
+    {
+        if (amount <= 0) return;
+        TotalRevenue += amount;
+        MonthlyRecurringRevenue += amount;
+    }
+
+    public void ResetMonthlyMetrics()
+    {
+        EmailsSentThisMonth = 0;
+        ApiCallsUsedToday = 0;
+        MonthlyRecurringRevenue = 0;
+    }
+
+    public void UpdateStorageUsage(long bytes) => StorageUsedBytes = bytes;
+    public void IncrementEmailsSent() => EmailsSentThisMonth++;
+    public void IncrementApiCalls() => ApiCallsUsedToday++;
 
     public void Activate() => Status = TenantStatus.Active;
 

@@ -41,9 +41,19 @@ bld/
 *.exe
 *.exe.config
 *.dll.config
-*.pdb
 *.so
 *.dylib
+*.AssemblyReference.cache
+*.obj
+*.o
+*.a
+*.lib
+*.rsp
+*.ilk
+*.exp
+*.res
+*.AssemblyReference.cache
+*.cache
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -549,3 +559,4 @@ Thumbs.db
 # Jetbrains
 .idea/
 *.iml
+

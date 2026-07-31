@@ -17,4 +17,19 @@ public interface IProductRepository
     void Update(Product product);
     void Remove(Product product);
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get all products for a specific tenant.
+    /// </summary>
+    Task<IEnumerable<Product>> GetByTenantIdAsync(Guid tenantId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get count of all products for a specific tenant.
+    /// </summary>
+    Task<int> GetCountByTenantIdAsync(Guid tenantId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get count of low stock products for a specific tenant.
+    /// </summary>
+    Task<int> GetLowStockCountByTenantIdAsync(Guid tenantId, int threshold = 10, CancellationToken cancellationToken = default);
 }

@@ -1,6 +1,8 @@
 ﻿using KromicStore.API.DependencyInjection;
 using KromicStore.Application;
 using KromicStore.Infrastructure;
+using KromicStore.Infrastructure.Configuration;
+using KromicStore.Infrastructure.Health;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,17 +26,31 @@ builder.Services.AddAuthenticationServices(builder.Configuration);
 // Add Swagger
 builder.Services.AddSwaggerGen();
 
-// Add Health Checks
-builder.Services.AddHealthChecks();
+// Add and configure Health Checks
+builder.Services
+    .AddHealthChecks()
+    .AddCheck<TenantResolutionHealthCheck>("Tenant Resolution", tags: new[] { "startup" })
+    .AddCheck<BrevoHealthCheck>("Brevo Email Service", tags: new[] { "external" })
+    .AddCheck<CloudinaryHealthCheck>("Cloudinary Media Service", tags: new[] { "external" })
+    .AddCheck<RazorpayHealthCheck>("Razorpay Payment Gateway", tags: new[] { "external" });
+
+// Register background services
+builder.Services.AddHostedService<KromicStore.Infrastructure.BackgroundJobs.EmailOutboxBackgroundWorker>();
 
 var app = builder.Build();
 
+// Validate platform configuration during startup
+var configValidator = app.Services.GetRequiredService<PlatformConfigurationValidator>();
+configValidator.ValidateAndLog();
+
+// Mark application as initialized after startup
+var startupState = app.Services.GetRequiredService<ApplicationStartupState>();
+startupState.MarkDependencyInjectionReady();
+startupState.MarkInitialized();
+
 // Configure middleware pipeline
-if (app.Environment.IsDevelopment())
-{
     app.UseSwagger();
     app.UseSwaggerUI();
-}
 
 // Use custom API middleware
 app.UseApiMiddleware();

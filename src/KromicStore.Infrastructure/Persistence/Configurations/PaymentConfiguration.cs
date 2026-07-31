@@ -27,6 +27,7 @@ public sealed class PaymentConfiguration : IEntityTypeConfiguration<Payment>
             .HasMaxLength(100);
 
         builder.Property(p => p.Provider)
+            .IsRequired()
             .HasMaxLength(50);
 
         builder.Property(p => p.ProviderTransactionId)
@@ -41,52 +42,49 @@ public sealed class PaymentConfiguration : IEntityTypeConfiguration<Payment>
             .HasPrecision(18, 2);
 
         builder.Property(p => p.RefundedAmount)
-            .HasPrecision(18, 2);
+            .HasPrecision(18, 2)
+            .HasDefaultValue(0m);
 
         builder.Property(p => p.Currency)
             .IsRequired()
             .HasMaxLength(3);
 
         builder.Property(p => p.AttemptCount)
-            .IsRequired();
-
-        builder.Property(p => p.MaxAttempts)
-            .IsRequired();
+            .IsRequired()
+            .HasDefaultValue(0);
 
         builder.Property(p => p.NextRetryAtUtc);
 
         builder.Property(p => p.FailureReason)
             .HasMaxLength(500);
 
-        builder.Property(p => p.FailureCode)
-            .HasMaxLength(100);
-
-        builder.Property(p => p.InitiatedOnUtc)
-            .IsRequired();
-
-        builder.Property(p => p.ProcessedOnUtc);
-
         builder.Property(p => p.RefundedOnUtc);
 
         // Auditing
-        builder.Property(p => p.ModifiedAtUtc)
+        builder.Property(p => p.CreatedOnUtc)
             .IsRequired();
 
         builder.Property(p => p.CreatedBy)
             .IsRequired()
             .HasMaxLength(256);
 
+        builder.Property(p => p.ModifiedOnUtc);
+
         builder.Property(p => p.ModifiedBy)
-            .IsRequired()
             .HasMaxLength(256);
 
         // Soft delete
         builder.Property(p => p.IsDeleted)
-            .IsRequired();
+            .IsRequired()
+            .HasDefaultValue(false);
 
         builder.Property(p => p.DeletedOnUtc);
 
         builder.Property(p => p.DeletedBy)
+            .HasMaxLength(256);
+
+        // Idempotency
+        builder.Property(p => p.IdempotencyKey)
             .HasMaxLength(256);
 
         // Relationships
@@ -115,6 +113,10 @@ public sealed class PaymentConfiguration : IEntityTypeConfiguration<Payment>
 
         builder.HasIndex(p => p.IsDeleted)
             .HasDatabaseName("IX_Payment_IsDeleted");
+
+        builder.HasIndex(p => p.IdempotencyKey)
+            .IsUnique()
+            .HasDatabaseName("IX_Payment_IdempotencyKey");
 
         builder.ToTable("Payments");
     }

@@ -145,4 +145,57 @@ public sealed class OrderRepository : IOrderRepository
     {
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<IEnumerable<Order>> GetByTenantIdAsync(Guid tenantId, CancellationToken cancellationToken = default)
+    {
+        if (tenantId == Guid.Empty)
+            return [];
+
+        return await _dbContext.Orders
+            .Where(o => o.TenantId == tenantId)
+            .Include(o => o.Items)
+            .Include(o => o.Timeline)
+            .Include(o => o.OrderNotes)
+            .OrderByDescending(o => o.CreatedOnUtc)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> GetTotalOrderCountAsync(CancellationToken cancellationToken = default)
+        => await _dbContext.Orders.CountAsync(cancellationToken);
+
+    public async Task<int> GetOrderCountByTenantIdAsync(Guid tenantId, CancellationToken cancellationToken = default)
+    {
+        if (tenantId == Guid.Empty)
+            return 0;
+
+        return await _dbContext.Orders.CountAsync(o => o.TenantId == tenantId, cancellationToken);
+    }
+
+    public async Task<decimal> GetTotalRevenueAsync(CancellationToken cancellationToken = default)
+        => await _dbContext.Orders.SumAsync(o => o.GrandTotal, cancellationToken);
+
+    public async Task<decimal> GetRevenueBytTenantIdAsync(Guid tenantId, CancellationToken cancellationToken = default)
+    {
+        if (tenantId == Guid.Empty)
+            return 0m;
+
+        return await _dbContext.Orders
+            .Where(o => o.TenantId == tenantId)
+            .SumAsync(o => o.GrandTotal, cancellationToken);
+    }
+
+    public async Task<int> GetTotalUniqueCustomerCountAsync(CancellationToken cancellationToken = default)
+        => await _dbContext.Orders.Select(o => o.CustomerId).Distinct().CountAsync(cancellationToken);
+
+    public async Task<int> GetUniqueCustomerCountByTenantIdAsync(Guid tenantId, CancellationToken cancellationToken = default)
+    {
+        if (tenantId == Guid.Empty)
+            return 0;
+
+        return await _dbContext.Orders
+            .Where(o => o.TenantId == tenantId)
+            .Select(o => o.CustomerId)
+            .Distinct()
+            .CountAsync(cancellationToken);
+    }
 }

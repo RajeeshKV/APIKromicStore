@@ -145,4 +145,37 @@ public sealed class ProductRepository : IProductRepository
     {
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<IEnumerable<Product>> GetByTenantIdAsync(Guid tenantId, CancellationToken cancellationToken = default)
+    {
+        if (tenantId == Guid.Empty)
+            return [];
+
+        return await _dbContext.Products
+            .AsNoTracking()
+            .Where(p => p.TenantId == tenantId && p.Status != ProductStatus.Draft)
+            .OrderByDescending(p => p.CreatedAtUtc)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> GetCountByTenantIdAsync(Guid tenantId, CancellationToken cancellationToken = default)
+    {
+        if (tenantId == Guid.Empty)
+            return 0;
+
+        return await _dbContext.Products
+            .CountAsync(p => p.TenantId == tenantId && p.Status != ProductStatus.Draft, cancellationToken);
+    }
+
+    public async Task<int> GetLowStockCountByTenantIdAsync(Guid tenantId, int threshold = 10, CancellationToken cancellationToken = default)
+    {
+        if (tenantId == Guid.Empty)
+            return 0;
+
+        // TODO: Integrate with inventory/stock table when available
+        // For now, return 0 as we need to query the inventory/stock entity
+        // This would be: Count of products with stock quantity < threshold
+        await Task.CompletedTask;
+        return 0;
+    }
 }
