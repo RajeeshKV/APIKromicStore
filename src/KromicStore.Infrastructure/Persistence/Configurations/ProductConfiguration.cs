@@ -34,8 +34,10 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.ShortDescription)
             .HasMaxLength(500);
 
-        builder.Property(p => p.Description)
-            .HasColumnType("nvarchar(max)");
+        builder.Property(p => p.Description);
+            // Column type is determined by database provider
+            // - SQL Server: nvarchar(max)
+            // - PostgreSQL: text
 
         builder.Property(p => p.ProductType)
             .IsRequired()

@@ -37,8 +37,10 @@ public sealed class PaymentTransactionConfiguration : IEntityTypeConfiguration<P
         builder.Property(pt => pt.ResponseMessage)
             .HasMaxLength(500);
 
-        builder.Property(pt => pt.RawResponse)
-            .HasColumnType("nvarchar(max)");
+        builder.Property(pt => pt.RawResponse);
+            // Column type is determined by database provider
+            // - SQL Server: nvarchar(max)
+            // - PostgreSQL: text
 
         builder.Property(pt => pt.CreatedOnUtc)
             .IsRequired();
