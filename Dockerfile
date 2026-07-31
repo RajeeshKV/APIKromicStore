@@ -10,26 +10,23 @@ COPY ["src/KromicStore.Application/KromicStore.Application.csproj", "src/KromicS
 COPY ["src/KromicStore.Domain/KromicStore.Domain.csproj", "src/KromicStore.Domain/"]
 COPY ["src/KromicStore.Infrastructure/KromicStore.Infrastructure.csproj", "src/KromicStore.Infrastructure/"]
 
-# Restore dependencies
-RUN dotnet restore "src/KromicStore.API/KromicStore.API.csproj"
+# Restore dependencies with linux-x64 runtime identifier for Alpine Linux
+RUN dotnet restore "src/KromicStore.API/KromicStore.API.csproj" \
+    -r linux-x64
 
 # Copy source
 COPY . .
 
-# Build
-RUN dotnet build "src/KromicStore.API/KromicStore.API.csproj" \
-    -c Release \
-    --no-restore \
-    -p:DebugType=none \
-    -p:DebugSymbols=false
-
-# Publish
+# Publish in Release configuration
+# Combined build and publish to ensure runtime identifier consistency
 RUN dotnet publish "src/KromicStore.API/KromicStore.API.csproj" \
     -c Release \
-    --no-build \
     -o /app/publish \
+    -r linux-x64 \
     -p:PublishSingleFile=false \
-    -p:PublishReadyToRun=true
+    -p:PublishReadyToRun=true \
+    -p:DebugType=none \
+    -p:DebugSymbols=false
 
 # Runtime image - minimal base image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
