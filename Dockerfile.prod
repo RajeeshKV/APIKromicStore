@@ -1,5 +1,5 @@
 # Production Dockerfile for Render deployment
-# Multi-stage build optimized for minimal image size
+# Multi-stage build optimized for minimal image size and production-ready startup
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS builder
 WORKDIR /src
@@ -31,25 +31,33 @@ RUN dotnet publish "src/KromicStore.API/KromicStore.API.csproj" \
     -p:PublishSingleFile=false \
     -p:PublishReadyToRun=true
 
-# Runtime image
+# Runtime image - minimal base image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
 
-# Install curl for health checks
-RUN apk add --no-cache curl
+# Install curl for health checks and ca-certificates for HTTPS
+RUN apk add --no-cache curl ca-certificates
 
 WORKDIR /app
 
-# Copy published application
+# Copy published application from builder
 COPY --from=builder /app/publish .
 
-# Environment configuration
+# Copy startup script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Set environment variables for production
 ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
+ENV DOTNET_RUNNING_IN_CONTAINER=true
+
 EXPOSE 8080
 
-# Health check
+# Health check - verifies application is running and responsive
+# Waits 40s before first check to allow migrations to complete
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8080/api/v1/health || exit 1
 
-# Run application
-ENTRYPOINT ["dotnet", "KromicStore.API.dll"]
+# Use entrypoint script for validation and startup
+ENTRYPOINT ["/entrypoint.sh"]
+

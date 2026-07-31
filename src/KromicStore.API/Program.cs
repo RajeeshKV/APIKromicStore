@@ -2,7 +2,9 @@
 using KromicStore.Application;
 using KromicStore.Infrastructure;
 using KromicStore.Infrastructure.Configuration;
+using KromicStore.Infrastructure.Extensions;
 using KromicStore.Infrastructure.Health;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,10 @@ builder.Services.AddApplication();
 
 // Add Infrastructure layer
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// Configure database migration options
+builder.Services.Configure<DatabaseOptions>(builder.Configuration.GetSection(DatabaseOptions.SectionName));
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<DatabaseOptions>>().Value);
 
 // Add Authentication
 builder.Services.AddAuthenticationServices(builder.Configuration);
@@ -54,6 +60,10 @@ startupState.MarkInitialized();
 
 // Use custom API middleware
 app.UseApiMiddleware();
+
+// Apply database migrations before starting the application
+// This ensures the database schema is up-to-date before any requests are processed
+await app.Services.ApplyMigrationsAsync();
 
 // Map endpoints
 app.MapControllers();
