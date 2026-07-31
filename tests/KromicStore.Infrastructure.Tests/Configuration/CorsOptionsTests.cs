@@ -23,17 +23,17 @@ public sealed class CorsOptionsTests
     }
 
     [Fact]
-    public void Validate_WithEmptyOrigins_ReturnsFalse()
+    public void Validate_WithEmptyOrigins_ReturnsTrue()
     {
-        // Arrange
+        // Arrange - Empty origins are allowed (can be configured via environment variables)
         var options = new CorsOptions { AllowedOrigins = "" };
 
         // Act
         var (isValid, error) = options.Validate();
 
         // Assert
-        Assert.False(isValid);
-        Assert.Contains("at least one", error, StringComparison.OrdinalIgnoreCase);
+        Assert.True(isValid);
+        Assert.Null(error);
     }
 
     [Fact]
@@ -200,5 +200,99 @@ public sealed class CorsOptionsTests
         // Assert
         Assert.Equal(2, parsed.Count);
         Assert.DoesNotContain("  ", parsed.First());
+    }
+
+    [Fact]
+    public void Validate_WithWildcardSubdomain_Succeeds()
+    {
+        // Arrange
+        var options = new CorsOptions { AllowedOrigins = "https://*.kromic.in" };
+
+        // Act
+        var (isValid, error) = options.Validate();
+
+        // Assert
+        Assert.True(isValid);
+        Assert.Null(error);
+    }
+
+    [Fact]
+    public void Validate_WithWildcardPort_Succeeds()
+    {
+        // Arrange
+        var options = new CorsOptions { AllowedOrigins = "http://localhost:*" };
+
+        // Act
+        var (isValid, error) = options.Validate();
+
+        // Assert
+        Assert.True(isValid);
+        Assert.Null(error);
+    }
+
+    [Fact]
+    public void Validate_WithMixedWildcardAndExplicit_Succeeds()
+    {
+        // Arrange
+        var options = new CorsOptions
+        {
+            AllowedOrigins = "https://*.kromic.in,http://localhost:3000,https://admin.example.com"
+        };
+
+        // Act
+        var (isValid, error) = options.Validate();
+
+        // Assert
+        Assert.True(isValid);
+        Assert.Null(error);
+    }
+
+    [Fact]
+    public void IsOriginAllowed_WithWildcardSubdomain_MatchesSubdomains()
+    {
+        // Arrange
+        var options = new CorsOptions { AllowedOrigins = "https://*.kromic.in" };
+
+        // Act
+        var storeResult = options.IsOriginAllowed("https://store.kromic.in");
+        var adminResult = options.IsOriginAllowed("https://admin.kromic.in");
+        var otherResult = options.IsOriginAllowed("https://kromic.in"); // No subdomain
+
+        // Assert
+        Assert.True(storeResult);
+        Assert.True(adminResult);
+        Assert.False(otherResult); // Doesn't match - no subdomain
+    }
+
+    [Fact]
+    public void IsOriginAllowed_WithWildcardPort_MatchesPorts()
+    {
+        // Arrange
+        var options = new CorsOptions { AllowedOrigins = "http://localhost:*" };
+
+        // Act
+        var port3000 = options.IsOriginAllowed("http://localhost:3000");
+        var port5173 = options.IsOriginAllowed("http://localhost:5173");
+        var https = options.IsOriginAllowed("https://localhost:3000"); // Different scheme
+
+        // Assert
+        Assert.True(port3000);
+        Assert.True(port5173);
+        Assert.False(https); // Doesn't match - different scheme
+    }
+
+    [Fact]
+    public void IsOriginAllowed_WithWildcardPattern_IsCaseInsensitive()
+    {
+        // Arrange
+        var options = new CorsOptions { AllowedOrigins = "https://*.kromic.in" };
+
+        // Act
+        var result1 = options.IsOriginAllowed("https://STORE.KROMIC.IN");
+        var result2 = options.IsOriginAllowed("HTTPS://ADMIN.KROMIC.IN");
+
+        // Assert
+        Assert.True(result1);
+        Assert.True(result2);
     }
 }
