@@ -54,6 +54,7 @@ public sealed class GetCheckoutSessionQueryHandler : IRequestHandler<GetCheckout
 
         return new GetCheckoutSessionResponse(
             CheckoutSessionId: checkoutSession.Id,
+            TenantId: checkoutSession.TenantId,
             CustomerId: checkoutSession.CustomerId,
             Currency: "USD",
             Items: items,

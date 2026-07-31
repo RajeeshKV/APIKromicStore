@@ -38,12 +38,13 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public Task<ActionResult<IEnumerable<dynamic>>> GetCampaigns(
+    public Task<ActionResult<IEnumerable<EmailCampaignDto>>> GetCampaigns(
         [FromQuery] int skip = 0,
         [FromQuery] int take = 20,
         CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<ActionResult<IEnumerable<dynamic>>>(Ok(Enumerable.Empty<object>()));
+        // TODO: Implement GetCampaignsQuery handler in Features/Tenants/Queries/
+        return Task.FromResult<ActionResult<IEnumerable<EmailCampaignDto>>>(Ok(Enumerable.Empty<EmailCampaignDto>()));
     }
 
     /// <summary>
@@ -62,12 +63,21 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public Task<ActionResult<dynamic>> CreateCampaign(
-        [FromBody] dynamic request,
+    public Task<ActionResult<EmailCampaignDto>> CreateCampaign(
+        [FromBody] CreateEmailCampaignRequest request,
         CancellationToken cancellationToken = default)
     {
+        // TODO: Implement CreateCampaignCommand handler in Features/Tenants/Commands/
         var campaignId = Guid.NewGuid();
-        return Task.FromResult<ActionResult<dynamic>>(CreatedAtAction(nameof(GetCampaign), new { campaignId }, new { id = campaignId }));
+        var campaign = new EmailCampaignDto
+        {
+            Id = campaignId,
+            Name = request.Name,
+            Subject = request.Subject,
+            Status = "Draft",
+            CreatedAt = DateTime.UtcNow
+        };
+        return Task.FromResult<ActionResult<EmailCampaignDto>>(CreatedAtAction(nameof(GetCampaign), new { campaignId }, campaign));
     }
 
     /// <summary>
@@ -86,11 +96,12 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public Task<ActionResult<dynamic>> GetCampaign(
+    public Task<ActionResult<EmailCampaignDto>> GetCampaign(
         Guid campaignId,
         CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<ActionResult<dynamic>>(NotFound());
+        // TODO: Implement GetCampaignQuery handler in Features/Tenants/Queries/
+        return Task.FromResult<ActionResult<EmailCampaignDto>>(NotFound());
     }
 
     /// <summary>
@@ -112,12 +123,13 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public Task<ActionResult<dynamic>> UpdateCampaign(
+    public Task<ActionResult<EmailCampaignDto>> UpdateCampaign(
         Guid campaignId,
-        [FromBody] dynamic request,
+        [FromBody] UpdateEmailCampaignRequest request,
         CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<ActionResult<dynamic>>(NotFound());
+        // TODO: Implement UpdateCampaignCommand handler in Features/Tenants/Commands/
+        return Task.FromResult<ActionResult<EmailCampaignDto>>(NotFound());
     }
 
     /// <summary>
@@ -136,11 +148,17 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public Task<ActionResult<dynamic>> SendCampaign(
+    public Task<ActionResult<SendCampaignResponse>> SendCampaign(
         Guid campaignId,
         CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<ActionResult<dynamic>>(Ok(new { status = "Sent", sentAt = DateTime.UtcNow }));
+        // TODO: Implement SendCampaignCommand handler in Features/Tenants/Commands/
+        return Task.FromResult<ActionResult<SendCampaignResponse>>(Ok(new SendCampaignResponse 
+        { 
+            Status = "Sent", 
+            SentAt = DateTime.UtcNow,
+            RecipientCount = 0
+        }));
     }
 
     /// <summary>
@@ -162,15 +180,20 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public Task<ActionResult<dynamic>> ScheduleCampaign(
+    public Task<ActionResult<ScheduleCampaignResponse>> ScheduleCampaign(
         Guid campaignId,
         [FromQuery] DateTime sendDate,
         CancellationToken cancellationToken = default)
     {
         if (sendDate < DateTime.UtcNow)
-            return Task.FromResult<ActionResult<dynamic>>(BadRequest(new { message = "Send date must be in the future." }));
+            return Task.FromResult<ActionResult<ScheduleCampaignResponse>>(BadRequest(new { message = "Send date must be in the future." }));
 
-        return Task.FromResult<ActionResult<dynamic>>(Ok(new { status = "Scheduled", scheduledFor = sendDate }));
+        // TODO: Implement ScheduleCampaignCommand handler in Features/Tenants/Commands/
+        return Task.FromResult<ActionResult<ScheduleCampaignResponse>>(Ok(new ScheduleCampaignResponse 
+        { 
+            Status = "Scheduled", 
+            ScheduledFor = sendDate 
+        }));
     }
 
     /// <summary>
@@ -186,9 +209,10 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public Task<ActionResult<IEnumerable<dynamic>>> GetAutomations(CancellationToken cancellationToken = default)
+    public Task<ActionResult<IEnumerable<EmailAutomationDto>>> GetAutomations(CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<ActionResult<IEnumerable<dynamic>>>(Ok(Enumerable.Empty<object>()));
+        // TODO: Implement GetAutomationsQuery handler in Features/Tenants/Queries/
+        return Task.FromResult<ActionResult<IEnumerable<EmailAutomationDto>>>(Ok(Enumerable.Empty<EmailAutomationDto>()));
     }
 
     /// <summary>
@@ -207,12 +231,21 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public Task<ActionResult<dynamic>> CreateAutomation(
-        [FromBody] dynamic request,
+    public Task<ActionResult<EmailAutomationDto>> CreateAutomation(
+        [FromBody] CreateEmailAutomationRequest request,
         CancellationToken cancellationToken = default)
     {
+        // TODO: Implement CreateAutomationCommand handler in Features/Tenants/Commands/
         var automationId = Guid.NewGuid();
-        return Task.FromResult<ActionResult<dynamic>>(CreatedAtAction(nameof(GetAutomation), new { automationId }, new { id = automationId }));
+        var automation = new EmailAutomationDto
+        {
+            Id = automationId,
+            Name = request.Name,
+            Trigger = request.Trigger,
+            IsActive = false,
+            CreatedAt = DateTime.UtcNow
+        };
+        return Task.FromResult<ActionResult<EmailAutomationDto>>(CreatedAtAction(nameof(GetAutomation), new { automationId }, automation));
     }
 
     /// <summary>
@@ -231,11 +264,12 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public Task<ActionResult<dynamic>> GetAutomation(
+    public Task<ActionResult<EmailAutomationDto>> GetAutomation(
         Guid automationId,
         CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<ActionResult<dynamic>>(NotFound());
+        // TODO: Implement GetAutomationQuery handler in Features/Tenants/Queries/
+        return Task.FromResult<ActionResult<EmailAutomationDto>>(NotFound());
     }
 
     /// <summary>
@@ -258,6 +292,61 @@ public class MarketingController : ControllerBase
         Guid automationId,
         CancellationToken cancellationToken = default)
     {
+        // TODO: Implement DeleteAutomationCommand handler in Features/Tenants/Commands/
         return Task.FromResult<IActionResult>(NoContent());
     }
 }
+
+// DTOs for Campaign operations
+public class EmailCampaignDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Subject { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+}
+
+public class CreateEmailCampaignRequest
+{
+    public string Name { get; set; } = string.Empty;
+    public string Subject { get; set; } = string.Empty;
+    public string HtmlContent { get; set; } = string.Empty;
+}
+
+public class UpdateEmailCampaignRequest
+{
+    public string? Name { get; set; }
+    public string? Subject { get; set; }
+    public string? HtmlContent { get; set; }
+}
+
+public class SendCampaignResponse
+{
+    public string Status { get; set; } = string.Empty;
+    public DateTime SentAt { get; set; }
+    public int RecipientCount { get; set; }
+}
+
+public class ScheduleCampaignResponse
+{
+    public string Status { get; set; } = string.Empty;
+    public DateTime ScheduledFor { get; set; }
+}
+
+public class EmailAutomationDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Trigger { get; set; } = string.Empty;
+    public bool IsActive { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+public class CreateEmailAutomationRequest
+{
+    public string Name { get; set; } = string.Empty;
+    public string Trigger { get; set; } = string.Empty;
+    public string Action { get; set; } = string.Empty;
+}
+

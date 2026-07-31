@@ -1,19 +1,26 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using KromicStore.Application.Features.Orders.Abstractions;
+using KromicStore.Application.Common.Repositories;
 
 namespace KromicStore.Application.Features.Orders.Queries.GetOrderById;
 
 public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, OrderDetailDto?>
 {
     private readonly IOrderRepository _orderRepository;
+    private readonly ICustomerAddressRepository _addressRepository;
+    private readonly IFulfillmentRepository _fulfillmentRepository;
     private readonly ILogger<GetOrderByIdQueryHandler> _logger;
 
     public GetOrderByIdQueryHandler(
         IOrderRepository orderRepository,
+        ICustomerAddressRepository addressRepository,
+        IFulfillmentRepository fulfillmentRepository,
         ILogger<GetOrderByIdQueryHandler> logger)
     {
         _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
+        _addressRepository = addressRepository ?? throw new ArgumentNullException(nameof(addressRepository));
+        _fulfillmentRepository = fulfillmentRepository ?? throw new ArgumentNullException(nameof(fulfillmentRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -53,11 +60,13 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
 
         _logger.LogInformation("Retrieved order {OrderNumber} successfully", order.OrderNumber);
 
-        // Map order to DTO
-        return MapToDetailDto(order);
+        // Map order to DTO with full address and tracking details
+        return await MapToDetailDtoAsync(order, cancellationToken);
     }
 
-    private OrderDetailDto MapToDetailDto(Domain.Orders.Entities.Order order)
+    private async Task<OrderDetailDto> MapToDetailDtoAsync(
+        Domain.Orders.Entities.Order order,
+        CancellationToken cancellationToken = default)
     {
         var items = order.Items
             .Select(item => new OrderItemDto(
@@ -69,19 +78,52 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
             .ToList()
             .AsReadOnly();
 
-        // Note: Address details would come from a separate address repository lookup
-        // For now, we return null for addresses, but this should be completed when address service is integrated
+        // Load actual address details from AddressRepository
         OrderAddressDto? shippingAddress = null;
         OrderAddressDto? billingAddress = null;
 
-        // TODO: Load actual address details from AddressRepository using BillingAddressId and ShippingAddressId
+        if (order.ShippingAddressId != Guid.Empty)
+        {
+            var shippingAddr = await _addressRepository.GetByIdAsync(order.ShippingAddressId, cancellationToken);
+            if (shippingAddr != null)
+            {
+                shippingAddress = new OrderAddressDto(
+                    Name: shippingAddr.Label,
+                    Street: shippingAddr.Street,
+                    City: shippingAddr.City,
+                    State: shippingAddr.StateCode,
+                    PostalCode: shippingAddr.PostalCode,
+                    Country: shippingAddr.CountryCode,
+                    Phone: shippingAddr.PhoneNumber ?? string.Empty);
+            }
+        }
 
+        if (order.BillingAddressId != Guid.Empty)
+        {
+            var billingAddr = await _addressRepository.GetByIdAsync(order.BillingAddressId, cancellationToken);
+            if (billingAddr != null)
+            {
+                billingAddress = new OrderAddressDto(
+                    Name: billingAddr.Label,
+                    Street: billingAddr.Street,
+                    City: billingAddr.City,
+                    State: billingAddr.StateCode,
+                    PostalCode: billingAddr.PostalCode,
+                    Country: billingAddr.CountryCode,
+                    Phone: billingAddr.PhoneNumber ?? string.Empty);
+            }
+        }
+
+        // Load tracking information from Fulfillment entity
         ShipmentTrackingDto? tracking = null;
         if (order.ShippedOnUtc.HasValue)
         {
+            var fulfillment = await _fulfillmentRepository.GetByOrderIdAsync(order.Id, cancellationToken);
+            var trackingNumber = fulfillment?.TrackingNumber ?? "";
+            
             tracking = new ShipmentTrackingDto(
                 Carrier: order.ShippingMethod,
-                TrackingNumber: "", // TODO: Load from Fulfillment entity when available
+                TrackingNumber: trackingNumber,
                 ShippedDateUtc: order.ShippedOnUtc.Value,
                 DeliveredDateUtc: order.DeliveredOnUtc,
                 Status: order.Status.ToString());

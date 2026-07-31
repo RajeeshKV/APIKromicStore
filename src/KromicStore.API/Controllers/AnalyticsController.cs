@@ -45,7 +45,14 @@ public class AnalyticsController : ControllerBase
         [FromQuery] DateTime? endDate = null,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetStoreAnalyticsQuery();
+        var start = startDate ?? DateTime.UtcNow.AddDays(-30);
+        var end = endDate ?? DateTime.UtcNow;
+
+        var query = new GetStoreAnalyticsQuery 
+        { 
+            StartDate = start,
+            EndDate = end
+        };
         var result = await _mediator.Send(query, cancellationToken);
 
         if (result == null)
@@ -53,12 +60,14 @@ public class AnalyticsController : ControllerBase
 
         return Ok(new
         {
-            startDate = startDate ?? DateTime.UtcNow.AddDays(-30),
-            endDate = endDate ?? DateTime.UtcNow,
-            totalRevenue = 0m,
-            totalOrders = 0,
-            averageOrderValue = 0m,
-            conversionRate = 0m
+            startDate = start,
+            endDate = end,
+            totalRevenue = result.TotalRevenue,
+            totalOrders = result.OrderCount,
+            averageOrderValue = result.AverageOrderValue,
+            conversionRate = result.ConversionRate,
+            customerCount = result.CustomerCount,
+            productsSold = result.ProductsSold
         });
     }
 

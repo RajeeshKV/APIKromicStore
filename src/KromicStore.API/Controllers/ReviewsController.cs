@@ -18,17 +18,20 @@ public class ReviewsController : ControllerBase
     private readonly IProductReviewRepository _reviewRepository;
     private readonly IProductRepository _productRepository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IApplicationDbContext _dbContext;
     private readonly ILogger<ReviewsController> _logger;
 
     public ReviewsController(
         IProductReviewRepository reviewRepository,
         IProductRepository productRepository,
         ICurrentUserService currentUserService,
+        IApplicationDbContext dbContext,
         ILogger<ReviewsController> logger)
     {
         _reviewRepository = reviewRepository ?? throw new ArgumentNullException(nameof(reviewRepository));
         _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
         _currentUserService = currentUserService ?? throw new ArgumentNullException(nameof(currentUserService));
+        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -316,9 +319,24 @@ public class ReviewsController : ControllerBase
                 return Forbid();
             }
 
-            // TODO: Implement update logic to modify review fields
-            // For now, just log and return the review as-is
-            _logger.LogInformation("Review update requested. ReviewId: {ReviewId}, but not yet implemented", reviewId);
+            // Validate request
+            if (request.Rating < 1 || request.Rating > 5)
+                return BadRequest(new { message = "Rating must be between 1 and 5" });
+
+            if (string.IsNullOrWhiteSpace(request.Title) || request.Title.Length > 200)
+                return BadRequest(new { message = "Title is required and must not exceed 200 characters" });
+
+            if (request.Comment != null && request.Comment.Length > 5000)
+                return BadRequest(new { message = "Comment must not exceed 5000 characters" });
+
+            // Update the review with new values
+            review.UpdateReview(request.Title, request.Comment, request.Rating);
+
+            // Persist changes
+            _reviewRepository.Update(review);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Review updated successfully. ReviewId: {ReviewId}", reviewId);
 
             var reviewDto = MapToDto(review);
             return Ok(reviewDto);

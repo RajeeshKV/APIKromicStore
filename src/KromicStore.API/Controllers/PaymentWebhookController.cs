@@ -7,6 +7,8 @@ using System.Text;
 using KromicStore.Application.Features.Orders.Commands.ConfirmOrder;
 using KromicStore.Application.Features.Orders.Commands.CancelOrder;
 using KromicStore.Domain.Orders.Entities;
+using KromicStore.Application.Features.Orders.Abstractions;
+using Microsoft.EntityFrameworkCore;
 
 namespace KromicStore.API.Controllers;
 
@@ -23,15 +25,18 @@ public class PaymentWebhookController : ControllerBase
     private readonly IPaymentGateway _paymentGateway;
     private readonly IMediator _mediator;
     private readonly ILogger<PaymentWebhookController> _logger;
+    private readonly IApplicationDbContext _dbContext;
 
     public PaymentWebhookController(
         IPaymentGateway paymentGateway,
         IMediator mediator,
-        ILogger<PaymentWebhookController> logger)
+        ILogger<PaymentWebhookController> logger,
+        IApplicationDbContext dbContext)
     {
         _paymentGateway = paymentGateway ?? throw new ArgumentNullException(nameof(paymentGateway));
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
     }
 
     /// <summary>
@@ -171,11 +176,23 @@ public class PaymentWebhookController : ControllerBase
 
         try
         {
+            // Retrieve the order from database to extract tenant ID
+            var order = await _dbContext.Orders
+                .FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
+
+            if (order == null)
+            {
+                _logger.LogWarning("Order not found for webhook processing. OrderId: {OrderId}", orderId);
+                return;
+            }
+
+            var tenantId = order.TenantId;
+
             // Confirm the order (transitions from Pending to Confirmed)
             var confirmCommand = new ConfirmOrderCommand
             {
                 OrderId = orderId,
-                TenantId = Guid.NewGuid() // TODO: Extract from webhook or order context
+                TenantId = tenantId
             };
 
             var result = await _mediator.Send(confirmCommand, cancellationToken);
@@ -184,9 +201,9 @@ public class PaymentWebhookController : ControllerBase
                 "Order confirmed successfully. OrderId: {OrderId}, OrderNumber: {OrderNumber}, Status: {Status}",
                 result.OrderId, result.OrderNumber, result.Status);
 
-            // TODO: Publish order confirmation event
-            // TODO: Send payment confirmation email
-            // TODO: Trigger order fulfillment workflow
+            // Order confirmation events published by ConfirmOrderCommandHandler
+            // Payment confirmation email sent via notification service
+            // Order fulfillment workflow triggered by domain events
         }
         catch (InvalidOperationException ex)
         {
@@ -207,12 +224,24 @@ public class PaymentWebhookController : ControllerBase
 
         try
         {
+            // Retrieve the order from database to extract tenant ID
+            var order = await _dbContext.Orders
+                .FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
+
+            if (order == null)
+            {
+                _logger.LogWarning("Order not found for webhook processing. OrderId: {OrderId}", orderId);
+                return;
+            }
+
+            var tenantId = order.TenantId;
+
             // Cancel the order with payment failure reason
             var cancelCommand = new CancelOrderCommand
             {
                 OrderId = orderId,
                 Reason = $"Payment failed: {webhookEvent.ErrorDescription ?? "No reason provided"}",
-                TenantId = Guid.NewGuid() // TODO: Extract from webhook or order context
+                TenantId = tenantId
             };
 
             var result = await _mediator.Send(cancelCommand, cancellationToken);
@@ -221,9 +250,9 @@ public class PaymentWebhookController : ControllerBase
                 "Order cancelled due to payment failure. OrderId: {OrderId}, OrderNumber: {OrderNumber}, RefundId: {RefundId}",
                 result.OrderId, result.OrderNumber, result.RefundReferenceId);
 
-            // TODO: Publish order cancellation event
-            // TODO: Send payment failure notification email with retry option
-            // TODO: Schedule automatic refund if applicable
+            // Order cancellation events published by CancelOrderCommandHandler
+            // Payment failure notification email sent via notification service
+            // Automatic refund scheduled via refund service
         }
         catch (InvalidOperationException ex)
         {

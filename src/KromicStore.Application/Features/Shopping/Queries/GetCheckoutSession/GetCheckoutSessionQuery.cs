@@ -32,6 +32,7 @@ public sealed record AddressDto(
 /// </summary>
 public sealed record GetCheckoutSessionResponse(
     Guid CheckoutSessionId,
+    Guid TenantId,
     Guid CustomerId,
     string Currency,
     List<CheckoutItemDto> Items,

@@ -1,5 +1,6 @@
 ﻿using KromicStore.Application.Common.Abstractions;
 using KromicStore.Application.Features.Catalog.Abstractions;
+using KromicStore.Application.Features.CMS.Abstractions;
 using KromicStore.Application.Features.Email.Abstractions;
 using KromicStore.Application.Features.Orders.Abstractions;
 using KromicStore.Application.Features.Promotions.Abstractions;
@@ -121,6 +122,9 @@ public static class DependencyInjection
         services.AddScoped<IProductRepository,          ProductRepository>();
         services.AddScoped<ICollectionRepository,       ProductCollectionRepository>();
         
+        // CMS repositories
+        services.AddScoped<ICMSPageRepository,          CMSPageRepository>();
+        
         // Shopping repositories
         services.AddScoped<ICartRepository,             CartRepository>();
         services.AddScoped<IWishlistRepository,         WishlistRepository>();
@@ -139,6 +143,17 @@ public static class DependencyInjection
         
         // Promotions repositories
         services.AddScoped<IPromotionRepository,        PromotionRepository>();
+        
+        // Tenant Management repositories (Themes, Plans, Settings, Contact Requests, Feature Flags, Audit)
+        services.AddScoped<IThemeRepository,            ThemeRepository>();
+        services.AddScoped<ISubscriptionPlanRepository, SubscriptionPlanRepository>();
+        services.AddScoped<IPlatformSettingsRepository, PlatformSettingsRepository>();
+        services.AddScoped<IContactRequestRepository,   ContactRequestRepository>();
+        services.AddScoped<IAuditLogRepository,         AuditLogRepository>();
+        services.AddScoped<IFeatureFlagRepository,      FeatureFlagRepository>();
+        
+        // Tenant Management services
+        services.AddScoped<IRefundService,              RefundService>();
         
         // Health check services
         services.AddSingleton<ApplicationStartupState>();

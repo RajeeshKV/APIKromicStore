@@ -1,5 +1,6 @@
 ﻿using KromicStore.Application.Common.Abstractions;
 using KromicStore.Domain.Catalog.Entities;
+using KromicStore.Domain.CMS.Entities;
 using KromicStore.Domain.Common;
 using KromicStore.Domain.CustomerPortal.Entities;
 using KromicStore.Domain.Email.Entities;
@@ -39,6 +40,24 @@ public sealed class KromicStoreDbContext : DbContext, IApplicationDbContext
     public DbSet<TenantSettings> TenantSettingsSet => Set<TenantSettings>();
     public IQueryable<TenantSettings> TenantSettings => TenantSettingsSet;
 
+    public DbSet<Theme> ThemeSet => Set<Theme>();
+    public IQueryable<Theme> Themes => ThemeSet;
+
+    public DbSet<SubscriptionPlan> SubscriptionPlanSet => Set<SubscriptionPlan>();
+    public IQueryable<SubscriptionPlan> SubscriptionPlans => SubscriptionPlanSet;
+
+    public DbSet<PlatformSettings> PlatformSettingsSet => Set<PlatformSettings>();
+    public IQueryable<PlatformSettings> PlatformSettings => PlatformSettingsSet;
+
+    public DbSet<ContactRequest> ContactRequestSet => Set<ContactRequest>();
+    public IQueryable<ContactRequest> ContactRequests => ContactRequestSet;
+
+    public DbSet<FeatureFlag> FeatureFlagSet => Set<FeatureFlag>();
+    public IQueryable<FeatureFlag> FeatureFlags => FeatureFlagSet;
+
+    public DbSet<AuditLog> AuditLogSet => Set<AuditLog>();
+    public IQueryable<AuditLog> AuditLogs => AuditLogSet;
+
     public DbSet<User> UserSet => Set<User>();
     public IQueryable<User> Users => UserSet;
 
@@ -63,6 +82,10 @@ public sealed class KromicStoreDbContext : DbContext, IApplicationDbContext
 
     public DbSet<ProductCollection> ProductCollectionSet => Set<ProductCollection>();
     public IQueryable<ProductCollection> ProductCollections => ProductCollectionSet;
+
+    // CMS DbSets
+    public DbSet<CMSPage> CMSPageSet => Set<CMSPage>();
+    public IQueryable<CMSPage> CMSPages => CMSPageSet;
 
     // Shopping DbSets (Cart, Wishlist, Checkout)
     public DbSet<Cart> CartSet => Set<Cart>();
@@ -209,6 +232,12 @@ public sealed class KromicStoreDbContext : DbContext, IApplicationDbContext
         modelBuilder.Entity<Tenant>().HasQueryFilter(entity => !entity.IsDeleted);
         modelBuilder.Entity<TenantDomain>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
         modelBuilder.Entity<TenantSettings>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
+        modelBuilder.Entity<Theme>().HasQueryFilter(entity => !entity.IsDeleted);
+        modelBuilder.Entity<SubscriptionPlan>().HasQueryFilter(entity => !entity.IsDeleted);
+        modelBuilder.Entity<PlatformSettings>().HasQueryFilter(entity => !entity.IsDeleted);
+        modelBuilder.Entity<ContactRequest>().HasQueryFilter(entity => !entity.IsDeleted);
+        modelBuilder.Entity<FeatureFlag>().HasQueryFilter(entity => !entity.IsDeleted);
+        modelBuilder.Entity<AuditLog>().HasQueryFilter(entity => true); // No filter, platform-wide audit log
         modelBuilder.Entity<User>().HasQueryFilter(entity => !entity.IsDeleted && (!entity.TenantId.HasValue || (_tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId)));
         modelBuilder.Entity<Role>().HasQueryFilter(entity => !entity.IsDeleted);
 
@@ -216,6 +245,9 @@ public sealed class KromicStoreDbContext : DbContext, IApplicationDbContext
         modelBuilder.Entity<Category>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
         modelBuilder.Entity<Product>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
         modelBuilder.Entity<ProductCollection>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
+
+        // CMS query filters
+        modelBuilder.Entity<CMSPage>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
 
         // Shopping query filters
         modelBuilder.Entity<Cart>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);

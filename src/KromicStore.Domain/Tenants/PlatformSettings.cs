@@ -58,9 +58,12 @@ public sealed class PlatformSettings : AuditableEntity
     public string? CloudinaryApiKey { get; private set; }
     // NOTE: API Secret should NOT be stored in settings; use secure vault instead
 
-    // Payment Gateway Defaults
+    // Payment Gateway Configuration
     public string? RazorpayKeyId { get; private set; }
-    // NOTE: Key Secret should NOT be stored in settings; use secure vault instead
+    public bool RazorpayEnabled { get; private set; }
+    public bool? StripeEnabled { get; private set; }
+    public bool? PayPalEnabled { get; private set; }
+    // NOTE: Key Secrets should NOT be stored in settings; use secure vault instead
 
     // Feature Flags
     public bool MaintenanceMode { get; private set; }
@@ -171,12 +174,19 @@ public sealed class PlatformSettings : AuditableEntity
         CloudinaryApiKey = cloudinaryApiKey;
     }
 
-    public void UpdatePaymentDefaults(string razorpayKeyId)
+    public void UpdatePaymentDefaults(
+        string razorpayKeyId,
+        bool razorpayEnabled = true,
+        bool? stripeEnabled = null,
+        bool? paypalEnabled = null)
     {
         if (string.IsNullOrWhiteSpace(razorpayKeyId))
             throw new ArgumentException("Razorpay key ID is required.", nameof(razorpayKeyId));
 
         RazorpayKeyId = razorpayKeyId.Trim();
+        RazorpayEnabled = razorpayEnabled;
+        StripeEnabled = stripeEnabled;
+        PayPalEnabled = paypalEnabled;
     }
 
     public void SetMaintenanceMode(bool enabled, string? message = null)

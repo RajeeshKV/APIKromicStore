@@ -1,4 +1,5 @@
 ﻿using KromicStore.Domain.Catalog.Entities;
+using KromicStore.Domain.CMS.Entities;
 using KromicStore.Domain.Identity;
 using KromicStore.Domain.Orders.Entities;
 using KromicStore.Domain.Promotions.Entities;
@@ -11,9 +12,18 @@ namespace KromicStore.Application.Common.Abstractions;
 
 public interface IApplicationDbContext
 {
+    // Tenants
     IQueryable<Tenant> Tenants { get; }
     IQueryable<TenantDomain> TenantDomains { get; }
     IQueryable<TenantSettings> TenantSettings { get; }
+    IQueryable<Theme> Themes { get; }
+    IQueryable<SubscriptionPlan> SubscriptionPlans { get; }
+    IQueryable<PlatformSettings> PlatformSettings { get; }
+    IQueryable<ContactRequest> ContactRequests { get; }
+    IQueryable<FeatureFlag> FeatureFlags { get; }
+    IQueryable<AuditLog> AuditLogs { get; }
+    
+    // Identity
     IQueryable<User> Users { get; }
     IQueryable<Role> Roles { get; }
     IQueryable<RefreshToken> RefreshTokens { get; }
@@ -24,6 +34,9 @@ public interface IApplicationDbContext
     IQueryable<Category> Categories { get; }
     IQueryable<Product> Products { get; }
     IQueryable<ProductCollection> ProductCollections { get; }
+
+    // CMS
+    IQueryable<CMSPage> CMSPages { get; }
 
     // Shopping
     IQueryable<Cart> Carts { get; }

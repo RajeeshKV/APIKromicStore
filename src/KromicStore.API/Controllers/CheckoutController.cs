@@ -322,7 +322,7 @@ public class CheckoutController : ControllerBase
             {
                 CheckoutSessionId = sessionId,
                 CustomerId = customerIdGuid,
-                TenantId = Guid.NewGuid() // TODO: Get from tenant context
+                TenantId = checkoutSession.TenantId
             };
 
             var result = await _mediator.Send(command, cancellationToken);

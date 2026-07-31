@@ -111,6 +111,28 @@ public sealed class ProductReview : AuditableEntity
     {
         UnhelpfulCount++;
     }
+
+    /// <summary>
+    /// Updates the review content (only for draft/pending reviews).
+    /// </summary>
+    public void UpdateReview(string title, string? comment, int rating)
+    {
+        if (Status == ReviewStatus.Approved)
+            throw new InvalidOperationException("Cannot update an approved review");
+
+        if (Status == ReviewStatus.Deleted)
+            throw new InvalidOperationException("Cannot update a deleted review");
+
+        if (rating < 1 || rating > 5)
+            throw new ArgumentException("Rating must be between 1 and 5", nameof(rating));
+
+        if (string.IsNullOrWhiteSpace(title))
+            throw new ArgumentException("Review title cannot be empty", nameof(title));
+
+        Rating = rating;
+        Title = title.Trim();
+        Comment = comment?.Trim();
+    }
 }
 
 /// <summary>
