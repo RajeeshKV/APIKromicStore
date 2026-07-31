@@ -361,7 +361,7 @@ public sealed class ProductTests
         product.SoftDelete(DateTime.UtcNow, "admin");
 
         // Act
-        product.Restore();
+        product.Restore(DateTime.UtcNow, "admin");
 
         // Assert
         product.IsDeleted.Should().BeFalse();
@@ -612,9 +612,9 @@ public sealed class ProductTests
         product.MarkCreated(now, "user-123");
 
         // Assert
-        product.CreatedAtUtc.Should().Be(now);
+        product.CreatedOnUtc.Should().Be(now);
         product.CreatedBy.Should().Be("user-123");
-        product.ModifiedAtUtc.Should().Be(now);
+        product.ModifiedOnUtc.Should().Be(now);
         product.ModifiedBy.Should().Be("user-123");
     }
 
@@ -632,9 +632,9 @@ public sealed class ProductTests
         product.MarkModified(modifiedTime, "user-2");
 
         // Assert
-        product.CreatedAtUtc.Should().Be(createdTime);
+        product.CreatedOnUtc.Should().Be(createdTime);
         product.CreatedBy.Should().Be("user-1");
-        product.ModifiedAtUtc.Should().Be(modifiedTime);
+        product.ModifiedOnUtc.Should().Be(modifiedTime);
         product.ModifiedBy.Should().Be("user-2");
     }
 

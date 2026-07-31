@@ -133,7 +133,7 @@ public class WishlistTests
     {
         // Arrange
         var wishlist = Wishlist.Create(_tenantId, _customerId);
-        typeof(Wishlist).GetProperty("IsDeleted")?.SetValue(wishlist, true);
+        wishlist.SoftDelete(DateTime.UtcNow, "system");
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => wishlist.AddItem(Guid.NewGuid()));
@@ -226,7 +226,7 @@ public class WishlistTests
         var wishlist = Wishlist.Create(_tenantId, _customerId);
         var productId = Guid.NewGuid();
         wishlist.AddItem(productId);
-        typeof(Wishlist).GetProperty("IsDeleted")?.SetValue(wishlist, true);
+        wishlist.SoftDelete(DateTime.UtcNow, "system");
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => wishlist.RemoveItem(productId));
@@ -335,7 +335,7 @@ public class WishlistTests
         // Arrange
         var wishlist = Wishlist.Create(_tenantId, _customerId);
         wishlist.AddItem(Guid.NewGuid());
-        typeof(Wishlist).GetProperty("IsDeleted")?.SetValue(wishlist, true);
+        wishlist.SoftDelete(DateTime.UtcNow, "system");
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => wishlist.Clear());
@@ -630,7 +630,7 @@ public class WishlistTests
     {
         // Arrange
         var wishlist = Wishlist.Create(_tenantId, _customerId);
-        typeof(Wishlist).GetProperty("IsDeleted")?.SetValue(wishlist, true);
+        wishlist.SoftDelete(DateTime.UtcNow, "system");
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => wishlist.AddItem(Guid.NewGuid()));
@@ -642,7 +642,7 @@ public class WishlistTests
         // Arrange
         var wishlist = Wishlist.Create(_tenantId, _customerId);
         wishlist.AddItem(Guid.NewGuid());
-        typeof(Wishlist).GetProperty("IsDeleted")?.SetValue(wishlist, true);
+        wishlist.SoftDelete(DateTime.UtcNow, "system");
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => wishlist.RemoveItem(Guid.NewGuid()));

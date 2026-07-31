@@ -16,7 +16,6 @@ public sealed class FulfillmentConfiguration : IEntityTypeConfiguration<Fulfillm
         builder.Property(x => x.OrderId).HasColumnName("order_id").IsRequired();
         builder.Property(x => x.Status).HasColumnName("status").IsRequired();
         
-        builder.Property(x => x.CreatedAtUtc).HasColumnName("created_at_utc").IsRequired();
         builder.Property(x => x.ProcessedAtUtc).HasColumnName("processed_at_utc");
         builder.Property(x => x.PackedAtUtc).HasColumnName("packed_at_utc");
         builder.Property(x => x.ShippedAtUtc).HasColumnName("shipped_at_utc");
@@ -47,6 +46,6 @@ public sealed class FulfillmentConfiguration : IEntityTypeConfiguration<Fulfillm
         
         builder.HasIndex(x => new { x.TenantId, x.OrderId }).IsUnique().HasDatabaseName("idx_fulfillments_order");
         builder.HasIndex(x => x.Status).HasDatabaseName("idx_fulfillments_status");
-        builder.HasIndex(x => x.CreatedAtUtc).HasDatabaseName("idx_fulfillments_created");
+        builder.HasIndex(x => x.CreatedOnUtc).HasDatabaseName("idx_fulfillments_created");
     }
 }

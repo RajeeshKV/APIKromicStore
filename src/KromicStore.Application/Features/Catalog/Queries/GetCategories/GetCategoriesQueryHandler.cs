@@ -56,7 +56,7 @@ public sealed class GetCategoriesQueryHandler : IRequestHandler<GetCategoriesQue
             IsActive: category.Status == 0, // CategoryStatus.Active
             Slug: category.Slug,
             ProductCount: 0, // Will be populated from Category.Products relationship when available
-            CreatedAtUtc: category.CreatedAtUtc,
-            ModifiedAtUtc: category.ModifiedAtUtc);
+            CreatedAtUtc: category.CreatedOnUtc,
+            ModifiedAtUtc: category.ModifiedOnUtc);
     }
 }

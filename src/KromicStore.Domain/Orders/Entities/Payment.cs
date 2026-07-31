@@ -27,16 +27,7 @@ public class Payment : TenantEntity, IAuditable, ISoftDeletable
     private readonly List<PaymentTransaction> _transactions = new();
     public IReadOnlyList<PaymentTransaction> Transactions => _transactions.AsReadOnly();
 
-    // Auditing
-    public DateTime CreatedOnUtc { get; private set; }
-    public string CreatedBy { get; private set; } = string.Empty;
-    public DateTime? ModifiedOnUtc { get; private set; }
-    public string? ModifiedBy { get; private set; }
-
-    // Soft delete
-    public bool IsDeleted { get; private set; }
-    public DateTime? DeletedOnUtc { get; private set; }
-    public string? DeletedBy { get; private set; }
+    // Auditing and soft delete are inherited from AuditableEntity
 
     private Payment() { }
 

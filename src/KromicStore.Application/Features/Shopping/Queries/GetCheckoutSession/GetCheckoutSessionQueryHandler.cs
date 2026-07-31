@@ -70,6 +70,6 @@ public sealed class GetCheckoutSessionQueryHandler : IRequestHandler<GetCheckout
             PaymentStatus: checkoutSession.Status.ToString(),
             Status: checkoutSession.Status.ToString(),
             CreatedOnUtc: checkoutSession.CreatedOnUtc,
-            LastModifiedOnUtc: checkoutSession.ModifiedAtUtc);
+            LastModifiedOnUtc: checkoutSession.ModifiedOnUtc ?? checkoutSession.CreatedOnUtc);
     }
 }

@@ -46,7 +46,7 @@ public sealed class RestoreProductCommandHandler : IRequestHandler<RestoreProduc
         }
 
         // Restore the product
-        product.Restore();
+        product.Restore(DateTime.UtcNow, _currentUserService.UserId.ToString());
 
         // Save changes
         await _dbContext.SaveChangesAsync(cancellationToken);

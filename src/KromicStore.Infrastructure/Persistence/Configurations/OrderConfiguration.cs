@@ -79,7 +79,8 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.PaymentId);
 
         // Auditing
-        builder.Property(o => o.ModifiedAtUtc)
+        builder.Property(o => o.ModifiedOnUtc)
+            .HasColumnName("ModifiedAtUtc")
             .IsRequired();
 
         builder.Property(o => o.CreatedBy)

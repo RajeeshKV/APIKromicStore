@@ -79,13 +79,13 @@ public class AnalyticsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ReportDto>> GetSalesReport(
+    public Task<ActionResult<ReportDto>> GetSalesReport(
         [FromQuery] DateTime startDate,
         [FromQuery] DateTime endDate,
         CancellationToken cancellationToken = default)
     {
         if (endDate < startDate)
-            return BadRequest(new { message = "End date must be after start date." });
+            return Task.FromResult<ActionResult<ReportDto>>(BadRequest(new { message = "End date must be after start date." }));
 
         var report = new ReportDto
         {
@@ -103,7 +103,7 @@ public class AnalyticsController : ControllerBase
             }
         };
 
-        return Ok(report);
+        return Task.FromResult<ActionResult<ReportDto>>(Ok(report));
     }
 
     /// <summary>
@@ -123,13 +123,13 @@ public class AnalyticsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ReportDto>> GetOrderAnalytics(
+    public Task<ActionResult<ReportDto>> GetOrderAnalytics(
         [FromQuery] DateTime startDate,
         [FromQuery] DateTime endDate,
         CancellationToken cancellationToken = default)
     {
         if (endDate < startDate)
-            return BadRequest(new { message = "End date must be after start date." });
+            return Task.FromResult<ActionResult<ReportDto>>(BadRequest(new { message = "End date must be after start date." }));
 
         var report = new ReportDto
         {
@@ -148,7 +148,7 @@ public class AnalyticsController : ControllerBase
             }
         };
 
-        return Ok(report);
+        return Task.FromResult<ActionResult<ReportDto>>(Ok(report));
     }
 
     /// <summary>
@@ -168,13 +168,13 @@ public class AnalyticsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ReportDto>> GetCustomerAnalytics(
+    public Task<ActionResult<ReportDto>> GetCustomerAnalytics(
         [FromQuery] DateTime startDate,
         [FromQuery] DateTime endDate,
         CancellationToken cancellationToken = default)
     {
         if (endDate < startDate)
-            return BadRequest(new { message = "End date must be after start date." });
+            return Task.FromResult<ActionResult<ReportDto>>(BadRequest(new { message = "End date must be after start date." }));
 
         var report = new ReportDto
         {
@@ -192,7 +192,7 @@ public class AnalyticsController : ControllerBase
             }
         };
 
-        return Ok(report);
+        return Task.FromResult<ActionResult<ReportDto>>(Ok(report));
     }
 
     /// <summary>
@@ -209,7 +209,7 @@ public class AnalyticsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ReportDto>> GetProductAnalytics(
+    public Task<ActionResult<ReportDto>> GetProductAnalytics(
         [FromQuery] int limit = 10,
         CancellationToken cancellationToken = default)
     {
@@ -228,7 +228,7 @@ public class AnalyticsController : ControllerBase
             }
         };
 
-        return Ok(report);
+        return Task.FromResult<ActionResult<ReportDto>>(Ok(report));
     }
 
     /// <summary>
@@ -251,20 +251,20 @@ public class AnalyticsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> ExportReport(
+    public Task<IActionResult> ExportReport(
         [FromQuery] string reportType,
         [FromQuery] DateTime startDate,
         [FromQuery] DateTime endDate,
         CancellationToken cancellationToken = default)
     {
         if (endDate < startDate)
-            return BadRequest(new { message = "End date must be after start date." });
+            return Task.FromResult<IActionResult>(BadRequest(new { message = "End date must be after start date." }));
 
         // Generate CSV content
         var csv = $"Report Type,{reportType}\nStart Date,{startDate:yyyy-MM-dd}\nEnd Date,{endDate:yyyy-MM-dd}\nGenerated,{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}\n";
 
         var bytes = System.Text.Encoding.UTF8.GetBytes(csv);
-        return File(bytes, "text/csv", $"{reportType}_Report_{DateTime.UtcNow:yyyyMMdd}.csv");
+        return Task.FromResult<IActionResult>(File(bytes, "text/csv", $"{reportType}_Report_{DateTime.UtcNow:yyyyMMdd}.csv"));
     }
 
     /// <summary>
@@ -284,18 +284,18 @@ public class AnalyticsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> GetTrendData(
+    public Task<ActionResult> GetTrendData(
         [FromQuery] string metric = "Revenue",
         [FromQuery] string granularity = "Daily",
         CancellationToken cancellationToken = default)
     {
-        return Ok(new
+        return Task.FromResult<ActionResult>(Ok(new
         {
             metric,
             granularity,
             startDate = DateTime.UtcNow.AddDays(-30),
             endDate = DateTime.UtcNow,
             data = Array.Empty<object>()
-        });
+        }));
     }
 }

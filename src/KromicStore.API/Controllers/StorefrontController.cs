@@ -186,14 +186,14 @@ public class StorefrontController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<StorePoliciesDto>> GetPolicies(CancellationToken cancellationToken = default)
+    public Task<ActionResult<StorePoliciesDto>> GetPolicies(CancellationToken cancellationToken = default)
     {
         // Placeholder - will be implemented in next phase
-        return Ok(new StorePoliciesDto(
+        return Task.FromResult<ActionResult<StorePoliciesDto>>(Ok(new StorePoliciesDto(
             ShippingPolicy: "Shipping policy content",
             ReturnPolicy: "Return policy content",
             PrivacyPolicy: "Privacy policy content",
-            TermsOfService: "Terms of service content"));
+            TermsOfService: "Terms of service content")));
     }
 }
 

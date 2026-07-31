@@ -38,12 +38,12 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<dynamic>>> GetCampaigns(
+    public Task<ActionResult<IEnumerable<dynamic>>> GetCampaigns(
         [FromQuery] int skip = 0,
         [FromQuery] int take = 20,
         CancellationToken cancellationToken = default)
     {
-        return Ok(Enumerable.Empty<object>());
+        return Task.FromResult<ActionResult<IEnumerable<dynamic>>>(Ok(Enumerable.Empty<object>()));
     }
 
     /// <summary>
@@ -62,12 +62,12 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<dynamic>> CreateCampaign(
+    public Task<ActionResult<dynamic>> CreateCampaign(
         [FromBody] dynamic request,
         CancellationToken cancellationToken = default)
     {
         var campaignId = Guid.NewGuid();
-        return CreatedAtAction(nameof(GetCampaign), new { campaignId }, new { id = campaignId });
+        return Task.FromResult<ActionResult<dynamic>>(CreatedAtAction(nameof(GetCampaign), new { campaignId }, new { id = campaignId }));
     }
 
     /// <summary>
@@ -86,11 +86,11 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<dynamic>> GetCampaign(
+    public Task<ActionResult<dynamic>> GetCampaign(
         Guid campaignId,
         CancellationToken cancellationToken = default)
     {
-        return NotFound();
+        return Task.FromResult<ActionResult<dynamic>>(NotFound());
     }
 
     /// <summary>
@@ -112,12 +112,12 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<dynamic>> UpdateCampaign(
+    public Task<ActionResult<dynamic>> UpdateCampaign(
         Guid campaignId,
         [FromBody] dynamic request,
         CancellationToken cancellationToken = default)
     {
-        return NotFound();
+        return Task.FromResult<ActionResult<dynamic>>(NotFound());
     }
 
     /// <summary>
@@ -136,11 +136,11 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<dynamic>> SendCampaign(
+    public Task<ActionResult<dynamic>> SendCampaign(
         Guid campaignId,
         CancellationToken cancellationToken = default)
     {
-        return Ok(new { status = "Sent", sentAt = DateTime.UtcNow });
+        return Task.FromResult<ActionResult<dynamic>>(Ok(new { status = "Sent", sentAt = DateTime.UtcNow }));
     }
 
     /// <summary>
@@ -162,15 +162,15 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<dynamic>> ScheduleCampaign(
+    public Task<ActionResult<dynamic>> ScheduleCampaign(
         Guid campaignId,
         [FromQuery] DateTime sendDate,
         CancellationToken cancellationToken = default)
     {
         if (sendDate < DateTime.UtcNow)
-            return BadRequest(new { message = "Send date must be in the future." });
+            return Task.FromResult<ActionResult<dynamic>>(BadRequest(new { message = "Send date must be in the future." }));
 
-        return Ok(new { status = "Scheduled", scheduledFor = sendDate });
+        return Task.FromResult<ActionResult<dynamic>>(Ok(new { status = "Scheduled", scheduledFor = sendDate }));
     }
 
     /// <summary>
@@ -186,9 +186,9 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<dynamic>>> GetAutomations(CancellationToken cancellationToken = default)
+    public Task<ActionResult<IEnumerable<dynamic>>> GetAutomations(CancellationToken cancellationToken = default)
     {
-        return Ok(Enumerable.Empty<object>());
+        return Task.FromResult<ActionResult<IEnumerable<dynamic>>>(Ok(Enumerable.Empty<object>()));
     }
 
     /// <summary>
@@ -207,12 +207,12 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<dynamic>> CreateAutomation(
+    public Task<ActionResult<dynamic>> CreateAutomation(
         [FromBody] dynamic request,
         CancellationToken cancellationToken = default)
     {
         var automationId = Guid.NewGuid();
-        return CreatedAtAction(nameof(GetAutomation), new { automationId }, new { id = automationId });
+        return Task.FromResult<ActionResult<dynamic>>(CreatedAtAction(nameof(GetAutomation), new { automationId }, new { id = automationId }));
     }
 
     /// <summary>
@@ -231,11 +231,11 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<dynamic>> GetAutomation(
+    public Task<ActionResult<dynamic>> GetAutomation(
         Guid automationId,
         CancellationToken cancellationToken = default)
     {
-        return NotFound();
+        return Task.FromResult<ActionResult<dynamic>>(NotFound());
     }
 
     /// <summary>
@@ -254,10 +254,10 @@ public class MarketingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> DeleteAutomation(
+    public Task<IActionResult> DeleteAutomation(
         Guid automationId,
         CancellationToken cancellationToken = default)
     {
-        return NoContent();
+        return Task.FromResult<IActionResult>(NoContent());
     }
 }

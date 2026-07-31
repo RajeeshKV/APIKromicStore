@@ -23,7 +23,8 @@ public sealed class Fulfillment : TenantEntity, IAuditable, ISoftDeletable
 {
     public Guid OrderId { get; private set; }
     public FulfillmentStatus Status { get; private set; }
-    public DateTime CreatedAtUtc { get; private set; }
+    
+    // Fulfillment workflow timestamps
     public DateTime? ProcessedAtUtc { get; private set; }
     public DateTime? PackedAtUtc { get; private set; }
     public DateTime? ShippedAtUtc { get; private set; }
@@ -45,16 +46,7 @@ public sealed class Fulfillment : TenantEntity, IAuditable, ISoftDeletable
     private readonly List<FulfillmentItem> _items = new();
     public IReadOnlyList<FulfillmentItem> Items => _items.AsReadOnly();
     
-    // Auditing
-    public DateTime CreatedOnUtc { get; private set; }
-    public DateTime ModifiedOnUtc { get; private set; }
-    public string CreatedBy { get; private set; } = string.Empty;
-    public string? ModifiedBy { get; private set; }
-    
-    // Soft delete
-    public bool IsDeleted { get; private set; }
-    public DateTime? DeletedOnUtc { get; private set; }
-    public string? DeletedBy { get; private set; }
+    // Auditing and soft delete are inherited from AuditableEntity
     
     private Fulfillment()
     {
@@ -90,11 +82,11 @@ public sealed class Fulfillment : TenantEntity, IAuditable, ISoftDeletable
         {
             OrderId = orderId,
             Status = FulfillmentStatus.Pending,
-            CreatedAtUtc = DateTime.UtcNow,
             ShippingAddress = shippingAddress.Trim(),
-            ShippingCost = shippingCost,
-            CreatedBy = createdBy.Trim()
+            ShippingCost = shippingCost
         };
+        
+        fulfillment.MarkCreated(DateTime.UtcNow, createdBy.Trim());
         
         return fulfillment;
     }

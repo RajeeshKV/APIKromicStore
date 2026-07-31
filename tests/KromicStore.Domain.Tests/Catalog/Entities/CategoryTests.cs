@@ -289,7 +289,7 @@ public sealed class CategoryTests
         category.SoftDelete(DateTime.UtcNow, "admin");
 
         // Act
-        category.Restore();
+        category.Restore(DateTime.UtcNow, "admin");
 
         // Assert
         category.IsDeleted.Should().BeFalse();
@@ -312,9 +312,9 @@ public sealed class CategoryTests
         category.MarkCreated(now, "user-123");
 
         // Assert
-        category.CreatedAtUtc.Should().Be(now);
+        category.CreatedOnUtc.Should().Be(now);
         category.CreatedBy.Should().Be("user-123");
-        category.ModifiedAtUtc.Should().Be(now);
+        category.ModifiedOnUtc.Should().Be(now);
         category.ModifiedBy.Should().Be("user-123");
     }
 
@@ -332,9 +332,9 @@ public sealed class CategoryTests
         category.MarkModified(modifiedTime, "user-2");
 
         // Assert
-        category.CreatedAtUtc.Should().Be(createdTime);
+        category.CreatedOnUtc.Should().Be(createdTime);
         category.CreatedBy.Should().Be("user-1");
-        category.ModifiedAtUtc.Should().Be(modifiedTime);
+        category.ModifiedOnUtc.Should().Be(modifiedTime);
         category.ModifiedBy.Should().Be("user-2");
     }
 

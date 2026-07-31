@@ -30,8 +30,7 @@ public sealed class Order : TenantEntity, IAuditable, ISoftDeletable
     // Notes
     public string? Notes { get; private set; }
     
-    // Timestamps
-    public DateTime CreatedOnUtc { get; private set; }
+    // Timestamps (CreatedOnUtc is inherited from AuditableEntity)
     public DateTime? ShippedOnUtc { get; private set; }
     public DateTime? DeliveredOnUtc { get; private set; }
     public DateTime? CancelledOnUtc { get; private set; }
@@ -48,16 +47,6 @@ public sealed class Order : TenantEntity, IAuditable, ISoftDeletable
     
     // Payment relationship
     public Guid? PaymentId { get; private set; }
-    
-    // Auditing
-    public DateTime ModifiedAtUtc { get; private set; }
-    public string CreatedBy { get; private set; } = string.Empty;
-    public string ModifiedBy { get; private set; } = string.Empty;
-    
-    // Soft delete
-    public bool IsDeleted { get; private set; }
-    public DateTime? DeletedOnUtc { get; private set; }
-    public string? DeletedBy { get; private set; }
     
     private Order()
     {
@@ -122,9 +111,11 @@ public sealed class Order : TenantEntity, IAuditable, ISoftDeletable
             DiscountAmount = discountAmount,
             ShippingAmount = shippingAmount,
             TaxAmount = taxAmount,
-            CouponCode = couponCode?.ToUpperInvariant(),
-            CreatedOnUtc = DateTime.UtcNow
+            CouponCode = couponCode?.ToUpperInvariant()
         };
+        
+        // Mark as created (inherited from AuditableEntity)
+        order.MarkCreated(DateTime.UtcNow, "System");
         
         // Add items
         foreach (var item in items)

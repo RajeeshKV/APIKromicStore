@@ -14,16 +14,7 @@ public sealed class Wishlist : TenantEntity, IAuditable, ISoftDeletable
     private readonly List<WishlistItem> _items = [];
     public IReadOnlyList<WishlistItem> Items => _items.AsReadOnly();
 
-    // Auditing
-    public DateTime CreatedAtUtc { get; private set; }
-    public string CreatedBy { get; private set; } = string.Empty;
-    public DateTime ModifiedAtUtc { get; private set; }
-    public string ModifiedBy { get; private set; } = string.Empty;
-
-    // Soft delete
-    public bool IsDeleted { get; private set; }
-    public DateTime? DeletedOnUtc { get; private set; }
-    public string? DeletedBy { get; private set; }
+    // Auditing and soft delete are inherited from AuditableEntity
 
     private Wishlist()
     {

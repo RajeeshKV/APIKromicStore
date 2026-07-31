@@ -55,16 +55,7 @@ public sealed class Discount : TenantEntity, IAuditable, ISoftDeletable
     public int? MaxUsageCount { get; private set; }
     public int CurrentUsageCount { get; private set; }
     
-    // Auditing
-    public DateTime CreatedOnUtc { get; private set; }
-    public DateTime ModifiedOnUtc { get; private set; }
-    public string CreatedBy { get; private set; } = string.Empty;
-    public string? ModifiedBy { get; private set; }
-    
-    // Soft delete
-    public bool IsDeleted { get; private set; }
-    public DateTime? DeletedOnUtc { get; private set; }
-    public string? DeletedBy { get; private set; }
+    // Auditing and soft delete are inherited from AuditableEntity
     
     private Discount()
     {

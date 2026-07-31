@@ -46,7 +46,7 @@ public sealed class RestoreCategoryCommandHandler : IRequestHandler<RestoreCateg
         }
 
         // Restore the category
-        category.Restore();
+        category.Restore(DateTime.UtcNow, _currentUserService.UserId.ToString());
 
         // Save changes
         await _dbContext.SaveChangesAsync(cancellationToken);

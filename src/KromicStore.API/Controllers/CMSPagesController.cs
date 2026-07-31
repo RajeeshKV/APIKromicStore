@@ -33,9 +33,9 @@ public class CMSPagesController : ControllerBase
     [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<PageDto>>> GetPages(CancellationToken cancellationToken = default)
+    public Task<ActionResult<IEnumerable<PageDto>>> GetPages(CancellationToken cancellationToken = default)
     {
-        return Ok(Enumerable.Empty<PageDto>());
+        return Task.FromResult<ActionResult<IEnumerable<PageDto>>>(Ok(Enumerable.Empty<PageDto>()));
     }
 
     /// <summary>
@@ -51,11 +51,11 @@ public class CMSPagesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<PageDto>> GetPageBySlug(
+    public Task<ActionResult<PageDto>> GetPageBySlug(
         string slug,
         CancellationToken cancellationToken = default)
     {
-        return NotFound();
+        return Task.FromResult<ActionResult<PageDto>>(NotFound());
     }
 
     /// <summary>
@@ -77,7 +77,7 @@ public class CMSPagesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<PageDto>> CreatePage(
+    public Task<ActionResult<PageDto>> CreatePage(
         [FromBody] CreatePageRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -95,7 +95,7 @@ public class CMSPagesController : ControllerBase
             UpdatedAt = DateTime.UtcNow
         };
 
-        return CreatedAtAction(nameof(GetPageBySlug), new { slug = pageDto.Slug }, pageDto);
+        return Task.FromResult<ActionResult<PageDto>>(CreatedAtAction(nameof(GetPageBySlug), new { slug = pageDto.Slug }, pageDto));
     }
 
     /// <summary>
@@ -118,12 +118,12 @@ public class CMSPagesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<PageDto>> UpdatePage(
+    public Task<ActionResult<PageDto>> UpdatePage(
         Guid pageId,
         [FromBody] UpdatePageRequest request,
         CancellationToken cancellationToken = default)
     {
-        return NotFound();
+        return Task.FromResult<ActionResult<PageDto>>(NotFound());
     }
 
     /// <summary>
@@ -143,11 +143,11 @@ public class CMSPagesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> DeletePage(
+    public Task<IActionResult> DeletePage(
         Guid pageId,
         CancellationToken cancellationToken = default)
     {
-        return NoContent();
+        return Task.FromResult<IActionResult>(NoContent());
     }
 
     /// <summary>
@@ -167,11 +167,11 @@ public class CMSPagesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<PageDto>> PublishPage(
+    public Task<ActionResult<PageDto>> PublishPage(
         Guid pageId,
         CancellationToken cancellationToken = default)
     {
-        return NotFound();
+        return Task.FromResult<ActionResult<PageDto>>(NotFound());
     }
 
     /// <summary>
@@ -191,11 +191,11 @@ public class CMSPagesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<PageDto>> UnpublishPage(
+    public Task<ActionResult<PageDto>> UnpublishPage(
         Guid pageId,
         CancellationToken cancellationToken = default)
     {
-        return NotFound();
+        return Task.FromResult<ActionResult<PageDto>>(NotFound());
     }
 
     /// <summary>
@@ -218,14 +218,14 @@ public class CMSPagesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<PageDto>> SchedulePage(
+    public Task<ActionResult<PageDto>> SchedulePage(
         Guid pageId,
         [FromQuery] DateTime publishDate,
         CancellationToken cancellationToken = default)
     {
         if (publishDate < DateTime.UtcNow)
-            return BadRequest(new { message = "Publish date must be in the future." });
+            return Task.FromResult<ActionResult<PageDto>>(BadRequest(new { message = "Publish date must be in the future." }));
 
-        return NotFound();
+        return Task.FromResult<ActionResult<PageDto>>(NotFound());
     }
 }

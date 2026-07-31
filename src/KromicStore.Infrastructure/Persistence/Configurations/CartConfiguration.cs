@@ -36,14 +36,16 @@ public sealed class CartConfiguration : IEntityTypeConfiguration<Cart>
             .IsRequired();
 
         // Auditing
-        builder.Property(c => c.CreatedAtUtc)
+        builder.Property(c => c.CreatedOnUtc)
+            .HasColumnName("CreatedAtUtc")
             .IsRequired();
 
         builder.Property(c => c.CreatedBy)
             .HasMaxLength(255)
             .IsRequired();
 
-        builder.Property(c => c.ModifiedAtUtc)
+        builder.Property(c => c.ModifiedOnUtc)
+            .HasColumnName("ModifiedAtUtc")
             .IsRequired();
 
         builder.Property(c => c.ModifiedBy)

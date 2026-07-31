@@ -48,7 +48,7 @@ public sealed class ProductRepository : IProductRepository
         return await _dbContext.Products
             .AsNoTracking()
             .Where(p => p.Status != ProductStatus.Draft)
-            .OrderByDescending(p => p.CreatedAtUtc)
+            .OrderByDescending(p => p.CreatedOnUtc)
             .ToListAsync(cancellationToken);
     }
 
@@ -69,7 +69,7 @@ public sealed class ProductRepository : IProductRepository
         return await _dbContext.Products
             .AsNoTracking()
             .Where(p => p.IsFeatured && p.Status == ProductStatus.Active)
-            .OrderByDescending(p => p.CreatedAtUtc)
+            .OrderByDescending(p => p.CreatedOnUtc)
             .Take(take)
             .ToListAsync(cancellationToken);
     }
@@ -85,9 +85,9 @@ public sealed class ProductRepository : IProductRepository
             .AsNoTracking()
             .Where(p => (p.Name.ToLower().Contains(normalizedSearch) ||
                          p.Sku.ToLower().Contains(normalizedSearch) ||
-                         p.Description.ToLower().Contains(normalizedSearch)) &&
+                         (p.Description != null && p.Description.ToLower().Contains(normalizedSearch))) &&
                         p.Status != ProductStatus.Draft)
-            .OrderByDescending(p => p.CreatedAtUtc)
+            .OrderByDescending(p => p.CreatedOnUtc)
             .ToListAsync(cancellationToken);
     }
 
@@ -154,7 +154,7 @@ public sealed class ProductRepository : IProductRepository
         return await _dbContext.Products
             .AsNoTracking()
             .Where(p => p.TenantId == tenantId && p.Status != ProductStatus.Draft)
-            .OrderByDescending(p => p.CreatedAtUtc)
+            .OrderByDescending(p => p.CreatedOnUtc)
             .ToListAsync(cancellationToken);
     }
 
@@ -164,7 +164,7 @@ public sealed class ProductRepository : IProductRepository
             return 0;
 
         return await _dbContext.Products
-            .CountAsync(p => p.TenantId == tenantId && p.Status != ProductStatus.Draft, cancellationToken);
+            .CountAsync(p => p != null && p.TenantId == tenantId && p.Status != ProductStatus.Draft, cancellationToken);
     }
 
     public async Task<int> GetLowStockCountByTenantIdAsync(Guid tenantId, int threshold = 10, CancellationToken cancellationToken = default)

@@ -44,7 +44,7 @@ public sealed class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, 
             .Where(p => p.TenantId == _tenantContext.TenantId)
             .Where(p => !p.IsDeleted)
             .Where(p => query.Status == null || (int)p.Status == query.Status)
-            .OrderByDescending(p => p.CreatedAtUtc)
+            .OrderByDescending(p => p.CreatedOnUtc)
             .Skip(query.Skip)
             .Take(query.Take)
             .Select(MapToProductCardDto)
@@ -72,6 +72,6 @@ public sealed class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, 
             CategoryId: product.CategoryId,
             CategoryName: "", // Will be populated from category relationship when available
             Tags: tags,
-            CreatedAtUtc: product.CreatedAtUtc);
+            CreatedAtUtc: product.CreatedOnUtc);
     }
 }

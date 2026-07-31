@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
+using KromicStore.Application.Features.Catalog.Abstractions;
 using KromicStore.Application.Features.Orders.Abstractions;
 using KromicStore.Application.Features.Shopping.Abstractions;
 using KromicStore.Domain.Orders.Entities;
@@ -11,15 +12,18 @@ public sealed class CreateOrderCommandHandler : IRequestHandler<CreateOrderComma
 {
     private readonly IOrderRepository _orderRepository;
     private readonly ICheckoutSessionRepository _checkoutRepository;
+    private readonly IProductRepository _productRepository;
     private readonly ILogger<CreateOrderCommandHandler> _logger;
 
     public CreateOrderCommandHandler(
         IOrderRepository orderRepository,
         ICheckoutSessionRepository checkoutRepository,
+        IProductRepository productRepository,
         ILogger<CreateOrderCommandHandler> logger)
     {
         _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
         _checkoutRepository = checkoutRepository ?? throw new ArgumentNullException(nameof(checkoutRepository));
+        _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -51,17 +55,26 @@ public sealed class CreateOrderCommandHandler : IRequestHandler<CreateOrderComma
             throw new InvalidOperationException($"Order number {orderNumber} already exists");
 
         // Create order items
-        var orderItems = checkoutSession.Items
-            .Select(ci => OrderItem.Create(
+        var orderItems = new List<OrderItem>();
+        foreach (var ci in checkoutSession.Items)
+        {
+            // Load product details from repository
+            var product = await _productRepository.GetByIdAsync(ci.ProductId, cancellationToken);
+            var productName = product?.Name ?? "Unknown Product";
+            var productSku = product?.Sku ?? "UNKNOWN";
+
+            var orderItem = OrderItem.Create(
                 orderId: Guid.NewGuid(), // Will be set when adding to Order
                 productId: ci.ProductId,
-                productName: "Product", // TODO: Get from product repository
-                productSku: "SKU",      // TODO: Get from product repository
+                productName: productName,
+                productSku: productSku,
                 quantity: ci.Quantity,
                 unitPrice: ci.UnitPrice,
                 variantId: ci.ProductVariantId,
-                variantName: null))
-            .ToList();
+                variantName: null);
+
+            orderItems.Add(orderItem);
+        }
 
         // Create order
         var order = Order.Create(

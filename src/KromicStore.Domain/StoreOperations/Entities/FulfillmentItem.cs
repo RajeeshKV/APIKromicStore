@@ -17,11 +17,7 @@ public sealed class FulfillmentItem : TenantEntity, IAuditable
     public int PackedQuantity { get; private set; }
     public decimal UnitPrice { get; private set; }
     
-    // Auditing
-    public DateTime CreatedOnUtc { get; private set; }
-    public DateTime ModifiedOnUtc { get; private set; }
-    public string CreatedBy { get; private set; } = string.Empty;
-    public string? ModifiedBy { get; private set; }
+    // Auditing is inherited from AuditableEntity
     
     private FulfillmentItem()
     {
@@ -79,9 +75,10 @@ public sealed class FulfillmentItem : TenantEntity, IAuditable
             Quantity = quantity,
             PickedQuantity = 0,
             PackedQuantity = 0,
-            UnitPrice = unitPrice,
-            CreatedBy = createdBy.Trim()
+            UnitPrice = unitPrice
         };
+        
+        item.MarkCreated(DateTime.UtcNow, createdBy.Trim());
         
         return item;
     }

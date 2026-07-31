@@ -31,11 +31,7 @@ public sealed class ReturnInspection : TenantEntity, IAuditable
     public decimal RestockableValue { get; private set; } // Amount to refund (may be less than original if damaged)
     public decimal WasteValue { get; private set; } // Amount written off
     
-    // Auditing
-    public DateTime CreatedOnUtc { get; private set; }
-    public DateTime ModifiedOnUtc { get; private set; }
-    public string CreatedBy { get; private set; } = string.Empty;
-    public string? ModifiedBy { get; private set; }
+    // Auditing is inherited from AuditableEntity
     
     private ReturnInspection()
     {
@@ -85,9 +81,10 @@ public sealed class ReturnInspection : TenantEntity, IAuditable
             RestockableValue = restockableValue,
             WasteValue = wasteValue,
             InspectedOnUtc = DateTime.UtcNow,
-            InspectedBy = inspectedBy.Trim(),
-            CreatedBy = inspectedBy.Trim()
+            InspectedBy = inspectedBy.Trim()
         };
+        
+        inspection.MarkCreated(DateTime.UtcNow, inspectedBy.Trim());
         
         return inspection;
     }

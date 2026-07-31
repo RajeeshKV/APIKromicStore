@@ -7,6 +7,7 @@ using KromicStore.Application.Features.Orders.Commands.CancelOrder;
 using KromicStore.Application.Features.Orders.Commands.AddShipment;
 using KromicStore.Application.Features.Orders.Queries.GetOrders;
 using KromicStore.Application.Features.Orders.Queries.GetOrderById;
+using KromicStore.Application.Features.Orders.Queries.GetTracking;
 using GetProductsQuery = KromicStore.Application.Features.Catalog.Queries.GetProducts.GetProductsQuery;
 
 namespace KromicStore.API.Controllers;
@@ -284,8 +285,35 @@ public class OrdersController : ControllerBase
         Guid orderId,
         CancellationToken cancellationToken = default)
     {
-        // TODO: Implement GetTrackingQuery
-        return NotFound();
+        // Get current customer ID or tenant ID from claims
+        var customerIdClaim = User.FindFirst("sub")?.Value;
+        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+
+        Guid? customerId = null;
+        Guid? tenantId = null;
+
+        if (Guid.TryParse(customerIdClaim, out var custId))
+            customerId = custId;
+
+        if (Guid.TryParse(tenantIdClaim, out var tenId))
+            tenantId = tenId;
+
+        if ((!customerId.HasValue || customerId.Value == Guid.Empty) &&
+            (!tenantId.HasValue || tenantId.Value == Guid.Empty))
+            return Unauthorized();
+
+        var query = new GetTrackingQuery
+        {
+            OrderId = orderId,
+            CustomerId = customerId,
+            TenantId = tenantId
+        };
+
+        var result = await _mediator.Send(query, cancellationToken);
+        if (result == null)
+            return NotFound();
+
+        return Ok(result);
     }
 
     /// <summary>

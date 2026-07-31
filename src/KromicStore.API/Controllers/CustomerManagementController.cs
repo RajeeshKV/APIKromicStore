@@ -39,14 +39,14 @@ public class CustomerManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<CustomerDto>>> GetCustomers(
+    public Task<ActionResult<IEnumerable<CustomerDto>>> GetCustomers(
         [FromQuery] int skip = 0,
         [FromQuery] int take = 20,
         CancellationToken cancellationToken = default)
     {
         // Get customers from GetStoreCustomersQuery
         // For now, return empty list (handler would query DB)
-        return Ok(Enumerable.Empty<CustomerDto>());
+        return Task.FromResult<ActionResult<IEnumerable<CustomerDto>>>(Ok(Enumerable.Empty<CustomerDto>()));
     }
 
     /// <summary>
@@ -67,17 +67,17 @@ public class CustomerManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<CustomerDto>>> SearchCustomers(
+    public Task<ActionResult<IEnumerable<CustomerDto>>> SearchCustomers(
         [FromQuery] string searchTerm,
         [FromQuery] int skip = 0,
         [FromQuery] int take = 20,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
-            return BadRequest(new { message = "Search term cannot be empty." });
+            return Task.FromResult<ActionResult<IEnumerable<CustomerDto>>>(BadRequest(new { message = "Search term cannot be empty." }));
 
         // Search handler would query DB with searchTerm
-        return Ok(Enumerable.Empty<CustomerDto>());
+        return Task.FromResult<ActionResult<IEnumerable<CustomerDto>>>(Ok(Enumerable.Empty<CustomerDto>()));
     }
 
     /// <summary>
@@ -96,12 +96,12 @@ public class CustomerManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<CustomerDto>> GetCustomer(
+    public Task<ActionResult<CustomerDto>> GetCustomer(
         Guid customerId,
         CancellationToken cancellationToken = default)
     {
         // Get customer handler would retrieve from DB
-        return NotFound();
+        return Task.FromResult<ActionResult<CustomerDto>>(NotFound());
     }
 
     /// <summary>
@@ -122,14 +122,14 @@ public class CustomerManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<CustomerOrderDto>>> GetCustomerOrders(
+    public Task<ActionResult<IEnumerable<CustomerOrderDto>>> GetCustomerOrders(
         Guid customerId,
         [FromQuery] int skip = 0,
         [FromQuery] int take = 20,
         CancellationToken cancellationToken = default)
     {
         // Get customer orders handler would retrieve from DB
-        return Ok(Enumerable.Empty<CustomerOrderDto>());
+        return Task.FromResult<ActionResult<IEnumerable<CustomerOrderDto>>>(Ok(Enumerable.Empty<CustomerOrderDto>()));
     }
 
     /// <summary>
@@ -148,12 +148,12 @@ public class CustomerManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<CustomerPreferencesDto>> GetCustomerPreferences(
+    public Task<ActionResult<CustomerPreferencesDto>> GetCustomerPreferences(
         Guid customerId,
         CancellationToken cancellationToken = default)
     {
         // Get preferences handler would retrieve from DB
-        return NotFound();
+        return Task.FromResult<ActionResult<CustomerPreferencesDto>>(NotFound());
     }
 
     /// <summary>
@@ -175,13 +175,13 @@ public class CustomerManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<CustomerPreferencesDto>> UpdateCustomerPreferences(
+    public Task<ActionResult<CustomerPreferencesDto>> UpdateCustomerPreferences(
         Guid customerId,
         [FromBody] UpdateCustomerPreferencesRequest request,
         CancellationToken cancellationToken = default)
     {
         // Update preferences handler would be sent here
-        return NotFound();
+        return Task.FromResult<ActionResult<CustomerPreferencesDto>>(NotFound());
     }
 
     /// <summary>
@@ -200,19 +200,19 @@ public class CustomerManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> GetCustomerStatistics(
+    public Task<ActionResult> GetCustomerStatistics(
         Guid customerId,
         CancellationToken cancellationToken = default)
     {
         // Get statistics handler would retrieve from DB
-        return Ok(new
+        return Task.FromResult<ActionResult>(Ok(new
         {
             totalOrders = 0,
             totalSpent = 0m,
             averageOrderValue = 0m,
             lastOrderDate = (DateTime?)null,
             preferredCategory = (string?)null
-        });
+        }));
     }
 
     /// <summary>
@@ -229,7 +229,7 @@ public class CustomerManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<CustomerDto>>> GetTopCustomersBySpending(
+    public Task<ActionResult<IEnumerable<CustomerDto>>> GetTopCustomersBySpending(
         [FromQuery] int limit = 10,
         CancellationToken cancellationToken = default)
     {
@@ -237,6 +237,6 @@ public class CustomerManagementController : ControllerBase
             limit = 10;
 
         // Get top customers handler would retrieve from DB
-        return Ok(Enumerable.Empty<CustomerDto>());
+        return Task.FromResult<ActionResult<IEnumerable<CustomerDto>>>(Ok(Enumerable.Empty<CustomerDto>()));
     }
 }

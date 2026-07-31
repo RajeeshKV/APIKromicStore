@@ -19,16 +19,7 @@ public sealed class ShippingZone : TenantEntity, IAuditable, ISoftDeletable
     private readonly List<ShippingMethod> _methods = [];
     public IReadOnlyList<ShippingMethod> Methods => _methods.AsReadOnly();
     
-    // Auditing
-    public DateTime CreatedOnUtc { get; private set; }
-    public DateTime ModifiedOnUtc { get; private set; }
-    public string CreatedBy { get; private set; } = string.Empty;
-    public string? ModifiedBy { get; private set; }
-    
-    // Soft delete
-    public bool IsDeleted { get; private set; }
-    public DateTime? DeletedOnUtc { get; private set; }
-    public string? DeletedBy { get; private set; }
+    // Auditing and soft delete are inherited from AuditableEntity
     
     private ShippingZone()
     {

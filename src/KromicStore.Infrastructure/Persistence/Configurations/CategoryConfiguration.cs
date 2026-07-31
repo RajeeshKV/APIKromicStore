@@ -48,14 +48,16 @@ public sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.Property(c => c.MetaDescription)
             .HasMaxLength(200);
 
-        builder.Property(c => c.CreatedAtUtc)
+        builder.Property(c => c.CreatedOnUtc)
+            .HasColumnName("CreatedAtUtc")
             .IsRequired();
 
         builder.Property(c => c.CreatedBy)
             .IsRequired()
             .HasMaxLength(500);
 
-        builder.Property(c => c.ModifiedAtUtc)
+        builder.Property(c => c.ModifiedOnUtc)
+            .HasColumnName("ModifiedAtUtc")
             .IsRequired();
 
         builder.Property(c => c.ModifiedBy)

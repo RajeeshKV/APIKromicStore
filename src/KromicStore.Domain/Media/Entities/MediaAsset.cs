@@ -24,16 +24,7 @@ public class MediaAsset : TenantEntity, IAuditable, ISoftDeletable
     public string? AccessedBy { get; private set; }
     public DateTime? LastAccessedOnUtc { get; private set; }
 
-    // Auditing
-    public DateTime CreatedOnUtc { get; private set; }
-    public string CreatedBy { get; private set; } = string.Empty;
-    public DateTime? ModifiedOnUtc { get; private set; }
-    public string? ModifiedBy { get; private set; }
-
-    // Soft delete
-    public bool IsDeleted { get; private set; }
-    public DateTime? DeletedOnUtc { get; private set; }
-    public string? DeletedBy { get; private set; }
+    // Auditing and soft delete are inherited from AuditableEntity
 
     private MediaAsset() { }
 
@@ -119,12 +110,9 @@ public class MediaAsset : TenantEntity, IAuditable, ISoftDeletable
     /// <summary>
     /// Soft delete the asset (Cloudinary asset remains).
     /// </summary>
-    public void SoftDelete(string actor)
+    public void MarkAsDeleted(string actor)
     {
-        IsDeleted = true;
-        DeletedOnUtc = DateTime.UtcNow;
-        DeletedBy = actor;
-        MarkModified(DateTime.UtcNow, actor);
+        SoftDelete(DateTime.UtcNow, actor);
     }
 
     /// <summary>
@@ -132,10 +120,7 @@ public class MediaAsset : TenantEntity, IAuditable, ISoftDeletable
     /// </summary>
     public void Restore(string actor)
     {
-        IsDeleted = false;
-        DeletedOnUtc = null;
-        DeletedBy = null;
-        MarkModified(DateTime.UtcNow, actor);
+        Restore(DateTime.UtcNow, actor);
     }
 }
 

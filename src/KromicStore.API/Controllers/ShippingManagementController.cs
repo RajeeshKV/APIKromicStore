@@ -44,7 +44,7 @@ public class ShippingManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ShippingZoneDto>> CreateShippingZone(
+    public Task<ActionResult<ShippingZoneDto>> CreateShippingZone(
         [FromBody] CreateShippingZoneRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -54,7 +54,7 @@ public class ShippingManagementController : ControllerBase
             Description = request.Description
         };
 
-        var response = await _mediator.Send(command, cancellationToken);
+        var response = _mediator.Send(command, cancellationToken).Result;
 
         var zoneDto = new ShippingZoneDto
         {
@@ -66,7 +66,7 @@ public class ShippingManagementController : ControllerBase
             UpdatedAt = DateTime.UtcNow
         };
 
-        return CreatedAtAction(nameof(GetShippingZone), new { zoneId = response.ZoneId }, zoneDto);
+        return Task.FromResult<ActionResult<ShippingZoneDto>>(CreatedAtAction(nameof(GetShippingZone), new { zoneId = response.ZoneId }, zoneDto));
     }
 
     /// <summary>
@@ -85,12 +85,12 @@ public class ShippingManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ShippingZoneDto>> GetShippingZone(
+    public Task<ActionResult<ShippingZoneDto>> GetShippingZone(
         Guid zoneId,
         CancellationToken cancellationToken = default)
     {
         // Get zone handler would retrieve from DB
-        return NotFound();
+        return Task.FromResult<ActionResult<ShippingZoneDto>>(NotFound());
     }
 
     /// <summary>
@@ -108,13 +108,13 @@ public class ShippingManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<ShippingZoneDto>>> GetShippingZones(
+    public Task<ActionResult<IEnumerable<ShippingZoneDto>>> GetShippingZones(
         [FromQuery] int skip = 0,
         [FromQuery] int take = 20,
         CancellationToken cancellationToken = default)
     {
         // Get zones handler would retrieve list from DB
-        return Ok(Enumerable.Empty<ShippingZoneDto>());
+        return Task.FromResult<ActionResult<IEnumerable<ShippingZoneDto>>>(Ok(Enumerable.Empty<ShippingZoneDto>()));
     }
 
     /// <summary>
@@ -136,13 +136,13 @@ public class ShippingManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ShippingZoneDto>> UpdateShippingZone(
+    public Task<ActionResult<ShippingZoneDto>> UpdateShippingZone(
         Guid zoneId,
         [FromBody] UpdateShippingZoneRequest request,
         CancellationToken cancellationToken = default)
     {
         // Update zone handler would be sent here
-        return NotFound();
+        return Task.FromResult<ActionResult<ShippingZoneDto>>(NotFound());
     }
 
     /// <summary>
@@ -161,12 +161,12 @@ public class ShippingManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> DeleteShippingZone(
+    public Task<IActionResult> DeleteShippingZone(
         Guid zoneId,
         CancellationToken cancellationToken = default)
     {
         // Delete zone handler would be sent here
-        return NoContent();
+        return Task.FromResult<IActionResult>(NoContent());
     }
 
     /// <summary>
@@ -188,7 +188,7 @@ public class ShippingManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ShippingMethodDto>> AddShippingMethod(
+    public Task<ActionResult<ShippingMethodDto>> AddShippingMethod(
         Guid zoneId,
         [FromBody] CreateShippingMethodRequest request,
         CancellationToken cancellationToken = default)
@@ -202,7 +202,7 @@ public class ShippingManagementController : ControllerBase
             EstimatedDaysMax = request.EstimatedDays + 1
         };
 
-        var response = await _mediator.Send(command, cancellationToken);
+        var response = _mediator.Send(command, cancellationToken).Result;
 
         var methodDto = new ShippingMethodDto
         {
@@ -217,7 +217,7 @@ public class ShippingManagementController : ControllerBase
             UpdatedAt = DateTime.UtcNow
         };
 
-        return CreatedAtAction(nameof(GetShippingMethod), new { zoneId, methodId = response.MethodId }, methodDto);
+        return Task.FromResult<ActionResult<ShippingMethodDto>>(CreatedAtAction(nameof(GetShippingMethod), new { zoneId, methodId = response.MethodId }, methodDto));
     }
 
     /// <summary>
@@ -237,13 +237,13 @@ public class ShippingManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ShippingMethodDto>> GetShippingMethod(
+    public Task<ActionResult<ShippingMethodDto>> GetShippingMethod(
         Guid zoneId,
         Guid methodId,
         CancellationToken cancellationToken = default)
     {
         // Get method handler would retrieve from DB
-        return NotFound();
+        return Task.FromResult<ActionResult<ShippingMethodDto>>(NotFound());
     }
 
     /// <summary>
@@ -262,12 +262,12 @@ public class ShippingManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<ShippingMethodDto>>> GetShippingMethods(
+    public Task<ActionResult<IEnumerable<ShippingMethodDto>>> GetShippingMethods(
         Guid zoneId,
         CancellationToken cancellationToken = default)
     {
         // Get methods handler would retrieve list from DB
-        return Ok(Enumerable.Empty<ShippingMethodDto>());
+        return Task.FromResult<ActionResult<IEnumerable<ShippingMethodDto>>>(Ok(Enumerable.Empty<ShippingMethodDto>()));
     }
 
     /// <summary>
@@ -290,14 +290,14 @@ public class ShippingManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ShippingMethodDto>> UpdateShippingMethod(
+    public Task<ActionResult<ShippingMethodDto>> UpdateShippingMethod(
         Guid zoneId,
         Guid methodId,
         [FromBody] UpdateShippingMethodRequest request,
         CancellationToken cancellationToken = default)
     {
         // Update method handler would be sent here
-        return NotFound();
+        return Task.FromResult<ActionResult<ShippingMethodDto>>(NotFound());
     }
 
     /// <summary>
@@ -317,13 +317,13 @@ public class ShippingManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> DeleteShippingMethod(
+    public Task<IActionResult> DeleteShippingMethod(
         Guid zoneId,
         Guid methodId,
         CancellationToken cancellationToken = default)
     {
         // Delete method handler would be sent here
-        return NoContent();
+        return Task.FromResult<IActionResult>(NoContent());
     }
 
     /// <summary>
@@ -342,7 +342,7 @@ public class ShippingManagementController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> CalculateShippingCost(
+    public Task<ActionResult> CalculateShippingCost(
         [FromQuery] Guid methodId,
         [FromBody] dynamic request,
         CancellationToken cancellationToken = default)
@@ -352,11 +352,11 @@ public class ShippingManagementController : ControllerBase
             ShippingMethodId = methodId
         };
 
-        var response = await _mediator.Send(command, cancellationToken);
+        var response = _mediator.Send(command, cancellationToken).Result;
 
         if (!response.Success)
-            return BadRequest(new { message = "Unable to calculate shipping cost." });
+            return Task.FromResult<ActionResult>(BadRequest(new { message = "Unable to calculate shipping cost." }));
 
-        return Ok(new { cost = response.ShippingCost });
+        return Task.FromResult<ActionResult>(Ok(new { cost = response.ShippingCost }));
     }
 }

@@ -39,6 +39,7 @@ public sealed class CheckoutSessionConfiguration : IEntityTypeConfiguration<Chec
             .IsRequired();
 
         builder.Property(cs => cs.CreatedOnUtc)
+            .HasColumnName("CreatedAtUtc")
             .IsRequired();
 
         builder.Property(cs => cs.ExpiresOnUtc)
@@ -71,7 +72,8 @@ public sealed class CheckoutSessionConfiguration : IEntityTypeConfiguration<Chec
             .IsRequired(false);
 
         // Auditing
-        builder.Property(cs => cs.ModifiedAtUtc)
+        builder.Property(cs => cs.ModifiedOnUtc)
+            .HasColumnName("ModifiedAtUtc")
             .IsRequired();
 
         builder.Property(cs => cs.CreatedBy)

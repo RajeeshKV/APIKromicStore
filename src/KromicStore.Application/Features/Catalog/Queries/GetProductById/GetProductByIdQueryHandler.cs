@@ -119,8 +119,8 @@ public sealed class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQ
             Tags: tags,
             Slug: product.Slug,
             MetaDescription: product.MetaDescription ?? product.Description,
-            CreatedAtUtc: product.CreatedAtUtc,
-            ModifiedAtUtc: product.ModifiedAtUtc);
+            CreatedAtUtc: product.CreatedOnUtc,
+            ModifiedAtUtc: product.ModifiedOnUtc);
     }
 
     private static Dictionary<string, string> BuildAttributesDictionary(dynamic attributes)

@@ -73,14 +73,16 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
             .IsRequired()
             .HasDefaultValue(true);
 
-        builder.Property(p => p.CreatedAtUtc)
+        builder.Property(p => p.CreatedOnUtc)
+            .HasColumnName("CreatedAtUtc")
             .IsRequired();
 
         builder.Property(p => p.CreatedBy)
             .IsRequired()
             .HasMaxLength(500);
 
-        builder.Property(p => p.ModifiedAtUtc)
+        builder.Property(p => p.ModifiedOnUtc)
+            .HasColumnName("ModifiedAtUtc")
             .IsRequired();
 
         builder.Property(p => p.ModifiedBy)

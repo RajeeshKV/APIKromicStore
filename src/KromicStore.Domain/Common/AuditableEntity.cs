@@ -21,6 +21,7 @@ public abstract class AuditableEntity : BaseEntity, IAuditable, ISoftDeletable
         if (CreatedOnUtc != default) return;
         CreatedOnUtc = EnsureUtc(utcNow);
         CreatedBy = NormalizeActor(actor);
+        MarkModified(utcNow, actor);
     }
 
     public void MarkModified(DateTime utcNow, string actor)

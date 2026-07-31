@@ -56,6 +56,6 @@ public sealed class GetCollectionByIdQueryHandler : IRequestHandler<GetCollectio
             Slug: collection.Name.ToLower().Replace(" ", "-"),
             IsActive: collection.Status == 0, // CollectionStatus.Active
             ProductCount: collection.ProductMappings?.Count ?? 0,
-            CreatedAtUtc: collection.CreatedAtUtc);
+            CreatedAtUtc: collection.CreatedOnUtc);
     }
 }

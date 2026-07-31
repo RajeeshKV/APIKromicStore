@@ -20,17 +20,6 @@ public class Email : TenantEntity, IAuditable, ISoftDeletable
     public string? ErrorMessage { get; private set; }
     public DateTime? SentAt { get; private set; }
     public string? ExternalMessageId { get; private set; }
-    
-    // Auditing
-    public DateTime CreatedAt { get; private set; }
-    public string CreatedBy { get; private set; } = string.Empty;
-    public DateTime? ModifiedAt { get; private set; }
-    public string? ModifiedBy { get; private set; }
-    
-    // Soft delete
-    public DateTime? DeletedAt { get; private set; }
-    public string? DeletedBy { get; private set; }
-    public bool IsDeleted { get; private set; }
 
     private Email() { }
 
@@ -116,12 +105,9 @@ public class Email : TenantEntity, IAuditable, ISoftDeletable
     /// <summary>
     /// Soft delete the email record.
     /// </summary>
-    public void SoftDelete(string actor)
+    public void MarkAsDeleted(string actor)
     {
-        IsDeleted = true;
-        DeletedAt = DateTime.UtcNow;
-        DeletedBy = actor;
-        MarkModified(DateTime.UtcNow, actor);
+        SoftDelete(DateTime.UtcNow, actor);
     }
 
     /// <summary>
@@ -129,10 +115,7 @@ public class Email : TenantEntity, IAuditable, ISoftDeletable
     /// </summary>
     public void Restore(string actor)
     {
-        IsDeleted = false;
-        DeletedAt = null;
-        DeletedBy = null;
-        MarkModified(DateTime.UtcNow, actor);
+        Restore(DateTime.UtcNow, actor);
     }
 }
 

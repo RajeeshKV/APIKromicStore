@@ -17,16 +17,7 @@ public sealed class TaxRegion : TenantEntity, IAuditable, ISoftDeletable
     private readonly List<TaxRule> _rules = [];
     public IReadOnlyList<TaxRule> Rules => _rules.AsReadOnly();
     
-    // Auditing
-    public DateTime CreatedOnUtc { get; private set; }
-    public DateTime ModifiedOnUtc { get; private set; }
-    public string CreatedBy { get; private set; } = string.Empty;
-    public string? ModifiedBy { get; private set; }
-    
-    // Soft delete
-    public bool IsDeleted { get; private set; }
-    public DateTime? DeletedOnUtc { get; private set; }
-    public string? DeletedBy { get; private set; }
+    // Auditing and soft delete are inherited from AuditableEntity
     
     private TaxRegion()
     {
@@ -89,7 +80,7 @@ public sealed class TaxRegion : TenantEntity, IAuditable, ISoftDeletable
     /// <summary>
     /// Get applicable tax rate for a product category.
     /// </summary>
-    public decimal GetTaxRate(string productCategory)
+    public decimal GetTaxRate(string? productCategory)
     {
         if (string.IsNullOrWhiteSpace(productCategory))
             return 0;

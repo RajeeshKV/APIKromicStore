@@ -22,16 +22,7 @@ public sealed class Category : TenantEntity, IAuditable, ISoftDeletable
     public string? MetaTitle { get; private set; }
     public string? MetaDescription { get; private set; }
 
-    // Auditing
-    public DateTime CreatedAtUtc { get; private set; }
-    public string CreatedBy { get; private set; } = string.Empty;
-    public DateTime ModifiedAtUtc { get; private set; }
-    public string ModifiedBy { get; private set; } = string.Empty;
-
-    // Soft delete
-    public bool IsDeleted { get; private set; }
-    public DateTime? DeletedOnUtc { get; private set; }
-    public string? DeletedBy { get; private set; }
+    // Soft delete is inherited from AuditableEntity
 
     private Category()
     {
@@ -125,34 +116,6 @@ public sealed class Category : TenantEntity, IAuditable, ISoftDeletable
     public void Unarchive()
     {
         Status = CategoryStatus.Active;
-    }
-
-    public void MarkCreated(DateTime utcNow, string actor)
-    {
-        CreatedAtUtc = utcNow;
-        CreatedBy = actor;
-        ModifiedAtUtc = utcNow;
-        ModifiedBy = actor;
-    }
-
-    public void MarkModified(DateTime utcNow, string actor)
-    {
-        ModifiedAtUtc = utcNow;
-        ModifiedBy = actor;
-    }
-
-    public void SoftDelete(DateTime utcNow, string actor)
-    {
-        IsDeleted = true;
-        DeletedOnUtc = utcNow;
-        DeletedBy = actor;
-    }
-
-    public void Restore()
-    {
-        IsDeleted = false;
-        DeletedOnUtc = null;
-        DeletedBy = null;
     }
 
     private static void ValidateInputs(string name, Guid? parentCategoryId)

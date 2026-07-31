@@ -45,20 +45,9 @@ public sealed class Product : TenantEntity, IAuditable, ISoftDeletable
     public IReadOnlyList<ProductTag> Tags => _tags.AsReadOnly();
     public ProductInventory? Inventory => _inventory;
 
-    // Auditing
-    public DateTime CreatedAtUtc { get; private set; }
-    public string CreatedBy { get; private set; } = string.Empty;
-    public DateTime ModifiedAtUtc { get; private set; }
-    public string ModifiedBy { get; private set; } = string.Empty;
-
-    // Soft delete
-    public bool IsDeleted { get; private set; }
-    public DateTime? DeletedOnUtc { get; private set; }
-    public string? DeletedBy { get; private set; }
-
     // Domain events
     private readonly List<IDomainEvent> _domainEvents = [];
-    public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+    public new IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
     private Product()
     {
@@ -351,42 +340,15 @@ public sealed class Product : TenantEntity, IAuditable, ISoftDeletable
         _tags.Remove(productTag);
     }
 
-    public void ClearDomainEvents()
-    {
-        _domainEvents.Clear();
-    }
-
-    public void MarkCreated(DateTime utcNow, string actor)
-    {
-        CreatedAtUtc = utcNow;
-        CreatedBy = actor;
-        ModifiedAtUtc = utcNow;
-        ModifiedBy = actor;
-    }
-
-    public void MarkModified(DateTime utcNow, string actor)
-    {
-        ModifiedAtUtc = utcNow;
-        ModifiedBy = actor;
-    }
-
-    public void SoftDelete(DateTime utcNow, string actor)
-    {
-        IsDeleted = true;
-        DeletedOnUtc = utcNow;
-        DeletedBy = actor;
-    }
-
-    public void Restore()
-    {
-        IsDeleted = false;
-        DeletedOnUtc = null;
-        DeletedBy = null;
-    }
-
     private void AddDomainEvent(IDomainEvent domainEvent)
     {
         _domainEvents.Add(domainEvent);
+    }
+
+    public new void ClearDomainEvents()
+    {
+        _domainEvents.Clear();
+        base.ClearDomainEvents();
     }
 
     private static void ValidateInputs(

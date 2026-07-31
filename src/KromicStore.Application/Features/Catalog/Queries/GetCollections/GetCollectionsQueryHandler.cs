@@ -53,6 +53,6 @@ public sealed class GetCollectionsQueryHandler : IRequestHandler<GetCollectionsQ
             Slug: collection.Name.ToLower().Replace(" ", "-"),
             IsActive: collection.Status == 0, // CollectionStatus.Active
             ProductCount: collection.ProductMappings?.Count ?? 0,
-            CreatedAtUtc: collection.CreatedAtUtc);
+            CreatedAtUtc: collection.CreatedOnUtc);
     }
 }

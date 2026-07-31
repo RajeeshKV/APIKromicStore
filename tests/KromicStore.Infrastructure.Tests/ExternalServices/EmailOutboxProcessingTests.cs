@@ -6,6 +6,8 @@ using KromicStore.Infrastructure.Services.Email;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
+#pragma warning disable CS8618, CS1998, CS0169
+
 namespace KromicStore.Infrastructure.Tests.ExternalServices;
 
 /// <summary>

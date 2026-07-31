@@ -31,14 +31,16 @@ public sealed class ProductCollectionConfiguration : IEntityTypeConfiguration<Pr
             .IsRequired()
             .HasConversion<int>();
 
-        builder.Property(c => c.CreatedAtUtc)
+        builder.Property(c => c.CreatedOnUtc)
+            .HasColumnName("CreatedAtUtc")
             .IsRequired();
 
         builder.Property(c => c.CreatedBy)
             .IsRequired()
             .HasMaxLength(500);
 
-        builder.Property(c => c.ModifiedAtUtc)
+        builder.Property(c => c.ModifiedOnUtc)
+            .HasColumnName("ModifiedAtUtc")
             .IsRequired();
 
         builder.Property(c => c.ModifiedBy)

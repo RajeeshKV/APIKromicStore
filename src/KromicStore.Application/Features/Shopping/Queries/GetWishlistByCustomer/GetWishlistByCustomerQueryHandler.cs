@@ -55,7 +55,7 @@ public sealed class GetWishlistByCustomerQueryHandler : IRequestHandler<GetWishl
             CustomerId: wishlist.CustomerId,
             Items: items,
             ItemsCount: wishlist.GetItemsCount(),
-            CreatedOnUtc: wishlist.CreatedAtUtc,
-            LastModifiedOnUtc: wishlist.ModifiedAtUtc);
+            CreatedOnUtc: wishlist.CreatedOnUtc,
+            LastModifiedOnUtc: wishlist.ModifiedOnUtc ?? wishlist.CreatedOnUtc);
     }
 }

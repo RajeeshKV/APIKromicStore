@@ -37,9 +37,9 @@ public class ThemeBuilderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<ThemeDto>>> GetThemes(CancellationToken cancellationToken = default)
+    public Task<ActionResult<IEnumerable<ThemeDto>>> GetThemes(CancellationToken cancellationToken = default)
     {
-        return Ok(Enumerable.Empty<ThemeDto>());
+        return Task.FromResult<ActionResult<IEnumerable<ThemeDto>>>(Ok(Enumerable.Empty<ThemeDto>()));
     }
 
     /// <summary>
@@ -58,7 +58,7 @@ public class ThemeBuilderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ThemeDto>> CreateTheme(
+    public Task<ActionResult<ThemeDto>> CreateTheme(
         [FromBody] CreateThemeRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -75,7 +75,7 @@ public class ThemeBuilderController : ControllerBase
             UpdatedAt = DateTime.UtcNow
         };
 
-        return CreatedAtAction(nameof(GetTheme), new { themeId = themeDto.ThemeId }, themeDto);
+        return Task.FromResult<ActionResult<ThemeDto>>(CreatedAtAction(nameof(GetTheme), new { themeId = themeDto.ThemeId }, themeDto));
     }
 
     /// <summary>
@@ -94,11 +94,11 @@ public class ThemeBuilderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ThemeDto>> GetTheme(
+    public Task<ActionResult<ThemeDto>> GetTheme(
         Guid themeId,
         CancellationToken cancellationToken = default)
     {
-        return NotFound();
+        return Task.FromResult<ActionResult<ThemeDto>>(NotFound());
     }
 
     /// <summary>
@@ -120,12 +120,12 @@ public class ThemeBuilderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ThemeDto>> UpdateTheme(
+    public Task<ActionResult<ThemeDto>> UpdateTheme(
         Guid themeId,
         [FromBody] UpdateThemeRequest request,
         CancellationToken cancellationToken = default)
     {
-        return NotFound();
+        return Task.FromResult<ActionResult<ThemeDto>>(NotFound());
     }
 
     /// <summary>
@@ -144,11 +144,11 @@ public class ThemeBuilderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> DeleteTheme(
+    public Task<IActionResult> DeleteTheme(
         Guid themeId,
         CancellationToken cancellationToken = default)
     {
-        return NoContent();
+        return Task.FromResult<IActionResult>(NoContent());
     }
 
     /// <summary>
@@ -167,11 +167,11 @@ public class ThemeBuilderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ThemeDto>> PublishTheme(
+    public Task<ActionResult<ThemeDto>> PublishTheme(
         Guid themeId,
         CancellationToken cancellationToken = default)
     {
-        return NotFound();
+        return Task.FromResult<ActionResult<ThemeDto>>(NotFound());
     }
 
     /// <summary>
@@ -190,11 +190,11 @@ public class ThemeBuilderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> PreviewTheme(
+    public Task<ActionResult> PreviewTheme(
         Guid themeId,
         CancellationToken cancellationToken = default)
     {
-        return Ok(new { previewUrl = $"/themes/{themeId}/preview" });
+        return Task.FromResult<ActionResult>(Ok(new { previewUrl = $"/themes/{themeId}/preview" }));
     }
 
     /// <summary>
@@ -213,11 +213,11 @@ public class ThemeBuilderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<ThemeVersionDto>>> GetThemeVersions(
+    public Task<ActionResult<IEnumerable<ThemeVersionDto>>> GetThemeVersions(
         Guid themeId,
         CancellationToken cancellationToken = default)
     {
-        return Ok(Enumerable.Empty<ThemeVersionDto>());
+        return Task.FromResult<ActionResult<IEnumerable<ThemeVersionDto>>>(Ok(Enumerable.Empty<ThemeVersionDto>()));
     }
 
     /// <summary>
@@ -237,11 +237,11 @@ public class ThemeBuilderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ThemeDto>> RollbackTheme(
+    public Task<ActionResult<ThemeDto>> RollbackTheme(
         Guid themeId,
         int version,
         CancellationToken cancellationToken = default)
     {
-        return NotFound();
+        return Task.FromResult<ActionResult<ThemeDto>>(NotFound());
     }
 }

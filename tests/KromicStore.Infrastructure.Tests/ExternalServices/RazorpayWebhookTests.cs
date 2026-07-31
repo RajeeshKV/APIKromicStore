@@ -2,6 +2,8 @@ using FluentAssertions;
 using KromicStore.Infrastructure.Services.Payments;
 using Xunit;
 
+#pragma warning disable CS8618, CS1998, CS0169, CS0414
+
 namespace KromicStore.Infrastructure.Tests.ExternalServices;
 
 /// <summary>

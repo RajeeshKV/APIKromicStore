@@ -4,6 +4,8 @@ using KromicStore.Application.Features.Catalog.Abstractions;
 using NSubstitute;
 using Xunit;
 
+#pragma warning disable CS8625
+
 namespace KromicStore.Application.Tests.Features.Catalog.Commands.DuplicateProduct;
 
 /// <summary>

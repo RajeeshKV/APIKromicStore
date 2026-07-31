@@ -22,11 +22,7 @@ public sealed class ShippingRate : TenantEntity, IAuditable
     public decimal Cost { get; private set; }
     public bool IsActive { get; private set; }
     
-    // Auditing
-    public DateTime CreatedOnUtc { get; private set; }
-    public DateTime ModifiedOnUtc { get; private set; }
-    public string CreatedBy { get; private set; } = string.Empty;
-    public string? ModifiedBy { get; private set; }
+    // Auditing is inherited from AuditableEntity
     
     private ShippingRate()
     {

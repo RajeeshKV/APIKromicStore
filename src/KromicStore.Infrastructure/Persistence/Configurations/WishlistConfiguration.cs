@@ -22,14 +22,16 @@ public sealed class WishlistConfiguration : IEntityTypeConfiguration<Wishlist>
             .IsRequired();
 
         // Auditing
-        builder.Property(w => w.CreatedAtUtc)
+        builder.Property(w => w.CreatedOnUtc)
+            .HasColumnName("CreatedAtUtc")
             .IsRequired();
 
         builder.Property(w => w.CreatedBy)
             .HasMaxLength(255)
             .IsRequired();
 
-        builder.Property(w => w.ModifiedAtUtc)
+        builder.Property(w => w.ModifiedOnUtc)
+            .HasColumnName("ModifiedAtUtc")
             .IsRequired();
 
         builder.Property(w => w.ModifiedBy)

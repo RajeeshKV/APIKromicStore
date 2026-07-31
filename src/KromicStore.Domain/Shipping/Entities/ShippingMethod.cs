@@ -20,11 +20,7 @@ public sealed class ShippingMethod : TenantEntity, IAuditable
     private readonly List<ShippingRate> _rates = [];
     public IReadOnlyList<ShippingRate> Rates => _rates.AsReadOnly();
     
-    // Auditing
-    public DateTime CreatedOnUtc { get; private set; }
-    public DateTime ModifiedOnUtc { get; private set; }
-    public string CreatedBy { get; private set; } = string.Empty;
-    public string? ModifiedBy { get; private set; }
+    // Auditing is inherited from AuditableEntity
     
     private ShippingMethod()
     {

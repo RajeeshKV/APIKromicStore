@@ -54,7 +54,7 @@ public sealed class GetCartByCustomerQueryHandler : IRequestHandler<GetCartByCus
 
         return new GetCartByCustomerResponse(
             CartId: cart.Id,
-            CustomerId: cart.CustomerId.Value,
+            CustomerId: cart.CustomerId ?? query.CustomerId,
             Currency: cart.Currency,
             Items: items,
             ItemsCount: cart.GetItemsCount(),

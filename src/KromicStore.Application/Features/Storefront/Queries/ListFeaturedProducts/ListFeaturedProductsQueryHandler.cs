@@ -31,7 +31,7 @@ public sealed class ListFeaturedProductsQueryHandler : IRequestHandler<ListFeatu
 
         var products = allProducts
             .Where(p => p.TenantId == _tenantContext.TenantId && !p.IsDeleted)
-            .OrderByDescending(p => p.CreatedAtUtc)
+            .OrderByDescending(p => p.CreatedOnUtc)
             .Take(request.Take)
             .Select(p => new FeaturedProductDto(
                 Id: p.Id,

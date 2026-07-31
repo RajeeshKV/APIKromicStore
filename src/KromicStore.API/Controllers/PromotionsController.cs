@@ -44,7 +44,7 @@ public class PromotionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<DiscountDto>> CreateDiscount(
+    public Task<ActionResult<DiscountDto>> CreateDiscount(
         [FromBody] CreateDiscountRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -58,7 +58,7 @@ public class PromotionsController : ControllerBase
             ValidToUtc = DateTime.UtcNow.AddYears(1)
         };
 
-        var response = await _mediator.Send(command, cancellationToken);
+        var response = _mediator.Send(command, cancellationToken).Result;
 
         var discountDto = new DiscountDto
         {
@@ -71,7 +71,7 @@ public class PromotionsController : ControllerBase
             UpdatedAt = DateTime.UtcNow
         };
 
-        return CreatedAtAction(nameof(GetDiscount), new { discountId = response.DiscountId }, discountDto);
+        return Task.FromResult<ActionResult<DiscountDto>>(CreatedAtAction(nameof(GetDiscount), new { discountId = response.DiscountId }, discountDto));
     }
 
     /// <summary>
@@ -90,13 +90,13 @@ public class PromotionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<DiscountDto>> GetDiscount(
+    public Task<ActionResult<DiscountDto>> GetDiscount(
         Guid discountId,
         CancellationToken cancellationToken = default)
     {
         // For now, return placeholder
         // In production, query handler would retrieve from DB
-        return NotFound();
+        return Task.FromResult<ActionResult<DiscountDto>>(NotFound());
     }
 
     /// <summary>
@@ -118,14 +118,14 @@ public class PromotionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<DiscountDto>> UpdateDiscount(
+    public Task<ActionResult<DiscountDto>> UpdateDiscount(
         Guid discountId,
         [FromBody] UpdateDiscountRequest request,
         CancellationToken cancellationToken = default)
     {
         // Update handler would be sent here
         // For now, return placeholder
-        return NotFound();
+        return Task.FromResult<ActionResult<DiscountDto>>(NotFound());
     }
 
     /// <summary>
@@ -144,13 +144,13 @@ public class PromotionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> DeleteDiscount(
+    public Task<IActionResult> DeleteDiscount(
         Guid discountId,
         CancellationToken cancellationToken = default)
     {
         // Delete handler would be sent here
         // For now, return success
-        return NoContent();
+        return Task.FromResult<IActionResult>(NoContent());
     }
 
     /// <summary>
@@ -171,7 +171,7 @@ public class PromotionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<CouponDto>> CreateCoupon(
+    public Task<ActionResult<CouponDto>> CreateCoupon(
         [FromBody] CreateCouponRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -189,7 +189,7 @@ public class PromotionsController : ControllerBase
             UpdatedAt = DateTime.UtcNow
         };
 
-        return CreatedAtAction(nameof(GetCoupon), new { couponCode = request.Code }, couponDto);
+        return Task.FromResult<ActionResult<CouponDto>>(CreatedAtAction(nameof(GetCoupon), new { couponCode = request.Code }, couponDto));
     }
 
     /// <summary>
@@ -208,13 +208,13 @@ public class PromotionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<CouponDto>> GetCoupon(
+    public Task<ActionResult<CouponDto>> GetCoupon(
         string couponCode,
         CancellationToken cancellationToken = default)
     {
         // Get coupon handler would be sent here
         // For now, return placeholder
-        return NotFound();
+        return Task.FromResult<ActionResult<CouponDto>>(NotFound());
     }
 
     /// <summary>
@@ -236,14 +236,14 @@ public class PromotionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<CouponDto>> UpdateCoupon(
+    public Task<ActionResult<CouponDto>> UpdateCoupon(
         string couponCode,
         [FromBody] UpdateCouponRequest request,
         CancellationToken cancellationToken = default)
     {
         // Update coupon handler would be sent here
         // For now, return placeholder
-        return NotFound();
+        return Task.FromResult<ActionResult<CouponDto>>(NotFound());
     }
 
     /// <summary>
@@ -262,12 +262,12 @@ public class PromotionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> DeleteCoupon(
+    public Task<IActionResult> DeleteCoupon(
         string couponCode,
         CancellationToken cancellationToken = default)
     {
         // Delete coupon handler would be sent here
-        return NoContent();
+        return Task.FromResult<IActionResult>(NoContent());
     }
 
     /// <summary>

@@ -14,7 +14,6 @@ public sealed class CheckoutSession : TenantEntity, IAuditable, ISoftDeletable
     public string? ShippingMethod { get; private set; }
     public string? PaymentMethod { get; private set; }
     public CheckoutSessionStatus Status { get; private set; }
-    public DateTime CreatedOnUtc { get; private set; }
     public DateTime? ExpiresOnUtc { get; private set; }
 
     // Pricing
@@ -31,15 +30,7 @@ public sealed class CheckoutSession : TenantEntity, IAuditable, ISoftDeletable
     private readonly List<CheckoutItem> _items = [];
     public IReadOnlyList<CheckoutItem> Items => _items.AsReadOnly();
 
-    // Auditing
-    public DateTime ModifiedAtUtc { get; private set; }
-    public string CreatedBy { get; private set; } = string.Empty;
-    public string ModifiedBy { get; private set; } = string.Empty;
-
-    // Soft delete
-    public bool IsDeleted { get; private set; }
-    public DateTime? DeletedOnUtc { get; private set; }
-    public string? DeletedBy { get; private set; }
+    // Auditing and soft delete are inherited from AuditableEntity
 
     private CheckoutSession()
     {
@@ -61,9 +52,10 @@ public sealed class CheckoutSession : TenantEntity, IAuditable, ISoftDeletable
         {
             CustomerId = customerId,
             Status = CheckoutSessionStatus.Draft,
-            CreatedOnUtc = DateTime.UtcNow,
             ExpiresOnUtc = DateTime.UtcNow.AddHours(1) // 1-hour expiration
         };
+
+        session.MarkCreated(DateTime.UtcNow, "System");
 
         return session;
     }

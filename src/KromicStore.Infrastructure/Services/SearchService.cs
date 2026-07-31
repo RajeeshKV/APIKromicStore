@@ -36,7 +36,7 @@ public sealed class SearchService
             query = query.Where(p =>
                 p.Name.ToLower().Contains(normalizedSearch) ||
                 p.Sku.ToLower().Contains(normalizedSearch) ||
-                p.Description.ToLower().Contains(normalizedSearch));
+                (p.Description != null && p.Description.ToLower().Contains(normalizedSearch)));
         }
 
         // Category filter
@@ -60,7 +60,7 @@ public sealed class SearchService
         // This requires including the Tags navigation property
 
         return await query
-            .OrderByDescending(p => p.CreatedAtUtc)
+            .OrderByDescending(p => p.CreatedOnUtc)
             .ToListAsync(cancellationToken);
     }
 
@@ -76,13 +76,15 @@ public sealed class SearchService
         if (sourceProduct is null)
             return [];
 
+        var categoryId = sourceProduct.CategoryId;
+
         // Find products in the same category, excluding the source
         return await _dbContext.Products
             .AsNoTracking()
-            .Where(p => p.CategoryId == sourceProduct.CategoryId &&
+            .Where(p => p.CategoryId == categoryId &&
                        p.Id != productId &&
                        p.Status == ProductStatus.Active)
-            .OrderByDescending(p => p.CreatedAtUtc)
+            .OrderByDescending(p => p.CreatedOnUtc)
             .Take(take)
             .ToListAsync(cancellationToken);
     }
