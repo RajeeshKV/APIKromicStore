@@ -48,6 +48,13 @@ ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV DOTNET_RUNNING_IN_CONTAINER=true
 
+# Disable file watching to prevent inotify limit exceeded errors on small instances
+# (Render's free tier has limited file descriptors)
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
+
+# Set higher limits for compatibility with small containers
+ENV COMPlus_PollWaitTimeout=500
+
 EXPOSE 8080
 
 # Health check - verifies application is running and responsive

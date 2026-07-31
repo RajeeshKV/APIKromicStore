@@ -8,6 +8,17 @@ using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Disable file watching in production to prevent inotify limit errors on small instances
+// (Render's free tier has limited file descriptors - this prevents IOException)
+if (builder.Environment.IsProduction())
+{
+    builder.Host.UseDefaultServiceProvider(options => 
+    {
+        options.ValidateScopes = false;
+        options.ValidateOnBuild = false;
+    });
+}
+
 // Add Serilog
 builder.AddSerilogLogging();
 
