@@ -192,12 +192,12 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.HasIndex(p => new { p.TenantId, p.Sku })
             .IsUnique()
             .HasDatabaseName("UX_Product_Tenant_SKU")
-            .HasFilter("\"IsDeleted\" = 0");
+            .HasFilter("\"IsDeleted\" = false");
 
         builder.HasIndex(p => new { p.TenantId, p.Slug })
             .IsUnique()
             .HasDatabaseName("UX_Product_Tenant_Slug")
-            .HasFilter("\"IsDeleted\" = 0");
+            .HasFilter("\"IsDeleted\" = false");
 
         builder.HasIndex(p => new { p.TenantId, p.CategoryId })
             .HasDatabaseName("IX_Product_Tenant_Category");
