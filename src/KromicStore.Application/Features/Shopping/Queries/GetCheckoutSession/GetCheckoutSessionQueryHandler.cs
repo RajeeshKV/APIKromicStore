@@ -1,6 +1,7 @@
 using MediatR;
 using KromicStore.Application.Common.Abstractions;
 using KromicStore.Application.Features.Shopping.Abstractions;
+using KromicStore.Application.Features.Shopping.Dtos;
 using Microsoft.Extensions.Logging;
 
 namespace KromicStore.Application.Features.Shopping.Queries.GetCheckoutSession;

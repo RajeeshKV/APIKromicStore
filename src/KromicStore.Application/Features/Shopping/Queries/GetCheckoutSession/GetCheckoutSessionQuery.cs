@@ -1,4 +1,5 @@
 using MediatR;
+using KromicStore.Application.Features.Shopping.Dtos;
 
 namespace KromicStore.Application.Features.Shopping.Queries.GetCheckoutSession;
 
@@ -6,16 +7,6 @@ namespace KromicStore.Application.Features.Shopping.Queries.GetCheckoutSession;
 /// Query to retrieve a checkout session with all details.
 /// </summary>
 public sealed record GetCheckoutSessionQuery(Guid CheckoutSessionId) : IRequest<GetCheckoutSessionResponse>;
-
-/// <summary>
-/// DTO for a checkout item in the response.
-/// </summary>
-public sealed record CheckoutItemDto(
-    Guid ProductId,
-    Guid? VariantId,
-    int Quantity,
-    decimal UnitPrice,
-    decimal LineTotal);
 
 /// <summary>
 /// DTO for address details in the response.

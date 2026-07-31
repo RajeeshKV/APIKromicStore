@@ -1,4 +1,5 @@
 using MediatR;
+using KromicStore.Application.Features.Shopping.Dtos;
 
 namespace KromicStore.Application.Features.Shopping.Commands.CreateCheckoutSession;
 
@@ -8,16 +9,6 @@ namespace KromicStore.Application.Features.Shopping.Commands.CreateCheckoutSessi
 public sealed record CreateCheckoutSessionCommand(
     Guid CartId,
     Guid CustomerId) : IRequest<CreateCheckoutSessionResponse>;
-
-/// <summary>
-/// DTO for a checkout item in the response.
-/// </summary>
-public sealed record CheckoutItemDto(
-    Guid ProductId,
-    Guid? VariantId,
-    int Quantity,
-    decimal UnitPrice,
-    decimal LineTotal);
 
 /// <summary>
 /// Response for CreateCheckoutSession command.
