@@ -85,7 +85,7 @@ public sealed class ProductCollectionConfiguration : IEntityTypeConfiguration<Pr
         builder.HasIndex(c => new { c.TenantId, c.Name })
             .IsUnique()
             .HasDatabaseName("UX_Collection_Tenant_Name")
-            .HasFilter("[IsDeleted] = 0");
+            .HasFilter("\"IsDeleted\" = 0");
 
         builder.HasIndex(c => new { c.TenantId, c.Status })
             .HasDatabaseName("IX_Collection_Tenant_Status");

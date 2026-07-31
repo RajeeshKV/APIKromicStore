@@ -89,7 +89,7 @@ public sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.HasIndex(c => new { c.TenantId, c.Slug })
             .IsUnique()
             .HasDatabaseName("UX_Category_Tenant_Slug")
-            .HasFilter("[IsDeleted] = 0");
+            .HasFilter("\"IsDeleted\" = 0");
 
         builder.HasIndex(c => new { c.TenantId, c.ParentCategoryId })
             .HasDatabaseName("IX_Category_Tenant_Parent");

@@ -128,7 +128,7 @@ namespace KromicStore.Infrastructure.Persistence.Migrations
                     b.HasIndex("TenantId", "Slug")
                         .IsUnique()
                         .HasDatabaseName("UX_Category_Tenant_Slug")
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("\"IsDeleted\" = 0");
 
                     b.HasIndex("TenantId", "Status")
                         .HasDatabaseName("IX_Category_Tenant_Status");
@@ -267,12 +267,12 @@ namespace KromicStore.Infrastructure.Persistence.Migrations
                     b.HasIndex("TenantId", "Sku")
                         .IsUnique()
                         .HasDatabaseName("UX_Product_Tenant_SKU")
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("\"IsDeleted\" = 0");
 
                     b.HasIndex("TenantId", "Slug")
                         .IsUnique()
                         .HasDatabaseName("UX_Product_Tenant_Slug")
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("\"IsDeleted\" = 0");
 
                     b.HasIndex("TenantId", "Status")
                         .HasDatabaseName("IX_Product_Tenant_Status");
@@ -348,7 +348,7 @@ namespace KromicStore.Infrastructure.Persistence.Migrations
                     b.HasIndex("TenantId", "Name")
                         .IsUnique()
                         .HasDatabaseName("UX_Collection_Tenant_Name")
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("\"IsDeleted\" = 0");
 
                     b.HasIndex("TenantId", "Status")
                         .HasDatabaseName("IX_Collection_Tenant_Status");

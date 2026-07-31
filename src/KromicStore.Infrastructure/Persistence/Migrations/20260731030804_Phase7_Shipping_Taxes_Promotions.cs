@@ -1021,7 +1021,7 @@ namespace KromicStore.Infrastructure.Persistence.Migrations
                 table: "Categories",
                 columns: new[] { "TenantId", "Slug" },
                 unique: true,
-                filter: "[IsDeleted] = 0");
+                filter: "\"IsDeleted\" = 0");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CheckoutItem_CheckoutSessionId",
@@ -1288,7 +1288,7 @@ namespace KromicStore.Infrastructure.Persistence.Migrations
                 table: "ProductCollections",
                 columns: new[] { "TenantId", "Name" },
                 unique: true,
-                filter: "[IsDeleted] = 0");
+                filter: "\"IsDeleted\" = 0");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductImages_ProductId_DisplayOrder",
@@ -1325,14 +1325,14 @@ namespace KromicStore.Infrastructure.Persistence.Migrations
                 table: "Products",
                 columns: new[] { "TenantId", "Sku" },
                 unique: true,
-                filter: "[IsDeleted] = 0");
+                filter: "\"IsDeleted\" = 0");
 
             migrationBuilder.CreateIndex(
                 name: "UX_Product_Tenant_Slug",
                 table: "Products",
                 columns: new[] { "TenantId", "Slug" },
                 unique: true,
-                filter: "[IsDeleted] = 0");
+                filter: "\"IsDeleted\" = 0");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductTags_ProductId_Tag",
