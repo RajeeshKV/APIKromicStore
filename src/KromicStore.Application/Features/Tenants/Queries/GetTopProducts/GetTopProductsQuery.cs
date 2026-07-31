@@ -2,25 +2,22 @@ using MediatR;
 
 namespace KromicStore.Application.Features.Tenants.Queries.GetTopProducts;
 
-/// <summary>
-/// Query to retrieve top selling products within a date range.
-/// </summary>
-public sealed class GetTopProductsQuery : IRequest<GetTopProductsResponse>
+public sealed class GetTopProductsQuery : IRequest<TopProductsResponse>
 {
     public Guid TenantId { get; set; }
-    public int Take { get; set; } = 10;
-    public int Days { get; set; } = 30;
+    public int Limit { get; set; } = 5;
 }
 
-public sealed class TopProductDto
+public sealed class TopProductsResponse
 {
-    public Guid ProductId { get; set; }
-    public string ProductName { get; set; } = string.Empty;
-    public int OrderCount { get; set; }
-    public decimal TotalRevenue { get; set; }
+    public List<TopProduct> Products { get; set; } = new();
 }
 
-public sealed class GetTopProductsResponse
+public sealed class TopProduct
 {
-    public List<TopProductDto> Products { get; set; } = [];
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+    public int SalesCount { get; set; }
+    public decimal Revenue { get; set; }
 }

@@ -2,6 +2,17 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using KromicStore.Application.Features.Tenants.Queries.GetDashboardOverview;
+using KromicStore.Application.Features.Tenants.Queries.GetStoreSettings;
+using KromicStore.Application.Features.Tenants.Queries.GetStoreAnalytics;
+using KromicStore.Application.Features.Tenants.Queries.GetStoreOrders;
+using KromicStore.Application.Features.Orders.Queries.GetOrders;
+using KromicStore.Application.Features.Tenants.Queries.GetLowStockProducts;
+using KromicStore.Application.Features.Tenants.Queries.GetTopProducts;
+using KromicStore.Application.Features.Tenants.Queries.GetStoreCustomers;
+using KromicStore.Application.Features.Tenants.Queries.GetPublishStatus;
+using KromicStore.Application.Features.Tenants.Queries.GetPaymentSettings;
+using KromicStore.Application.Features.Tenants.Commands.UpdateStoreSettings;
+using KromicStore.Application.Features.Tenants.Commands.UpdatePaymentSettings;
 
 namespace KromicStore.API.Controllers;
 
@@ -64,8 +75,20 @@ public class TenantDashboardController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<StoreSettingsDto>> GetStoreSettings(CancellationToken cancellationToken = default)
     {
-        // TODO: Implement GetStoreSettingsQuery
-        return NotFound();
+        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+        if (!Guid.TryParse(tenantIdClaim, out var tenantId))
+            return Unauthorized();
+
+        var query = new GetStoreSettingsQuery { TenantId = tenantId };
+        var result = await _mediator.Send(query, cancellationToken);
+        
+        return Ok(new StoreSettingsDto(
+            result.TenantId,
+            result.StoreName,
+            result.Description,
+            result.Email,
+            result.PhoneNumber,
+            result.CurrencyCode));
     }
 
     /// <summary>
@@ -86,8 +109,33 @@ public class TenantDashboardController : ControllerBase
         [FromBody] UpdateStoreSettingsRequest request,
         CancellationToken cancellationToken = default)
     {
-        // TODO: Implement UpdateStoreSettingsCommand
-        return NotFound();
+        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+        if (!Guid.TryParse(tenantIdClaim, out var tenantId))
+            return Unauthorized();
+
+        var command = new UpdateStoreSettingsCommand
+        {
+            TenantId = tenantId,
+            StoreName = request.StoreName,
+            Description = request.Description,
+            Email = request.Email,
+            PhoneNumber = request.PhoneNumber,
+            CurrencyCode = request.CurrencyCode
+        };
+        
+        var result = await _mediator.Send(command, cancellationToken);
+        
+        // Return updated settings
+        var getQuery = new GetStoreSettingsQuery { TenantId = tenantId };
+        var settings = await _mediator.Send(getQuery, cancellationToken);
+        
+        return Ok(new StoreSettingsDto(
+            settings.TenantId,
+            settings.StoreName,
+            settings.Description,
+            settings.Email,
+            settings.PhoneNumber,
+            settings.CurrencyCode));
     }
 
     /// <summary>
@@ -108,14 +156,30 @@ public class TenantDashboardController : ControllerBase
         [FromQuery] DateTime? endDate = null,
         CancellationToken cancellationToken = default)
     {
-        // TODO: Implement GetStoreAnalyticsQuery - requires Order repository aggregations
-        // When implemented, should calculate:
-        // - Total revenue (sum of orders)
-        // - Order count
-        // - Customer count (distinct)
-        // - Average order value
-        // - Conversion rate
-        return NotFound();
+        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+        if (!Guid.TryParse(tenantIdClaim, out var tenantId))
+            return Unauthorized();
+
+        startDate ??= DateTime.UtcNow.AddDays(-30);
+        endDate ??= DateTime.UtcNow;
+
+        var query = new GetStoreAnalyticsQuery
+        {
+            TenantId = tenantId,
+            StartDate = startDate.Value,
+            EndDate = endDate.Value
+        };
+        
+        var result = await _mediator.Send(query, cancellationToken);
+        
+        return Ok(new StoreAnalyticsDto(
+            startDate.Value,
+            endDate.Value,
+            result.TotalRevenue,
+            result.OrderCount,
+            result.CustomerCount,
+            result.AverageOrderValue,
+            result.ConversionRate));
     }
 
     /// <summary>
@@ -138,9 +202,29 @@ public class TenantDashboardController : ControllerBase
         [FromQuery] string? status = null,
         CancellationToken cancellationToken = default)
     {
-        // TODO: Implement GetStoreOrdersQuery - requires Order repository  
-        // When implemented, should query orders for tenant with optional status filter
-        return Ok(new List<OrderSummaryDto>());
+        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+        if (!Guid.TryParse(tenantIdClaim, out var tenantId))
+            return Unauthorized();
+
+        var query = new GetStoreOrdersQuery
+        {
+            TenantId = tenantId,
+            Skip = skip,
+            Take = Math.Min(take, 50),
+            Status = status
+        };
+        
+        var result = await _mediator.Send(query, cancellationToken);
+        
+        var dtos = result.Orders.Select(o => new OrderSummaryDto(
+            o.Id,
+            o.OrderNumber,
+            o.CreatedOnUtc,
+            o.Total,
+            o.Status,
+            1)).ToList();
+        
+        return Ok(dtos);
     }
 
     /// <summary>
@@ -159,9 +243,25 @@ public class TenantDashboardController : ControllerBase
         [FromQuery] int threshold = 10,
         CancellationToken cancellationToken = default)
     {
-        // TODO: Implement GetLowStockProductsQuery - requires Product repository queries
-        // When implemented, should query products where Quantity < threshold
-        return Ok(new List<LowStockProductDto>());
+        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+        if (!Guid.TryParse(tenantIdClaim, out var tenantId))
+            return Unauthorized();
+
+        var query = new GetLowStockProductsQuery
+        {
+            TenantId = tenantId,
+            ThresholdQty = threshold
+        };
+        
+        var result = await _mediator.Send(query, cancellationToken);
+        
+        var dtos = result.Products.Select(p => new LowStockProductDto(
+            p.Id,
+            p.Name,
+            p.CurrentStock,
+            p.ThresholdQty)).ToList();
+        
+        return Ok(dtos);
     }
 
     /// <summary>
@@ -182,9 +282,25 @@ public class TenantDashboardController : ControllerBase
         [FromQuery] int days = 30,
         CancellationToken cancellationToken = default)
     {
-        // TODO: Implement GetTopProductsQuery - requires OrderItem repository aggregations
-        // When implemented, should group by product and calculate order count and revenue
-        return Ok(new List<TopProductDto>());
+        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+        if (!Guid.TryParse(tenantIdClaim, out var tenantId))
+            return Unauthorized();
+
+        var query = new GetTopProductsQuery
+        {
+            TenantId = tenantId,
+            Limit = Math.Min(take, 50)
+        };
+        
+        var result = await _mediator.Send(query, cancellationToken);
+        
+        var dtos = result.Products.Select(p => new TopProductDto(
+            p.Id,
+            p.Name,
+            p.SalesCount,
+            p.Revenue)).ToList();
+        
+        return Ok(dtos);
     }
 
     /// <summary>
@@ -207,13 +323,33 @@ public class TenantDashboardController : ControllerBase
         [FromQuery] string? search = null,
         CancellationToken cancellationToken = default)
     {
-        // TODO: Implement GetStoreCustomersQuery - requires Order and CustomerProfile repository queries
-        // When implemented, should:
-        // 1. Get distinct customers from orders
-        // 2. Load customer profiles
-        // 3. Calculate order count and total spent per customer
-        // 4. Support search by name/email
-        return Ok(new List<CustomerSummaryDto>());
+        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+        if (!Guid.TryParse(tenantIdClaim, out var tenantId))
+            return Unauthorized();
+
+        var query = new GetStoreCustomersQuery
+        {
+            TenantId = tenantId,
+            Skip = skip,
+            Take = Math.Min(take, 100)
+        };
+        
+        var result = await _mediator.Send(query, cancellationToken);
+        
+        var dtos = result.Customers
+            .Where(c => string.IsNullOrEmpty(search) || 
+                       c.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                       c.Email.Contains(search, StringComparison.OrdinalIgnoreCase))
+            .Select(c => new CustomerSummaryDto(
+                c.Id,
+                c.Name,
+                c.Email,
+                c.TotalOrders,
+                c.TotalSpent,
+                c.LastOrderDate))
+            .ToList();
+        
+        return Ok(dtos);
     }
 
     /// <summary>
@@ -229,8 +365,18 @@ public class TenantDashboardController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<PublishStatusDto>> GetPublishStatus(CancellationToken cancellationToken = default)
     {
-        // TODO: Implement GetPublishStatusQuery
-        return NotFound();
+        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+        if (!Guid.TryParse(tenantIdClaim, out var tenantId))
+            return Unauthorized();
+
+        var query = new GetPublishStatusQuery { TenantId = tenantId };
+        var result = await _mediator.Send(query, cancellationToken);
+        
+        return Ok(new PublishStatusDto(
+            result.IsPublished,
+            result.PublishedOnUtc,
+            result.StoreUrl,
+            result.IsPublished));
     }
 
     /// <summary>
@@ -246,8 +392,17 @@ public class TenantDashboardController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<PaymentSettingsDto>> GetPaymentSettings(CancellationToken cancellationToken = default)
     {
-        // TODO: Implement GetPaymentSettingsQuery
-        return NotFound();
+        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+        if (!Guid.TryParse(tenantIdClaim, out var tenantId))
+            return Unauthorized();
+
+        var query = new GetPaymentSettingsQuery { TenantId = tenantId };
+        var result = await _mediator.Send(query, cancellationToken);
+        
+        return Ok(new PaymentSettingsDto(
+            "Razorpay",
+            result.RazorpayEnabled,
+            DateTime.UtcNow));
     }
 
     /// <summary>
@@ -268,8 +423,28 @@ public class TenantDashboardController : ControllerBase
         [FromBody] UpdatePaymentSettingsRequest request,
         CancellationToken cancellationToken = default)
     {
-        // TODO: Implement UpdatePaymentSettingsCommand
-        return NotFound();
+        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+        if (!Guid.TryParse(tenantIdClaim, out var tenantId))
+            return Unauthorized();
+
+        var command = new UpdatePaymentSettingsCommand
+        {
+            TenantId = tenantId,
+            RazorpayEnabled = true,
+            RazorpayKeyId = request.ApiKey,
+            RazorpayKeySecret = request.ApiSecret
+        };
+        
+        var result = await _mediator.Send(command, cancellationToken);
+        
+        // Return updated settings
+        var getQuery = new GetPaymentSettingsQuery { TenantId = tenantId };
+        var settings = await _mediator.Send(getQuery, cancellationToken);
+        
+        return Ok(new PaymentSettingsDto(
+            "Razorpay",
+            settings.RazorpayEnabled,
+            DateTime.UtcNow));
     }
 }
 

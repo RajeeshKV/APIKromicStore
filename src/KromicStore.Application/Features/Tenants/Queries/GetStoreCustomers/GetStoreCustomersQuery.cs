@@ -2,29 +2,25 @@ using MediatR;
 
 namespace KromicStore.Application.Features.Tenants.Queries.GetStoreCustomers;
 
-/// <summary>
-/// Query to retrieve paginated list of customers for a store with purchase history.
-/// </summary>
-public sealed class GetStoreCustomersQuery : IRequest<GetStoreCustomersResponse>
+public sealed class GetStoreCustomersQuery : IRequest<StoreCustomersResponse>
 {
     public Guid TenantId { get; set; }
-    public int Skip { get; set; }
-    public int Take { get; set; } = 20;
-    public string? Search { get; set; }
+    public int Skip { get; set; } = 0;
+    public int Take { get; set; } = 10;
 }
 
-public sealed class CustomerSummaryDto
+public sealed class StoreCustomersResponse
 {
-    public Guid CustomerId { get; set; }
+    public List<CustomerSummary> Customers { get; set; } = new();
+    public int TotalCount { get; set; }
+}
+
+public sealed class CustomerSummary
+{
+    public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
-    public int OrderCount { get; set; }
+    public int TotalOrders { get; set; }
     public decimal TotalSpent { get; set; }
-    public DateTime? LastOrderDate { get; set; }
-}
-
-public sealed class GetStoreCustomersResponse
-{
-    public List<CustomerSummaryDto> Customers { get; set; } = [];
-    public int TotalCount { get; set; }
+    public DateTime LastOrderDate { get; set; }
 }
