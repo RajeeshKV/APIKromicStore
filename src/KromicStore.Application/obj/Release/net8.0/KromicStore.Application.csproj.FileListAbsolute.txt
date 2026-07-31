@@ -1,5 +1,0 @@
-C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Release\net8.0\KromicStore.Application.csproj.AssemblyReference.cache
-C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Release\net8.0\KromicStore.Application.GeneratedMSBuildEditorConfig.editorconfig
-C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Release\net8.0\KromicStore.Application.AssemblyInfoInputs.cache
-C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Release\net8.0\KromicStore.Application.AssemblyInfo.cs
-C:\Personal\KromicStore\Backend\src\KromicStore.Application\obj\Release\net8.0\KromicStore.Application.csproj.CoreCompileInputs.cache

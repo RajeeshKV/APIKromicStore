@@ -1,11 +1,13 @@
 ﻿using KromicStore.Application.Common.Abstractions;
 using KromicStore.Domain.Catalog.Entities;
 using KromicStore.Domain.Common;
+using KromicStore.Domain.CustomerPortal.Entities;
 using KromicStore.Domain.Identity;
 using KromicStore.Domain.Orders.Entities;
 using KromicStore.Domain.Promotions.Entities;
 using KromicStore.Domain.Shipping.Entities;
 using KromicStore.Domain.Shopping.Entities;
+using KromicStore.Domain.StoreOperations.Entities;
 using KromicStore.Domain.Taxes.Entities;
 using KromicStore.Domain.Tenants;
 using Microsoft.EntityFrameworkCore;
@@ -125,6 +127,32 @@ public sealed class KromicStoreDbContext : DbContext, IApplicationDbContext
 
     public DbSet<Campaign> CampaignSet => Set<Campaign>();
     public IQueryable<Campaign> Campaigns => CampaignSet;
+
+    // Customer Portal DbSets
+    public DbSet<CustomerProfile> CustomerProfileSet => Set<CustomerProfile>();
+    public IQueryable<CustomerProfile> CustomerProfiles => CustomerProfileSet;
+
+    public DbSet<CustomerAddress> CustomerAddressSet => Set<CustomerAddress>();
+    public IQueryable<CustomerAddress> CustomerAddresses => CustomerAddressSet;
+
+    public DbSet<CustomerNotificationPreference> CustomerNotificationPreferenceSet => Set<CustomerNotificationPreference>();
+    public IQueryable<CustomerNotificationPreference> CustomerNotificationPreferences => CustomerNotificationPreferenceSet;
+
+    // Store Operations DbSets
+    public DbSet<InventoryAdjustment> InventoryAdjustmentSet => Set<InventoryAdjustment>();
+    public IQueryable<InventoryAdjustment> InventoryAdjustments => InventoryAdjustmentSet;
+
+    public DbSet<Fulfillment> FulfillmentSet => Set<Fulfillment>();
+    public IQueryable<Fulfillment> Fulfillments => FulfillmentSet;
+
+    public DbSet<FulfillmentItem> FulfillmentItemSet => Set<FulfillmentItem>();
+    public IQueryable<FulfillmentItem> FulfillmentItems => FulfillmentItemSet;
+
+    public DbSet<ReturnRequest> ReturnRequestSet => Set<ReturnRequest>();
+    public IQueryable<ReturnRequest> ReturnRequests => ReturnRequestSet;
+
+    public DbSet<ReturnInspection> ReturnInspectionSet => Set<ReturnInspection>();
+    public IQueryable<ReturnInspection> ReturnInspections => ReturnInspectionSet;
 
     public void AddEntity<T>(T entity) where T : class => Set<T>().Add(entity);
 

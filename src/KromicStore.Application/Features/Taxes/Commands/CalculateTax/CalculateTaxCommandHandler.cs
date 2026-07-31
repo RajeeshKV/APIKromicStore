@@ -41,7 +41,8 @@ public sealed class CalculateTaxCommandHandler : IRequestHandler<CalculateTaxCom
             };
         
         // Calculate tax amount
-        var taxAmount = request.OrderAmount * (taxRate / 100);
+        // Note: taxRate is already a decimal between 0 and 1 (e.g., 0.15 for 15%)
+        var taxAmount = request.OrderAmount * taxRate;
         
         return new CalculateTaxResponse
         {
