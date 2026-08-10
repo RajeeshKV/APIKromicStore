@@ -16,6 +16,9 @@ public static class MiddlewareExtensions
         // Exception handling must be first
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+        // CORS must come before authentication
+        app.UseCors("AllowSpecificOrigins");
+
         // Tenant resolution must come before authentication
         app.UseMiddleware<TenantResolutionMiddleware>();
 

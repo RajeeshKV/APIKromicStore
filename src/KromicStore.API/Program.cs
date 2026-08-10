@@ -27,6 +27,31 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
 
+// Configure CORS
+builder.Services.Configure<CorsOptions>(builder.Configuration.GetSection(CorsOptions.SectionName));
+builder.Services.AddCors(options =>
+{
+    var corsOptions = new CorsOptions();
+    builder.Configuration.GetSection(CorsOptions.SectionName).Bind(corsOptions);
+    
+    var (isValid, errorMessage) = corsOptions.Validate();
+    if (!isValid)
+    {
+        throw new InvalidOperationException($"Invalid CORS configuration: {errorMessage}");
+    }
+
+    options.AddPolicy("AllowSpecificOrigins", policy =>
+    {
+        var allowedOrigins = corsOptions.ParsedAllowedOrigins.ToArray();
+        
+        policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+});
+
 // Add Application layer
 builder.Services.AddApplication();
 
