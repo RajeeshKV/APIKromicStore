@@ -69,18 +69,18 @@ public sealed class AuthController : ControllerBase
     /// <summary>
     /// Authenticate with email and password.
     /// Returns JWT + refresh token on success.
+    /// Note: Users can login with unverified email, but frontend should show 
+    /// a verification banner when IsEmailVerified = false.
     /// </summary>
-    /// <response code="200">Authenticated successfully.</response>
+    /// <response code="200">Authenticated successfully (check IsEmailVerified for banner).</response>
     /// <response code="400">Validation failure.</response>
     /// <response code="401">Invalid credentials.</response>
-    /// <response code="403">Email not verified.</response>
     /// <response code="423">Account locked.</response>
     [HttpPost("login")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(AuthTokenResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Login(
         [FromBody] LoginRequest request,
         CancellationToken cancellationToken)

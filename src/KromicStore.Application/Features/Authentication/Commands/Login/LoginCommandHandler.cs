@@ -62,10 +62,11 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthToke
             throw new AccountLockedException("Your account has been deactivated. Please contact support.");
         }
 
+        // Allow login with unverified email, but frontend will show verification banner
+        // User can still access the app but should verify email before performing sensitive actions
         if (!user.IsEmailVerified)
         {
-            _logger.LogWarning("Login attempt with unverified email UserId={UserId}", user.Id);
-            throw new EmailNotVerifiedException();
+            _logger.LogInformation("Login with unverified email UserId={UserId} — verification required", user.Id);
         }
 
         // ── 3. Resolve roles ──────────────────────────────────────────────────
