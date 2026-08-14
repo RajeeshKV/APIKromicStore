@@ -9,6 +9,7 @@ using UpdateProductCommand = KromicStore.Application.Features.Catalog.Commands.U
 using DeleteProductCommand = KromicStore.Application.Features.Catalog.Commands.DeleteProduct.DeleteProductCommand;
 using RestoreProductCommand = KromicStore.Application.Features.Catalog.Commands.RestoreProduct.RestoreProductCommand;
 using DuplicateProductCommand = KromicStore.Application.Features.Catalog.Commands.DuplicateProduct.DuplicateProductCommand;
+using BulkDeleteProductsCommand = KromicStore.Application.Features.Catalog.Commands.BulkDeleteProducts.BulkDeleteProductsCommand;
 
 namespace KromicStore.API.Controllers;
 
@@ -263,4 +264,40 @@ public class ProductsController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
         return CreatedAtAction(nameof(GetProduct), new { id = result.DuplicatedProductId }, result);
     }
+
+    /// <summary>
+    /// Bulk deletes multiple products.
+    /// Soft deletes all specified products in a single efficient operation.
+    /// </summary>
+    /// <param name="request">List of product IDs to delete.</param>
+    /// <returns>Operation result with success/failure counts.</returns>
+    /// <response code="200">Bulk delete completed.</response>
+    /// <response code="400">Validation error or empty list.</response>
+    /// <response code="401">Unauthorized.</response>
+    /// <response code="403">Forbidden.</response>
+    /// <response code="500">Internal server error.</response>
+    [HttpPost("bulk-delete")]
+    [Authorize(Roles = "TenantAdmin,StoreManager")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> BulkDeleteProducts(
+        [FromBody] BulkDeleteProductsRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (request?.ProductIds == null || !request.ProductIds.Any())
+            return BadRequest(new { message = "No product IDs provided" });
+
+        var command = new BulkDeleteProductsCommand(request.ProductIds);
+        var result = await _mediator.Send(command, cancellationToken);
+        
+        return Ok(result);
+    }
 }
+
+// Request DTOs
+public sealed record BulkDeleteProductsRequest(
+    IEnumerable<Guid> ProductIds
+);

@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using KromicStore.Application.Common.Abstractions;
 using KromicStore.Application.Features.Catalog.Abstractions;
 using KromicStore.Domain.Catalog.Entities;
+using MediatR;
+using KromicStore.Application.Features.Catalog.Commands.ApproveReview;
+using KromicStore.Application.Features.Catalog.Commands.RejectReview;
 
 namespace KromicStore.API.Controllers;
 
@@ -20,19 +23,22 @@ public class ReviewsController : ControllerBase
     private readonly ICurrentUserService _currentUserService;
     private readonly IApplicationDbContext _dbContext;
     private readonly ILogger<ReviewsController> _logger;
+    private readonly IMediator _mediator;
 
     public ReviewsController(
         IProductReviewRepository reviewRepository,
         IProductRepository productRepository,
         ICurrentUserService currentUserService,
         IApplicationDbContext dbContext,
-        ILogger<ReviewsController> logger)
+        ILogger<ReviewsController> logger,
+        IMediator mediator)
     {
         _reviewRepository = reviewRepository ?? throw new ArgumentNullException(nameof(reviewRepository));
         _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
         _currentUserService = currentUserService ?? throw new ArgumentNullException(nameof(currentUserService));
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
     /// <summary>
@@ -495,7 +501,81 @@ public class ReviewsController : ControllerBase
             Status: review.Status.ToString(),
             SubmittedOn: review.SubmittedOnUtc);
     }
+
+    /// <summary>
+    /// Approves a review for public display (admin only).
+    /// </summary>
+    /// <param name="productId">The product ID.</param>
+    /// <param name="reviewId">The review ID.</param>
+    /// <response code="200">Review approved successfully.</response>
+    /// <response code="401">Unauthorized.</response>
+    /// <response code="403">Forbidden.</response>
+    /// <response code="404">Review not found.</response>
+    /// <response code="500">Internal server error.</response>
+    [HttpPost("{reviewId:guid}/approve")]
+    [Authorize(Roles = "TenantAdmin,StoreManager")]
+    [ProducesResponseType(typeof(ApproveReviewResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> ApproveReview(
+        Guid productId,
+        Guid reviewId,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new ApproveReviewCommand(reviewId);
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Rejects a review and removes it from public display (admin only).
+    /// </summary>
+    /// <param name="productId">The product ID.</param>
+    /// <param name="reviewId">The review ID.</param>
+    /// <param name="request">Rejection details with optional reason.</param>
+    /// <response code="200">Review rejected successfully.</response>
+    /// <response code="401">Unauthorized.</response>
+    /// <response code="403">Forbidden.</response>
+    /// <response code="404">Review not found.</response>
+    /// <response code="500">Internal server error.</response>
+    [HttpPost("{reviewId:guid}/reject")]
+    [Authorize(Roles = "TenantAdmin,StoreManager")]
+    [ProducesResponseType(typeof(RejectReviewResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> RejectReview(
+        Guid productId,
+        Guid reviewId,
+        [FromBody] RejectReviewRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new RejectReviewCommand(reviewId, request?.RejectionReason);
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
 }
+
+// DTOs - Review Moderation
+public sealed record RejectReviewRequest(
+    string? RejectionReason = null
+);
+
+public sealed record ApproveReviewResponse(
+    Guid ReviewId,
+    string Status,
+    string Message
+);
+
+public sealed record RejectReviewResponse(
+    Guid ReviewId,
+    string Status,
+    string? RejectionReason,
+    string Message
+);
 
 // ── Request/Response DTOs ───────────────────────────────────────────────────
 

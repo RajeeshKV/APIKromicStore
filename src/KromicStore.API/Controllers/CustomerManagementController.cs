@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using KromicStore.API.Contracts.Customers;
+using KromicStore.Application.Features.Customers.Queries.ExportCustomers;
 
 namespace KromicStore.API.Controllers;
 
@@ -238,5 +239,28 @@ public class CustomerManagementController : ControllerBase
 
         // Get top customers handler would retrieve from DB
         return Task.FromResult<ActionResult<IEnumerable<CustomerDto>>>(Ok(Enumerable.Empty<CustomerDto>()));
+    }
+
+    /// <summary>
+    /// Exports all customers to CSV file.
+    /// Tenant admins can export customer data for CRM integration and analysis.
+    /// </summary>
+    /// <returns>CSV file with customer data.</returns>
+    /// <response code="200">Returns CSV file.</response>
+    /// <response code="401">Unauthorized.</response>
+    /// <response code="403">Forbidden.</response>
+    /// <response code="500">Internal server error.</response>
+    [HttpGet("export")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> ExportCustomers(
+        CancellationToken cancellationToken = default)
+    {
+        var query = new ExportCustomersQuery();
+        var result = await _mediator.Send(query, cancellationToken);
+
+        return File(result.CsvData, "text/csv", result.FileName);
     }
 }

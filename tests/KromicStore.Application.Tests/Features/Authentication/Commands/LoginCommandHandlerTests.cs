@@ -116,7 +116,7 @@ public sealed class LoginCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_ShouldThrowEmailNotVerifiedException_WhenEmailNotVerified()
+    public async Task Handle_ShouldAllowLoginWithUnverifiedEmail_ButFlagNotVerified()
     {
         // Arrange
         var user = User.CreateTenantUser(
@@ -125,18 +125,27 @@ public sealed class LoginCommandHandlerTests
             passwordHash: "hashed-password",
             firstName: "Charlie",
             lastName: "Brown");
-        // Not verified
+        // Not verified - but should still allow login
         ((KromicStoreDbContext)_dbContext).UserSet.Add(user);
         await _dbContext.SaveChangesAsync();
 
         var command = new LoginCommand("charlie@example.com", "SecurePass1!", null, null);
         _passwordHasher.Verify("hashed-password", "SecurePass1!").Returns(true);
+        _tokenService.GenerateAccessToken(Arg.Any<User>(), Arg.Any<IEnumerable<string>>()).Returns("access-token");
+        _tokenService.GenerateRefreshToken().Returns("raw-refresh-token");
+        _tokenService.HashToken("raw-refresh-token").Returns("hashed-refresh-token");
+        _tokenService.RefreshTokenExpirationDays.Returns(30);
+        _tokenService.AccessTokenExpirationSeconds.Returns(3600);
 
         // Act
-        Func<Task> act = () => _sut.Handle(command, CancellationToken.None);
+        var result = await _sut.Handle(command, CancellationToken.None);
 
-        // Assert
-        await act.Should().ThrowAsync<EmailNotVerifiedException>();
+        // Assert - Login should succeed but IsEmailVerified flag should be false
+        result.Should().NotBeNull();
+        result.AccessToken.Should().Be("access-token");
+        result.User.IsEmailVerified.Should().BeFalse();
+        result.User.Email.Should().Be("charlie@example.com");
+        // Frontend should use IsEmailVerified=false to show verification banner
     }
 
     [Fact]

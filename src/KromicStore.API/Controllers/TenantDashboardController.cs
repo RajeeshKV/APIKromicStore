@@ -11,8 +11,12 @@ using KromicStore.Application.Features.Tenants.Queries.GetTopProducts;
 using KromicStore.Application.Features.Tenants.Queries.GetStoreCustomers;
 using KromicStore.Application.Features.Tenants.Queries.GetPublishStatus;
 using KromicStore.Application.Features.Tenants.Queries.GetPaymentSettings;
+using KromicStore.Application.Features.Tenants.Queries.GetTenant;
 using KromicStore.Application.Features.Tenants.Commands.UpdateStoreSettings;
 using KromicStore.Application.Features.Tenants.Commands.UpdatePaymentSettings;
+using KromicStore.Application.Features.Tenants.Commands.AddCustomDomain;
+using KromicStore.Application.Features.Tenants.Commands.RemoveCustomDomain;
+using KromicStore.Application.Features.Tenants.Commands.VerifyCustomDomain;
 
 namespace KromicStore.API.Controllers;
 
@@ -446,6 +450,88 @@ public class TenantDashboardController : ControllerBase
             settings.RazorpayEnabled,
             DateTime.UtcNow));
     }
+
+    // ── Domain Management ──────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Gets all domains configured for this tenant (subdomain + custom domains).
+    /// </summary>
+    [HttpGet("domains")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<IEnumerable<TenantDomainDto>>> GetDomains(
+        CancellationToken cancellationToken = default)
+    {
+        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+        if (!Guid.TryParse(tenantIdClaim, out var tenantId))
+            return Unauthorized();
+
+        var query = new GetTenantQuery(tenantId);
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result.Domains);
+    }
+
+    /// <summary>
+    /// Adds a custom domain to this tenant's storefront.
+    /// </summary>
+    [HttpPost("domains")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<AddCustomDomainResponse>> AddDomain(
+        [FromBody] AddDomainRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+        if (!Guid.TryParse(tenantIdClaim, out var tenantId))
+            return Unauthorized();
+
+        var command = new AddCustomDomainCommand(tenantId, request.CustomDomain, request.SetPrimary);
+        var result = await _mediator.Send(command, cancellationToken);
+        return CreatedAtAction(nameof(GetDomains), result);
+    }
+
+    /// <summary>
+    /// Removes a custom domain from this tenant.
+    /// </summary>
+    [HttpDelete("domains")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> RemoveDomain(
+        [FromBody] RemoveDomainRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+        if (!Guid.TryParse(tenantIdClaim, out var tenantId))
+            return Unauthorized();
+
+        var command = new RemoveCustomDomainCommand(tenantId, request.CustomDomain);
+        await _mediator.Send(command, cancellationToken);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Triggers DNS verification for a custom domain.
+    /// </summary>
+    [HttpPost("domains/verify")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<VerifyCustomDomainResponse>> VerifyDomain(
+        [FromBody] VerifyDomainRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+        if (!Guid.TryParse(tenantIdClaim, out var tenantId))
+            return Unauthorized();
+
+        var command = new VerifyCustomDomainCommand(tenantId, request.CustomDomain);
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
 }
 
 // DTOs
@@ -515,3 +601,13 @@ public record PaymentSettingsDto(
 public record UpdatePaymentSettingsRequest(
     string ApiKey,
     string ApiSecret);
+
+public record AddDomainRequest(
+    string CustomDomain,
+    bool SetPrimary = false);
+
+public record RemoveDomainRequest(
+    string CustomDomain);
+
+public record VerifyDomainRequest(
+    string CustomDomain);

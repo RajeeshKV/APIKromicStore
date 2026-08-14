@@ -43,6 +43,9 @@ public sealed class KromicStoreDbContext : DbContext, IApplicationDbContext
     public DbSet<Theme> ThemeSet => Set<Theme>();
     public IQueryable<Theme> Themes => ThemeSet;
 
+    public DbSet<ThemeAsset> ThemeAssetSet => Set<ThemeAsset>();
+    public IQueryable<ThemeAsset> ThemeAssets => ThemeAssetSet;
+
     public DbSet<SubscriptionPlan> SubscriptionPlanSet => Set<SubscriptionPlan>();
     public IQueryable<SubscriptionPlan> SubscriptionPlans => SubscriptionPlanSet;
 
@@ -233,6 +236,7 @@ public sealed class KromicStoreDbContext : DbContext, IApplicationDbContext
         modelBuilder.Entity<TenantDomain>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
         modelBuilder.Entity<TenantSettings>().HasQueryFilter(entity => !entity.IsDeleted && _tenantContext.TenantId.HasValue && entity.TenantId == _tenantContext.TenantId);
         modelBuilder.Entity<Theme>().HasQueryFilter(entity => !entity.IsDeleted);
+        modelBuilder.Entity<ThemeAsset>().HasQueryFilter(entity => !entity.IsDeleted);
         modelBuilder.Entity<SubscriptionPlan>().HasQueryFilter(entity => !entity.IsDeleted);
         modelBuilder.Entity<PlatformSettings>().HasQueryFilter(entity => !entity.IsDeleted);
         modelBuilder.Entity<ContactRequest>().HasQueryFilter(entity => !entity.IsDeleted);

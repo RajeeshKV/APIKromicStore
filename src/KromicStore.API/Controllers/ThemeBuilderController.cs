@@ -6,6 +6,8 @@ using GetThemesQuery = KromicStore.Application.Features.Tenants.Queries.GetTheme
 using ThemeQueryDto = KromicStore.Application.Features.Tenants.Queries.GetThemes.ThemeDto;
 using KromicStore.Application.Features.Tenants.Commands.CreateTheme;
 using KromicStore.Application.Features.Tenants.Commands.PublishTheme;
+using KromicStore.Application.Features.Tenants.Commands.UploadThemeAsset;
+using KromicStore.Domain.Tenants;
 
 namespace KromicStore.API.Controllers;
 
@@ -306,6 +308,67 @@ public class ThemeBuilderController : ControllerBase
 
         return Ok(theme);
     }
+
+    /// <summary>
+    /// Uploads an asset file for a theme (logo, hero banner, images, etc.)
+    /// Supports multipart file upload for theme customization.
+    /// </summary>
+    /// <param name="themeId">The theme ID.</param>
+    /// <param name="file">The asset file to upload.</param>
+    /// <param name="assetType">Type of asset (Logo, HeroBanner, Image, etc.).</param>
+    /// <param name="description">Optional description for the asset.</param>
+    /// <returns>Created asset details with public URL.</returns>
+    /// <response code="201">Asset uploaded successfully.</response>
+    /// <response code="400">Invalid file or validation error.</response>
+    /// <response code="401">Unauthorized.</response>
+    /// <response code="403">Forbidden.</response>
+    /// <response code="404">Theme not found.</response>
+    /// <response code="500">Internal server error.</response>
+    [HttpPost("{themeId}/assets")]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<UploadThemeAssetResponse>> UploadThemeAsset(
+        Guid themeId,
+        [FromForm] IFormFile file,
+        [FromForm] ThemeAssetType assetType,
+        [FromForm] string? description = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest(new { message = "File is required and cannot be empty." });
+
+        using var memoryStream = new MemoryStream();
+        await file.CopyToAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+
+        var command = new UploadThemeAssetCommand(
+            ThemeId: themeId,
+            FileStream: memoryStream,
+            FileName: file.FileName,
+            ContentType: file.ContentType,
+            FileSize: file.Length,
+            AssetType: assetType,
+            Description: description
+        );
+
+        var result = await _mediator.Send(command, cancellationToken);
+
+        return CreatedAtAction(nameof(UploadThemeAsset), new { themeId, assetId = result.AssetId },
+            new UploadThemeAssetResponse
+            {
+                AssetId = result.AssetId,
+                FileName = result.FileName,
+                FileSize = result.FileSize,
+                ContentType = result.ContentType,
+                PublicUrl = result.PublicUrl,
+                AssetType = result.AssetType.ToString()
+            });
+    }
 }
 
 /// <summary>
@@ -315,4 +378,18 @@ public class CreateThemeResponse
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
+}
+
+
+/// <summary>
+/// Response from UploadThemeAsset command.
+/// </summary>
+public class UploadThemeAssetResponse
+{
+    public Guid AssetId { get; set; }
+    public string FileName { get; set; } = string.Empty;
+    public long FileSize { get; set; }
+    public string ContentType { get; set; } = string.Empty;
+    public string? PublicUrl { get; set; }
+    public string AssetType { get; set; } = string.Empty;
 }

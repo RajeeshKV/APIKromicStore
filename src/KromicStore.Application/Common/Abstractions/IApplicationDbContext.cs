@@ -7,6 +7,10 @@ using KromicStore.Domain.Shipping.Entities;
 using KromicStore.Domain.Shopping.Entities;
 using KromicStore.Domain.Taxes.Entities;
 using KromicStore.Domain.Tenants;
+using KromicStore.Domain.StoreOperations.Entities;
+using KromicStore.Domain.CustomerPortal.Entities;
+using KromicStore.Domain.Email.Entities;
+using KromicStore.Domain.Media.Entities;
 
 namespace KromicStore.Application.Common.Abstractions;
 
@@ -17,6 +21,7 @@ public interface IApplicationDbContext
     IQueryable<TenantDomain> TenantDomains { get; }
     IQueryable<TenantSettings> TenantSettings { get; }
     IQueryable<Theme> Themes { get; }
+    IQueryable<ThemeAsset> ThemeAssets { get; }
     IQueryable<SubscriptionPlan> SubscriptionPlans { get; }
     IQueryable<PlatformSettings> PlatformSettings { get; }
     IQueryable<ContactRequest> ContactRequests { get; }

@@ -5,9 +5,11 @@ using KromicStore.Application.Features.Orders.Commands.ConfirmOrder;
 using KromicStore.Application.Features.Orders.Commands.RejectOrder;
 using KromicStore.Application.Features.Orders.Commands.CancelOrder;
 using KromicStore.Application.Features.Orders.Commands.AddShipment;
+using KromicStore.Application.Features.Orders.Commands.BulkUpdateOrderStatus;
 using KromicStore.Application.Features.Orders.Queries.GetOrders;
 using KromicStore.Application.Features.Orders.Queries.GetOrderById;
 using KromicStore.Application.Features.Orders.Queries.GetTracking;
+using KromicStore.Application.Features.Orders.Queries.ExportOrders;
 using GetProductsQuery = KromicStore.Application.Features.Catalog.Queries.GetProducts.GetProductsQuery;
 
 namespace KromicStore.API.Controllers;
@@ -383,9 +385,82 @@ public class OrdersController : ControllerBase
 
         return Ok(orderDetail);
     }
+
+    /// <summary>
+    /// Bulk updates status for multiple orders.
+    /// Changes all specified orders to the new status in a single efficient operation.
+    /// </summary>
+    /// <param name="request">List of order IDs and new status.</param>
+    /// <returns>Operation result with success/failure counts.</returns>
+    /// <response code="200">Bulk update completed.</response>
+    /// <response code="400">Validation error or invalid status.</response>
+    /// <response code="401">Unauthorized.</response>
+    /// <response code="403">Forbidden.</response>
+    /// <response code="500">Internal server error.</response>
+    [HttpPost("bulk-update-status")]
+    [Authorize(Roles = "TenantAdmin,StoreManager")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> BulkUpdateOrderStatus(
+        [FromBody] BulkUpdateOrderStatusRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (request?.OrderIds == null || !request.OrderIds.Any())
+            return BadRequest(new { message = "No order IDs provided" });
+
+        if (string.IsNullOrWhiteSpace(request.NewStatus))
+            return BadRequest(new { message = "New status is required" });
+
+        var command = new BulkUpdateOrderStatusCommand(request.OrderIds, request.NewStatus);
+        var result = await _mediator.Send(command, cancellationToken);
+        
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Exports orders to CSV file within a date range.
+    /// Tenant admins can export their store orders for accounting and CRM integration.
+    /// </summary>
+    /// <param name="startDate">Start date for export filter (ISO 8601 format).</param>
+    /// <param name="endDate">End date for export filter (ISO 8601 format).</param>
+    /// <returns>CSV file with order data.</returns>
+    /// <response code="200">Returns CSV file.</response>
+    /// <response code="400">Invalid date range.</response>
+    /// <response code="401">Unauthorized.</response>
+    /// <response code="403">Forbidden.</response>
+    /// <response code="500">Internal server error.</response>
+    [HttpGet("export")]
+    [Authorize(Roles = "TenantAdmin,StoreManager")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> ExportOrders(
+        [FromQuery] DateTime startDate,
+        [FromQuery] DateTime endDate,
+        CancellationToken cancellationToken = default)
+    {
+        if (endDate < startDate)
+            return BadRequest(new { message = "End date must be after start date" });
+
+        var query = new ExportOrdersQuery(startDate, endDate);
+        var result = await _mediator.Send(query, cancellationToken);
+
+        return File(result.CsvData, "text/csv", result.FileName);
+    }
 }
 
-// DTOs
+// DTOs - Bulk Operations
+public sealed record BulkUpdateOrderStatusRequest(
+    IEnumerable<Guid> OrderIds,
+    string NewStatus
+);
+
+// DTOs - Order Management
 public record OrderSummaryDto(
     Guid Id,
     string OrderNumber,
