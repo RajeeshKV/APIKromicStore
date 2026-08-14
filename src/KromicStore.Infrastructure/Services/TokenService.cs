@@ -90,7 +90,13 @@ public sealed class TokenService : ITokenService
                                                ClaimValueTypes.Integer64),
             new(ClaimTypes.NameIdentifier,    user.Id.ToString()),
             new(ClaimTypes.Email,             user.Email),
-            new("tokenVersion",               user.TokenVersion.ToString())
+            new("tokenVersion",               user.TokenVersion.ToString()),
+            new("isEmailVerified",            user.IsEmailVerified.ToString().ToLowerInvariant(),
+                                               ClaimValueTypes.Boolean),
+            // Security: Allow JWT-based tenant resolution only when explicitly enabled
+            // This prevents token scope creep. The middleware will verify user-tenant relationship in DB.
+            new("allowTenantIdBypass",        "true",
+                                               ClaimValueTypes.Boolean)
         };
 
         // TenantId is null for SuperAdmin

@@ -10,7 +10,15 @@ public interface ITokenService
 {
     /// <summary>
     /// Generate a signed JWT access token for the given user and their roles.
-    /// Claims included: sub, email, tenantId, role[], jti, iat, exp.
+    /// Claims included: sub, email, tenantId, isEmailVerified, allowTenantIdBypass, role[], jti, iat, exp.
+    /// 
+    /// Security Notes:
+    /// - allowTenantIdBypass: When true, allows middleware to resolve tenant from JWT claims.
+    ///   The middleware still validates the user-tenant relationship in the database.
+    /// - tenantId: Only included for non-SuperAdmin users. Middleware trusts this claim
+    ///   ONLY when allowTenantIdBypass=true AND user-tenant relationship is verified in DB.
+    /// - isEmailVerified: Indicates if user's email has been verified. Frontend should use
+    ///   this to show verification banners or block sensitive actions.
     /// </summary>
     string GenerateAccessToken(User user, IEnumerable<string> roles);
 
