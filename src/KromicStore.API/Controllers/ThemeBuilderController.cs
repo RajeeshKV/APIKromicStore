@@ -314,9 +314,9 @@ public class ThemeBuilderController : ControllerBase
     /// Supports multipart file upload for theme customization.
     /// </summary>
     /// <param name="themeId">The theme ID.</param>
-    /// <param name="file">The asset file to upload.</param>
-    /// <param name="assetType">Type of asset (Logo, HeroBanner, Image, etc.).</param>
-    /// <param name="description">Optional description for the asset.</param>
+    /// <param name="file">The asset file to upload (form parameter).</param>
+    /// <param name="assetType">Type of asset (Logo, HeroBanner, Image, etc.) - form parameter.</param>
+    /// <param name="description">Optional description for the asset - form parameter.</param>
     /// <returns>Created asset details with public URL.</returns>
     /// <response code="201">Asset uploaded successfully.</response>
     /// <response code="400">Invalid file or validation error.</response>
@@ -334,13 +334,18 @@ public class ThemeBuilderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<UploadThemeAssetResponse>> UploadThemeAsset(
         Guid themeId,
-        [FromForm] IFormFile file,
-        [FromForm] ThemeAssetType assetType,
-        [FromForm] string? description = null,
         CancellationToken cancellationToken = default)
     {
+        var form = await Request.ReadFormAsync(cancellationToken);
+        var file = form.Files.FirstOrDefault();
+        
         if (file == null || file.Length == 0)
             return BadRequest(new { message = "File is required and cannot be empty." });
+
+        if (!Enum.TryParse<ThemeAssetType>(form["assetType"], out var assetType))
+            return BadRequest(new { message = "Invalid asset type." });
+
+        var description = form["description"].ToString();
 
         using var memoryStream = new MemoryStream();
         await file.CopyToAsync(memoryStream, cancellationToken);
@@ -353,7 +358,7 @@ public class ThemeBuilderController : ControllerBase
             ContentType: file.ContentType,
             FileSize: file.Length,
             AssetType: assetType,
-            Description: description
+            Description: string.IsNullOrEmpty(description) ? null : description
         );
 
         var result = await _mediator.Send(command, cancellationToken);
