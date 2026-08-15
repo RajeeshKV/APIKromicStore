@@ -57,11 +57,54 @@ public sealed class AuthController : ControllerBase
             LastName:   request.LastName,
             Email:      request.Email,
             Password:   request.Password,
+            Subdomain:  request.Subdomain,
+            StoreName:  request.StoreName,
             DeviceName: request.DeviceName,
             IpAddress:  HttpContext.Connection.RemoteIpAddress?.ToString());
 
         var result = await _sender.Send(command, cancellationToken);
         return StatusCode(StatusCodes.Status201Created, result);
+    }
+
+    // ── Subdomain availability ────────────────────────────────────────────────
+
+    /// <summary>
+    /// Check if a subdomain is available for registration.
+    /// Debounce calls from the UI — call after 300-500ms of no typing.
+    /// </summary>
+    /// <response code="200">Returns availability and preview URL.</response>
+    /// <response code="400">Subdomain is missing or has invalid format.</response>
+    [HttpGet("check-subdomain")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CheckSubdomain(
+        [FromQuery] string subdomain,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(subdomain))
+            return BadRequest(new { message = "Subdomain is required." });
+
+        var normalized = subdomain.Trim().ToLowerInvariant();
+
+        // Quick client-side-mirror format check before hitting the DB
+        if (normalized.Length < 3 || normalized.Length > 63)
+            return Ok(new { available = false, subdomain = normalized, reason = "Subdomain must be 3–63 characters." });
+
+        if (!System.Text.RegularExpressions.Regex.IsMatch(normalized, @"^[a-z0-9][a-z0-9-]*[a-z0-9]$"))
+            return Ok(new { available = false, subdomain = normalized, reason = "Use only lowercase letters, numbers, and hyphens. Cannot start or end with a hyphen." });
+
+        var result = await _sender.Send(
+            new Application.Features.Authentication.Queries.CheckSubdomain.CheckSubdomainQuery(normalized),
+            cancellationToken);
+
+        return Ok(new
+        {
+            available  = result.IsAvailable,
+            subdomain  = result.Subdomain,
+            reason     = result.Reason,
+            previewUrl = result.IsAvailable ? $"https://{result.Subdomain}.kromic.in" : (string?)null
+        });
     }
 
     // ── Login ─────────────────────────────────────────────────────────────────
@@ -263,6 +306,8 @@ public sealed record RegisterRequest(
     string LastName,
     string Email,
     string Password,
+    string Subdomain,
+    string? StoreName = null,
     string? DeviceName = null);
 
 public sealed record LoginRequest(

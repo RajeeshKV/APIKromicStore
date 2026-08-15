@@ -59,6 +59,8 @@ public sealed class RegisterCommandHandlerTests
             LastName:   "Smith",
             Email:      "alice@example.com",
             Password:   "SecurePass1!",
+            Subdomain:  "teststore",
+            StoreName:  null,
             DeviceName: "iPhone",
             IpAddress:  "192.168.1.1");
 
@@ -105,6 +107,8 @@ public sealed class RegisterCommandHandlerTests
             LastName: "Smith",
             Email: "alice@example.com",
             Password: "SecurePass1!",
+            Subdomain:  "teststore",
+            StoreName:  null,
             DeviceName: null,
             IpAddress: null);
 
@@ -125,6 +129,8 @@ public sealed class RegisterCommandHandlerTests
             LastName: "Prince",
             Email: "diana@example.com",
             Password: "SecurePass1!",
+            Subdomain:  "teststore",
+            StoreName:  null,
             DeviceName: "iPad",
             IpAddress: "10.0.0.1");
 
@@ -154,6 +160,8 @@ public sealed class RegisterCommandHandlerTests
             LastName: "Adams",
             Email: "eve@example.com",
             Password: "SecurePass1!",
+            Subdomain:  "teststore",
+            StoreName:  null,
             DeviceName: null,
             IpAddress: null);
 
@@ -182,6 +190,8 @@ public sealed class RegisterCommandHandlerTests
             LastName: "Castle",
             Email: "frank@example.com",
             Password: "SecurePass1!",
+            Subdomain:  "teststore",
+            StoreName:  null,
             DeviceName: null,
             IpAddress: null);
 
@@ -212,6 +222,8 @@ public sealed class RegisterCommandHandlerTests
             LastName: "Hopper",
             Email: "  GRACE@EXAMPLE.COM  ",
             Password: "SecurePass1!",
+            Subdomain:  "teststore",
+            StoreName:  null,
             DeviceName: null,
             IpAddress: null);
 
@@ -231,3 +243,5 @@ public sealed class RegisterCommandHandlerTests
         user.Email.Should().Be("grace@example.com");
     }
 }
+
+

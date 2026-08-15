@@ -120,6 +120,10 @@ public sealed class RegisterCommandValidatorTests
         LastName:   "Smith",
         Email:      "alice@example.com",
         Password:   "SecurePass1!",
+            Subdomain:  "teststore",
+            StoreName:  null,
         DeviceName: null,
         IpAddress:  null);
 }
+
+

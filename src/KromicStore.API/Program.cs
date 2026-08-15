@@ -23,7 +23,13 @@ if (builder.Environment.IsProduction())
 builder.AddSerilogLogging();
 
 // Add services
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Treat empty string "" as null for Guid? fields.
+        // Frontend often sends "" instead of null for optional GUID inputs.
+        options.JsonSerializerOptions.Converters.Add(new KromicStore.API.Configuration.NullableGuidJsonConverter());
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
 

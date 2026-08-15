@@ -15,6 +15,8 @@ public sealed record RegisterCommand(
     string LastName,
     string Email,
     string Password,
+    string Subdomain,
+    string? StoreName,
     string? DeviceName,
     string? IpAddress
 ) : IRequest<AuthTokenResponse>;

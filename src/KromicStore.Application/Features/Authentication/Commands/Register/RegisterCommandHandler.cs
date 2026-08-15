@@ -63,24 +63,17 @@ public sealed class RegisterCommandHandler : IRequestHandler<RegisterCommand, Au
         // ── 2. Hash password ─────────────────────────────────────────────────
         var passwordHash = _passwordHasher.Hash(request.Password);
 
-        // ── 3. Create Tenant ─────────────────────────────────────────────────
-        // Derive a unique slug from the email local-part (e.g. "john.doe@gmail.com" → "johndoe")
-        var emailLocal   = normalizedEmail.Split('@')[0];
-        var baseSlug     = new string(emailLocal.Where(char.IsLetterOrDigit).ToArray());
-        if (string.IsNullOrWhiteSpace(baseSlug)) baseSlug = "store";
+        // ── 3. Validate and reserve subdomain ────────────────────────────────
+        var slug = request.Subdomain.Trim().ToLowerInvariant();
 
-        // Ensure slug is unique — append random suffix if taken
-        var slug = baseSlug;
-        var attempt = 0;
-        while (await _tenantRepository.SubdomainExistsAsync(slug, cancellationToken: cancellationToken))
-        {
-            attempt++;
-            slug = $"{baseSlug}{attempt}";
-        }
+        if (await _tenantRepository.SubdomainExistsAsync(slug, cancellationToken: cancellationToken))
+            throw new ConflictException($"The subdomain '{slug}' is already taken. Please choose another.");
 
         var firstName = request.FirstName.Trim();
         var lastName  = request.LastName.Trim();
-        var storeName = $"{firstName}'s Store";
+        var storeName = string.IsNullOrWhiteSpace(request.StoreName)
+            ? $"{firstName}'s Store"
+            : request.StoreName.Trim();
 
         var tenant = Tenant.Create(name: storeName, slug: slug, storeName: storeName);
         tenant.AddPlatformDomain(slug, isPrimary: true);
