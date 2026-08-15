@@ -19,17 +19,21 @@ public static class MiddlewareExtensions
         // CORS must come before authentication
         app.UseCors("AllowSpecificOrigins");
 
-        // Tenant resolution must come before authentication
-        app.UseMiddleware<TenantResolutionMiddleware>();
-
         // HTTPS redirection
         if (!app.Environment.IsDevelopment())
         {
             app.UseHttpsRedirection();
         }
 
-        // Authentication & Authorization
+        // Authentication must run before TenantResolution so that
+        // httpContext.User.Identity.IsAuthenticated is true when the
+        // middleware reads the JWT tenantId claim.
         app.UseAuthentication();
+
+        // Tenant resolution runs after authentication so the JWT is
+        // already validated and User.Identity.IsAuthenticated == true.
+        app.UseMiddleware<TenantResolutionMiddleware>();
+
         app.UseAuthorization();
 
         return app;
