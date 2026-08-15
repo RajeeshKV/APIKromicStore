@@ -93,9 +93,12 @@ public sealed class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCom
         }
 
         // ── Load user with roles ──────────────────────────────────────────────
+        // IgnoreQueryFilters: the refresh endpoint has no tenant context set.
+        // Without this, users with a TenantId would be invisible.
         var user = await _db.Users
+            .IgnoreQueryFilters()
             .Include(u => u.UserRoles)
-            .FirstOrDefaultAsync(u => u.Id == storedToken.UserId, cancellationToken);
+            .FirstOrDefaultAsync(u => u.Id == storedToken.UserId && !u.IsDeleted, cancellationToken);
 
         if (user is null || !user.IsActive)
             throw new AuthenticationException("Invalid or expired refresh token.");

@@ -44,9 +44,13 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthToke
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
 
         // ── 1. Load user with roles ───────────────────────────────────────────
+        // IgnoreQueryFilters: login is a public endpoint — no tenant context is set yet.
+        // The global User filter would hide any user whose TenantId != null (because
+        // TenantContext is null at this point). We do our own active/deleted checks below.
         var user = await _db.Users
+            .IgnoreQueryFilters()
             .Include(u => u.UserRoles)
-            .FirstOrDefaultAsync(u => u.Email == normalizedEmail, cancellationToken);
+            .FirstOrDefaultAsync(u => u.Email == normalizedEmail && !u.IsDeleted, cancellationToken);
 
         // Generic message — do NOT differentiate "email not found" from "wrong password"
         if (user is null || !_passwordHasher.Verify(user.PasswordHash, request.Password))
