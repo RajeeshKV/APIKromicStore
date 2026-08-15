@@ -54,11 +54,27 @@ public sealed class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCom
         // ── Replay attack detection ───────────────────────────────────────────
         if (storedToken.IsRevoked)
         {
+            // Grace window: if the token was just revoked in the last 5 seconds,
+            // it is likely a duplicate concurrent request from the frontend
+            // (e.g. two API calls fire simultaneously on page load, both triggering
+            // a refresh). In that case we do NOT nuke all tokens — we simply reject
+            // this second request. The frontend should use the new token from the
+            // first successful refresh.
+            var justRevoked = storedToken.RevokedOnUtc.HasValue &&
+                              (DateTime.UtcNow - storedToken.RevokedOnUtc.Value).TotalSeconds <= 10;
+
+            if (justRevoked)
+            {
+                _logger.LogWarning(
+                    "Duplicate refresh attempt within grace window for UserId={UserId}. Rejecting silently.",
+                    storedToken.UserId);
+                throw new AuthenticationException("Invalid or expired refresh token.");
+            }
+
             _logger.LogWarning(
-                "Revoked refresh token reused. Revoking ALL tokens for UserId={UserId}. Potential compromise.",
+                "Revoked refresh token reused outside grace window. Revoking ALL tokens for UserId={UserId}. Potential compromise.",
                 storedToken.UserId);
 
-            // Revoke every active token for the user
             var allTokens = await _db.RefreshTokens
                 .Where(rt => rt.UserId == storedToken.UserId && rt.RevokedOnUtc == null)
                 .ToListAsync(cancellationToken);

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using KromicStore.Application.Common.Abstractions;
@@ -136,11 +137,70 @@ public sealed class SetupController : ControllerBase
             return StatusCode(500, new { success = false, message = "An error occurred", error = ex.Message });
         }
     }
+
+    /// <summary>
+    /// One-time migration: creates a Tenant for every active user with TenantId = null.
+    /// Idempotent — safe to call multiple times. Remove after running once in production.
+    /// POST /api/v1/setup/assign-tenant-to-orphaned-users
+    /// </summary>
+    [HttpPost("assign-tenant-to-orphaned-users")]
+    public async Task<IActionResult> AssignTenantToOrphanedUsers(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var orphanedUsers = await _dbContext.Users
+                .IgnoreQueryFilters()
+                .Where(u => u.TenantId == null && !u.IsDeleted && u.IsActive)
+                .ToListAsync(cancellationToken);
+
+            if (!orphanedUsers.Any())
+                return Ok(new { message = "No orphaned users found.", patched = 0 });
+
+            var patched = 0;
+            var results = new List<object>();
+
+            foreach (var user in orphanedUsers)
+            {
+                var emailLocal = user.Email.Split('@')[0];
+                var baseSlug   = new string(emailLocal.Where(char.IsLetterOrDigit).ToArray());
+                if (string.IsNullOrWhiteSpace(baseSlug)) baseSlug = "store";
+
+                var slug    = baseSlug;
+                var attempt = 0;
+                while (await _dbContext.Tenants
+                    .IgnoreQueryFilters()
+                    .AnyAsync(t => t.Slug == slug && !t.IsDeleted, cancellationToken))
+                {
+                    attempt++;
+                    slug = $"{baseSlug}{attempt}";
+                }
+
+                var storeName = $"{user.FirstName}'s Store";
+                var tenant    = KromicStore.Domain.Tenants.Tenant.Create(storeName, slug, storeName);
+                tenant.AddPlatformDomain(slug, isPrimary: true);
+                tenant.Activate();
+                _dbContext.AddEntity(tenant);
+
+                user.AssignToTenant(tenant.Id);
+                tenant.AssignOwner(user.Id);
+
+                patched++;
+                results.Add(new { userId = user.Id, email = user.Email, tenantId = tenant.Id, slug });
+                _logger.LogInformation("Assigned tenant {TenantId} ({Slug}) to user {UserId}", tenant.Id, slug, user.Id);
+            }
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return Ok(new { message = $"Patched {patched} user(s).", patched, results });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in assign-tenant-to-orphaned-users");
+            return StatusCode(500, new { success = false, message = ex.Message });
+        }
+    }
 }
 
-/// <summary>
-/// Request model for creating a superuser.
-/// </summary>
+/// <summary>Request model for creating a superuser.</summary>
 public sealed record CreateSuperuserRequest(
     string Email,
     string Password,

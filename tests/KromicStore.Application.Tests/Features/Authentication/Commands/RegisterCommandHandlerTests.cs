@@ -1,9 +1,11 @@
 using FluentAssertions;
 using KromicStore.Application.Common.Abstractions;
 using KromicStore.Application.Features.Authentication.Commands.Register;
+using KromicStore.Application.Features.Tenants.Abstractions;
 using KromicStore.Application.Tests.Common;
 using KromicStore.Domain.Exceptions;
 using KromicStore.Domain.Identity;
+using KromicStore.Domain.Tenants;
 using KromicStore.Infrastructure.Persistence;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -19,6 +21,7 @@ namespace KromicStore.Application.Tests.Features.Authentication.Commands;
 public sealed class RegisterCommandHandlerTests
 {
     private readonly IApplicationDbContext _dbContext;
+    private readonly ITenantRepository _tenantRepository;
     private readonly Guid _tenantId;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ITokenService _tokenService;
@@ -30,11 +33,18 @@ public sealed class RegisterCommandHandlerTests
         _tenantId = Guid.NewGuid();
         var actualDb = InMemoryDbContextFactory.Create(_tenantId);
         _dbContext = actualDb;
+        _tenantRepository = Substitute.For<ITenantRepository>();
         _passwordHasher = Substitute.For<IPasswordHasher>();
         _tokenService = Substitute.For<ITokenService>();
         _logger = Substitute.For<ILogger<RegisterCommandHandler>>();
+
+        // Default: subdomain does not exist
+        _tenantRepository.SubdomainExistsAsync(Arg.Any<string>(), cancellationToken: Arg.Any<CancellationToken>())
+            .Returns(false);
+
         _sut = new RegisterCommandHandler(
             _dbContext,
+            _tenantRepository,
             _passwordHasher,
             _tokenService,
             _logger);

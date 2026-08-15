@@ -48,6 +48,17 @@ public sealed class User : AuditableEntity
     public static User CreateSuperUser(string email, string passwordHash, string firstName, string lastName) =>
         Create(null, email, passwordHash, firstName, lastName);
 
+    /// <summary>
+    /// Assigns this user to a tenant. Used for one-time migration of existing users
+    /// who were created without a TenantId (pre-tenant-provisioning era).
+    /// </summary>
+    public void AssignToTenant(Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) throw new ArgumentException("TenantId is required.", nameof(tenantId));
+        if (TenantId.HasValue) throw new InvalidOperationException("User already belongs to a tenant.");
+        TenantId = tenantId;
+    }
+
     public void MarkEmailVerified() => IsEmailVerified = true;
 
     public void RecordLogin(DateTime utcNow) => LastLoginOnUtc = utcNow.Kind == DateTimeKind.Utc ? utcNow : DateTime.SpecifyKind(utcNow, DateTimeKind.Utc);
