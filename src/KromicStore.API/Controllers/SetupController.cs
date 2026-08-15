@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using KromicStore.Application.Common.Abstractions;
@@ -139,8 +138,13 @@ public sealed class SetupController : ControllerBase
     }
 
     /// <summary>
-    /// One-time migration: creates a Tenant for every active user with TenantId = null.
-    /// Idempotent — safe to call multiple times. Remove after running once in production.
+    /// One-time migration: creates a real Tenant row (+ TenantDomain) for every
+    /// TenantAdmin user whose TenantId is NULL, then links the user to it.
+    ///
+    /// - Skips SuperAdmin users (TenantId = null is correct for them).
+    /// - Idempotent: safe to call multiple times.
+    /// - Remove this endpoint after running it once in production.
+    ///
     /// POST /api/v1/setup/assign-tenant-to-orphaned-users
     /// </summary>
     [HttpPost("assign-tenant-to-orphaned-users")]
@@ -148,19 +152,41 @@ public sealed class SetupController : ControllerBase
     {
         try
         {
+            // Find the SuperAdmin role ID so we can exclude those users
+            var superAdminRole = await _dbContext.Roles
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(r => r.Name == "SuperAdmin" && !r.IsDeleted, cancellationToken);
+
+            // Find the TenantAdmin role ID so we only patch the right users
+            var tenantAdminRole = await _dbContext.Roles
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(r => r.Name == "TenantAdmin" && !r.IsDeleted, cancellationToken);
+
+            if (tenantAdminRole == null)
+                return BadRequest(new { message = "TenantAdmin role not found. Run the role-seeding migration first." });
+
+            // Load users that:
+            //   - are active and not deleted
+            //   - have no TenantId (orphaned)
+            //   - have TenantAdmin role (NOT SuperAdmin)
             var orphanedUsers = await _dbContext.Users
                 .IgnoreQueryFilters()
-                .Where(u => u.TenantId == null && !u.IsDeleted && u.IsActive)
+                .Include(u => u.UserRoles)
+                .Where(u => u.TenantId == null
+                         && !u.IsDeleted
+                         && u.IsActive
+                         && u.UserRoles.Any(ur => ur.RoleId == tenantAdminRole.Id))
                 .ToListAsync(cancellationToken);
 
             if (!orphanedUsers.Any())
-                return Ok(new { message = "No orphaned users found.", patched = 0 });
+                return Ok(new { message = "No orphaned TenantAdmin users found.", patched = 0 });
 
             var patched = 0;
             var results = new List<object>();
 
             foreach (var user in orphanedUsers)
             {
+                // Derive a unique slug from the email local-part
                 var emailLocal = user.Email.Split('@')[0];
                 var baseSlug   = new string(emailLocal.Where(char.IsLetterOrDigit).ToArray());
                 if (string.IsNullOrWhiteSpace(baseSlug)) baseSlug = "store";
@@ -175,22 +201,38 @@ public sealed class SetupController : ControllerBase
                     slug = $"{baseSlug}{attempt}";
                 }
 
+                // Create and fully configure the Tenant aggregate
                 var storeName = $"{user.FirstName}'s Store";
                 var tenant    = KromicStore.Domain.Tenants.Tenant.Create(storeName, slug, storeName);
-                tenant.AddPlatformDomain(slug, isPrimary: true);
-                tenant.Activate();
+                tenant.AddPlatformDomain(slug, isPrimary: true);  // creates TenantDomain row
+                tenant.AssignOwner(user.Id);
+                tenant.Activate();                                  // sets Status = Active
+
+                // Track the tenant (EF will cascade-insert TenantDomain too)
                 _dbContext.AddEntity(tenant);
 
+                // Link user → tenant
                 user.AssignToTenant(tenant.Id);
-                tenant.AssignOwner(user.Id);
 
                 patched++;
-                results.Add(new { userId = user.Id, email = user.Email, tenantId = tenant.Id, slug });
-                _logger.LogInformation("Assigned tenant {TenantId} ({Slug}) to user {UserId}", tenant.Id, slug, user.Id);
+                results.Add(new
+                {
+                    userId    = user.Id,
+                    email     = user.Email,
+                    tenantId  = tenant.Id,
+                    slug,
+                    storeName
+                });
+
+                _logger.LogInformation(
+                    "Created Tenant {TenantId} (slug={Slug}) and linked to User {UserId} ({Email})",
+                    tenant.Id, slug, user.Id, user.Email);
             }
 
+            // Single transaction — tenant rows + user updates saved together
             await _dbContext.SaveChangesAsync(cancellationToken);
-            return Ok(new { message = $"Patched {patched} user(s).", patched, results });
+
+            return Ok(new { message = $"Patched {patched} TenantAdmin user(s).", patched, results });
         }
         catch (Exception ex)
         {
