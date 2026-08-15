@@ -13,7 +13,7 @@ namespace KromicStore.API.Controllers;
 /// SuperAdmin gets 403.
 /// Routes: /api/v1/tenant/analytics/*
 /// </summary>
-[Route("analytics")]
+[Route("api/v1/tenant/analytics")]
 public class AnalyticsController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
@@ -306,3 +306,4 @@ public class AnalyticsController : TenantAdminBaseController
         }));
     }
 }
+

@@ -27,7 +27,7 @@ namespace KromicStore.API.Controllers;
 /// SuperAdmin gets 403.
 /// Routes: /api/v1/tenant/dashboard/*
 /// </summary>
-[Route("dashboard")]
+[Route("api/v1/tenant/dashboard")]
 public class TenantDashboardController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
@@ -353,3 +353,4 @@ public record UpdatePaymentSettingsRequest(string ApiKey, string ApiSecret);
 public record AddDomainRequest(string CustomDomain, bool SetPrimary = false);
 public record RemoveDomainRequest(string CustomDomain);
 public record VerifyDomainRequest(string CustomDomain);
+

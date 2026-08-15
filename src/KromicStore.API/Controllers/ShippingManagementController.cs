@@ -15,7 +15,7 @@ namespace KromicStore.API.Controllers;
 /// SuperAdmin gets 403.
 /// Routes: /api/v1/tenant/shipping/*
 /// </summary>
-[Route("shipping")]
+[Route("api/v1/tenant/shipping")]
 public class ShippingManagementController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
@@ -361,3 +361,4 @@ public class ShippingManagementController : TenantAdminBaseController
         return Task.FromResult<ActionResult>(Ok(new { cost = response.ShippingCost }));
     }
 }
+

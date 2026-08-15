@@ -19,7 +19,7 @@ namespace KromicStore.API.Controllers;
 /// Only TenantAdmin and StoreManager roles can access these endpoints.
 /// SuperAdmin will get 403 Forbidden.
 /// </summary>
-[Route("products")]
+[Route("api/v1/tenant/products")]
 public class ProductsController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
@@ -299,3 +299,4 @@ public class ProductsController : TenantAdminBaseController
 public sealed record BulkDeleteProductsRequest(
     IEnumerable<Guid> ProductIds
 );
+

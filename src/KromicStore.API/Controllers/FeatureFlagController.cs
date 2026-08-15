@@ -13,7 +13,7 @@ namespace KromicStore.API.Controllers;
 /// TenantAdmin/StoreManager/Customer get 403.
 /// Routes: /api/v1/super/feature-flags/*
 /// </summary>
-[Route("feature-flags")]
+[Route("api/v1/super/feature-flags")]
 public class FeatureFlagController : SuperAdminBaseController
 {
     private readonly IMediator _mediator;
@@ -134,3 +134,4 @@ public class UpdateFeatureFlagRequest
     public string? Description { get; set; }
     public bool    IsEnabled   { get; set; }
 }
+

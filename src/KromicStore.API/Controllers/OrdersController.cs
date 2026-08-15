@@ -20,7 +20,7 @@ namespace KromicStore.API.Controllers;
 /// Only TenantAdmin and StoreManager roles can access these endpoints.
 /// SuperAdmin will get 403 Forbidden.
 /// </summary>
-[Route("orders")]
+[Route("api/v1/tenant/orders")]
 public class OrdersController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
@@ -511,3 +511,4 @@ public record ShipmentTrackingDto(
 public record RejectOrderRequest(string Reason);
 public record CancelOrderRequest(string Reason);
 public record AddShipmentRequest(string Carrier, string TrackingNumber);
+

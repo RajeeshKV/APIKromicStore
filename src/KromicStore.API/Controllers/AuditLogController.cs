@@ -11,7 +11,7 @@ namespace KromicStore.API.Controllers;
 /// TenantAdmin/StoreManager/Customer get 403.
 /// Routes: /api/v1/super/audit-logs/*
 /// </summary>
-[Route("audit-logs")]
+[Route("api/v1/super/audit-logs")]
 public class AuditLogController : SuperAdminBaseController
 {
     private readonly IMediator _mediator;
@@ -65,3 +65,4 @@ public class AuditLogController : SuperAdminBaseController
         return Ok(log);
     }
 }
+

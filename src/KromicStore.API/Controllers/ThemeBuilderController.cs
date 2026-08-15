@@ -18,7 +18,7 @@ namespace KromicStore.API.Controllers;
 /// SuperAdmin gets 403.
 /// Routes: /api/v1/tenant/themes/*
 /// </summary>
-[Route("themes")]
+[Route("api/v1/tenant/themes")]
 public class ThemeBuilderController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
@@ -396,3 +396,4 @@ public class UploadThemeAssetResponse
     public string? PublicUrl { get; set; }
     public string AssetType { get; set; } = string.Empty;
 }
+

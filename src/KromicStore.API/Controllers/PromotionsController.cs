@@ -19,7 +19,7 @@ namespace KromicStore.API.Controllers;
 /// SuperAdmin gets 403 on all write/read operations.
 /// Routes: /api/v1/tenant/promotions/*
 /// </summary>
-[Route("promotions")]
+[Route("api/v1/tenant/promotions")]
 public class PromotionsController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
@@ -499,3 +499,4 @@ public record CampaignDto(
     DateTime EndDate,
     DateTime CreatedAt,
     DateTime UpdatedAt);
+

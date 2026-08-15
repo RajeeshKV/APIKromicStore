@@ -16,7 +16,7 @@ namespace KromicStore.API.Controllers;
 /// Only TenantAdmin and StoreManager roles can access these endpoints.
 /// SuperAdmin will get 403 Forbidden.
 /// </summary>
-[Route("collections")]
+[Route("api/v1/tenant/collections")]
 public class CollectionsController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
@@ -176,3 +176,4 @@ public class CollectionsController : TenantAdminBaseController
         return NoContent();
     }
 }
+

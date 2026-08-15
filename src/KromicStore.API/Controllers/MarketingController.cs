@@ -11,7 +11,7 @@ namespace KromicStore.API.Controllers;
 /// SuperAdmin gets 403.
 /// Routes: /api/v1/tenant/marketing/*
 /// </summary>
-[Route("marketing")]
+[Route("api/v1/tenant/marketing")]
 public class MarketingController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
@@ -347,4 +347,5 @@ public class CreateEmailAutomationRequest
     public string Trigger { get; set; } = string.Empty;
     public string Action { get; set; } = string.Empty;
 }
+
 

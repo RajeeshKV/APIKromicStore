@@ -13,7 +13,7 @@ namespace KromicStore.API.Controllers;
 /// SuperAdmin gets 403.
 /// Routes: /api/v1/tenant/customers/*
 /// </summary>
-[Route("customers")]
+[Route("api/v1/tenant/customers")]
 public class CustomerManagementController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
@@ -262,3 +262,4 @@ public class CustomerManagementController : TenantAdminBaseController
         return File(result.CsvData, "text/csv", result.FileName);
     }
 }
+

@@ -16,7 +16,6 @@ namespace KromicStore.API.Controllers.BaseControllers;
 /// Example: /api/v1/tenant/products, /api/v1/tenant/orders, /api/v1/tenant/customers
 /// </summary>
 [ApiController]
-[Route("api/v1/tenant")]
 [Authorize(Roles = "TenantAdmin,StoreManager")]
 [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(void))]
 [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(void))]

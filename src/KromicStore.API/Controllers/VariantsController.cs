@@ -16,7 +16,7 @@ namespace KromicStore.API.Controllers;
 /// SuperAdmin gets 403.
 /// Routes: /api/v1/tenant/products/{productId}/variants/*
 /// </summary>
-[Route("products/{productId}/variants")]
+[Route("api/v1/tenant/products/{productId}/variants")]
 public class VariantsController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
@@ -152,3 +152,4 @@ public class VariantsController : TenantAdminBaseController
         return NoContent();
     }
 }
+

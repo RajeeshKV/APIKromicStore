@@ -12,7 +12,7 @@ namespace KromicStore.API.Controllers;
 /// TenantAdmin/StoreManager/Customer get 403.
 /// Routes: /api/v1/super/platform-settings
 /// </summary>
-[Route("platform-settings")]
+[Route("api/v1/super/platform-settings")]
 public class PlatformSettingsController : SuperAdminBaseController
 {
     private readonly IMediator _mediator;
@@ -50,3 +50,4 @@ public class PlatformSettingsController : SuperAdminBaseController
         return Ok(result);
     }
 }
+
