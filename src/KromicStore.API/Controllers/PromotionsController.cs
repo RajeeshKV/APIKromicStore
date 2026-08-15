@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
+using KromicStore.API.Controllers.BaseControllers;
 using KromicStore.API.Contracts.Promotions;
 using CreateDiscountCommand = KromicStore.Application.Features.Promotions.Commands.CreateDiscount.CreateDiscountCommand;
 using CreateDiscountResponse = KromicStore.Application.Features.Promotions.Commands.CreateDiscount.CreateDiscountResponse;
@@ -12,23 +13,20 @@ using CreateCampaignResponse = KromicStore.Application.Features.Promotions.Comma
 namespace KromicStore.API.Controllers;
 
 /// <summary>
-/// API endpoints for discount, coupon, and campaign management.
-/// Tenants can create and manage promotions for their stores.
+/// STRICT: Tenant Admin endpoints for promotions (discounts, coupons, campaigns).
+/// Only TenantAdmin and StoreManager roles can access write operations.
+/// Coupon apply endpoint is public (storefront use).
+/// SuperAdmin gets 403 on all write/read operations.
+/// Routes: /api/v1/tenant/promotions/*
 /// </summary>
-[ApiController]
-[Route("api/v1/promotions")]
-public class PromotionsController : ControllerBase
+[Route("promotions")]
+public class PromotionsController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
-    private readonly ILogger<PromotionsController> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PromotionsController"/> class.
-    /// </summary>
-    public PromotionsController(IMediator mediator, ILogger<PromotionsController> logger)
+    public PromotionsController(IMediator mediator, ILogger<PromotionsController> logger) : base(logger)
     {
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>

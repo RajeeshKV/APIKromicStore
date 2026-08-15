@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using KromicStore.API.Contracts.Catalog;
+using KromicStore.API.Controllers.BaseControllers;
 using GetVariantsQuery = KromicStore.Application.Features.Catalog.Queries.GetVariants.GetVariantsQuery;
 using CreateVariantCommand = KromicStore.Application.Features.Catalog.Commands.CreateVariant.CreateVariantCommand;
 using UpdateVariantCommand = KromicStore.Application.Features.Catalog.Commands.UpdateVariant.UpdateVariantCommand;
@@ -10,19 +11,17 @@ using DeleteVariantCommand = KromicStore.Application.Features.Catalog.Commands.D
 namespace KromicStore.API.Controllers;
 
 /// <summary>
-/// API endpoints for product variant management.
+/// STRICT: Tenant Admin endpoints for product variant management.
+/// Only TenantAdmin and StoreManager roles can access.
+/// SuperAdmin gets 403.
+/// Routes: /api/v1/tenant/products/{productId}/variants/*
 /// </summary>
-[ApiController]
-[Route("api/v1/products/{productId}/variants")]
-[Authorize(Roles = "TenantAdmin,StoreManager")]
-public class VariantsController : ControllerBase
+[Route("products/{productId}/variants")]
+public class VariantsController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="VariantsController"/> class.
-    /// </summary>
-    public VariantsController(IMediator mediator)
+    public VariantsController(IMediator mediator, ILogger<VariantsController> logger) : base(logger)
     {
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }

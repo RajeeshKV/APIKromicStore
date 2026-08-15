@@ -9,18 +9,23 @@ namespace KromicStore.API.Middleware;
 
 /// <summary>
 /// Resolves tenant from request with production-grade security.
-/// Priority: Custom Domain → Subdomain → JWT Token (with DB validation) → Development Header
 /// 
+/// Resolution priority:
+///   1. Custom Domain / Subdomain  → verified against DB
+///   2. JWT tenantId claim          → verified against DB (user must belong to tenant)
+///   3. X-Kromic-TenantId header    → development only
+///
+/// For admin panel (admin.kromic.in) the host is NOT a tenant subdomain.
+/// Tenant context is resolved from the JWT tenantId claim for authenticated users.
+///
 /// Security Notes:
-/// - JWT tenantId claim is ONLY trusted if explicitly flagged with "allowTenantIdBypass" claim
-/// - All JWT-based resolution includes database verification of user-tenant relationship
-/// - Prevents token scope creep and unauthorized tenant access
-/// - Development mode supports X-Kromic-TenantId header for testing without DNS setup
+/// - JWT tenantId claim is ONLY trusted if user actually belongs to that tenant in DB
+/// - Prevents token scope creep and cross-tenant access
+/// - SuperAdmin has no tenantId — they access /api/v1/super/* endpoints only
 /// </summary>
 public sealed class TenantResolutionMiddleware
 {
     private const string DevelopmentTenantHeader = "X-Kromic-TenantId";
-    private const string AllowTenantBypassClaim = "allowTenantIdBypass";
     private readonly RequestDelegate _next;
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<TenantResolutionMiddleware> _logger;
@@ -34,20 +39,20 @@ public sealed class TenantResolutionMiddleware
 
     public async Task InvokeAsync(HttpContext httpContext, TenantContext tenantContext, KromicStoreDbContext dbContext)
     {
-        // Try to resolve tenant from host header (custom domain or subdomain) - most secure, preferred method
+        // 1. Try subdomain / custom domain first (storefront and storefront-api calls)
         if (!await ResolveTenantFromHostAsync(httpContext, tenantContext, dbContext))
         {
-            // Fallback: Try to resolve from JWT token with database validation (production-safe)
-            if (!await ResolveTenantFromJwtWithValidationAsync(httpContext, tenantContext, dbContext))
+            // 2. Try JWT tenantId claim — covers admin panel calls (admin.kromic.in)
+            //    where host is not a tenant subdomain
+            if (!await ResolveTenantFromJwtAsync(httpContext, tenantContext, dbContext))
             {
-                // Development fallback: X-Kromic-TenantId header (for local testing without DNS)
-                if (_environment.IsDevelopment() && httpContext.Request.Headers.TryGetValue(DevelopmentTenantHeader, out var value))
+                // 3. Development fallback: explicit header for local testing without DNS
+                if (_environment.IsDevelopment() &&
+                    httpContext.Request.Headers.TryGetValue(DevelopmentTenantHeader, out var value) &&
+                    Guid.TryParse(value, out var devTenantId))
                 {
-                    if (Guid.TryParse(value, out var tenantId))
-                    {
-                        tenantContext.Set(tenantId);
-                        _logger.LogInformation("Tenant resolved by development header for {TenantId}", tenantId);
-                    }
+                    tenantContext.Set(devTenantId);
+                    _logger.LogInformation("Tenant resolved via dev header: {TenantId}", devTenantId);
                 }
             }
         }
@@ -55,113 +60,111 @@ public sealed class TenantResolutionMiddleware
         await _next(httpContext);
     }
 
+    // ── Resolution strategies ─────────────────────────────────────────────────
+
     /// <summary>
-    /// Resolves tenant from JWT with security validation.
-    /// Only trusts JWT tenantId claim if:
-    /// 1. The user is authenticated (has "sub" claim)
-    /// 2. The "allowTenantIdBypass" claim is explicitly set to "true"
-    /// 3. The user actually belongs to the tenant (verified in database)
-    /// 4. The tenant is active
+    /// Resolves tenant from the JWT tenantId claim with database ownership check.
+    /// Used primarily for requests from the admin panel (admin.kromic.in).
     /// </summary>
-    private async Task<bool> ResolveTenantFromJwtWithValidationAsync(
+    private async Task<bool> ResolveTenantFromJwtAsync(
         HttpContext httpContext,
         TenantContext tenantContext,
         KromicStoreDbContext dbContext)
     {
-        // Only process if user is authenticated
-        if (!httpContext.User.Identity?.IsAuthenticated ?? false)
+        // Must be authenticated
+        if (httpContext.User.Identity?.IsAuthenticated != true)
             return false;
 
-        // Check if bypass is explicitly allowed in the token
-        var bypassClaim = httpContext.User.FindFirst(AllowTenantBypassClaim)?.Value;
-        if (bypassClaim != "true")
+        // Extract tenantId from JWT
+        var tenantIdClaim = httpContext.User.FindFirst("tenantId")?.Value;
+        if (string.IsNullOrEmpty(tenantIdClaim) || !Guid.TryParse(tenantIdClaim, out var tenantId))
             return false;
 
-        // Get tenantId from JWT
-        if (httpContext.User.FindFirst("tenantId")?.Value is not { Length: > 0 } tenantIdClaim)
+        // Extract user id
+        var userIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                       ?? httpContext.User.FindFirst("sub")?.Value;
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
             return false;
 
-        if (!Guid.TryParse(tenantIdClaim, out var tenantIdFromJwt))
-            return false;
+        // *** Security check: user must actually belong to this tenant ***
+        // Use IgnoreQueryFilters() here because TenantContext is not yet set,
+        // so the global filter would exclude everything.
+        var userBelongsToTenant = await dbContext.UserSet
+            .IgnoreQueryFilters()
+            .AnyAsync(u => u.Id == userId && u.TenantId == tenantId && !u.IsDeleted);
 
-        // Get user ID from JWT
-        if (httpContext.User.FindFirst("sub")?.Value is not { Length: > 0 } userIdClaim)
-            return false;
-
-        if (!Guid.TryParse(userIdClaim, out var userId))
-            return false;
-
-        // *** CRITICAL SECURITY CHECK ***
-        // Verify the user actually belongs to this tenant in the database
-        var user = await dbContext.Users
-            .Where(u => u.Id == userId && u.TenantId == tenantIdFromJwt)
-            .FirstOrDefaultAsync();
-
-        if (user is null)
+        if (!userBelongsToTenant)
         {
             _logger.LogWarning(
-                "Security: User {UserId} attempted to access tenant {TenantId} but has no relationship in database. Possible token tampering.",
-                userId, tenantIdFromJwt);
+                "Security: User {UserId} claimed tenant {TenantId} but has no DB relationship. Possible token tampering.",
+                userId, tenantId);
             return false;
         }
 
-        // Verify tenant is active
-        var tenant = await dbContext.Tenants.FirstOrDefaultAsync(t => t.Id == tenantIdFromJwt);
+        // Tenant must exist and be active
+        var tenant = await dbContext.TenantSet
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(t => t.Id == tenantId && !t.IsDeleted);
+
         if (tenant is null || !tenant.Status.IsActive())
         {
-            _logger.LogWarning("Tenant {TenantId} not found or inactive for user {UserId}", tenantIdFromJwt, userId);
+            _logger.LogWarning("Tenant {TenantId} not found or inactive for user {UserId}", tenantId, userId);
             return false;
         }
 
-        tenantContext.Set(tenantIdFromJwt, storeName: tenant.StoreName);
-        _logger.LogInformation(
-            "Tenant resolved from JWT with database validation for UserId={UserId}, TenantId={TenantId}",
-            userId, tenantIdFromJwt);
+        tenantContext.Set(tenantId, storeName: tenant.StoreName);
+        _logger.LogDebug("Tenant resolved from JWT for UserId={UserId}, TenantId={TenantId}", userId, tenantId);
         return true;
     }
 
-    private static async Task<bool> ResolveTenantFromHostAsync(
+    /// <summary>
+    /// Resolves tenant from the Host header: custom domain or subdomain.
+    /// </summary>
+    private async Task<bool> ResolveTenantFromHostAsync(
         HttpContext httpContext,
         TenantContext tenantContext,
         KromicStoreDbContext dbContext)
     {
         var host = httpContext.Request.Host.Host;
-
         if (string.IsNullOrWhiteSpace(host))
             return false;
 
-        var normalizedHost = NormalizeHost(host);
+        var normalizedHost = host.ToLowerInvariant().TrimEnd('.');
 
-        // Try custom domain first
-        var tenantByCustomDomain = await dbContext.Tenants
-            .Where(t => t.Domains.Any(d => d.CustomDomain == normalizedHost && d.IsVerified))
+        // Try exact custom domain match
+        var tenantByDomain = await dbContext.TenantSet
+            .IgnoreQueryFilters()
+            .Where(t => !t.IsDeleted && t.Domains.Any(d => d.CustomDomain == normalizedHost && d.IsVerified))
             .FirstOrDefaultAsync();
 
-        if (tenantByCustomDomain is not null && tenantByCustomDomain.Status.IsActive())
+        if (tenantByDomain is not null && tenantByDomain.Status.IsActive())
         {
-            tenantContext.Set(tenantByCustomDomain.Id, storeName: tenantByCustomDomain.StoreName);
+            tenantContext.Set(tenantByDomain.Id, storeName: tenantByDomain.StoreName);
+            _logger.LogDebug("Tenant resolved from custom domain: {Host} → {TenantId}", normalizedHost, tenantByDomain.Id);
             return true;
         }
 
-        // Try subdomain (extract from "subdomain.kromic.in")
+        // Try subdomain (e.g. "mystore" from "mystore.kromic.in")
         var subdomain = ExtractSubdomain(normalizedHost);
         if (!string.IsNullOrEmpty(subdomain))
         {
-            var tenantBySubdomain = await dbContext.Tenants
-                .Where(t => t.Domains.Any(d => d.Subdomain == subdomain))
+            var tenantBySubdomain = await dbContext.TenantSet
+                .IgnoreQueryFilters()
+                .Where(t => !t.IsDeleted && t.Domains.Any(d => d.Subdomain == subdomain))
                 .FirstOrDefaultAsync();
-
-            if (tenantBySubdomain is not null && tenantBySubdomain.Status.IsActive())
-            {
-                tenantContext.Set(tenantBySubdomain.Id, storeName: tenantBySubdomain.StoreName);
-                return true;
-            }
 
             if (tenantBySubdomain is not null)
             {
-                // Tenant found but inactive
-                httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
-                await httpContext.Response.WriteAsJsonAsync(new { error = "Tenant is inactive" });
+                if (!tenantBySubdomain.Status.IsActive())
+                {
+                    httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    await httpContext.Response.WriteAsJsonAsync(new { error = "Tenant is inactive or suspended." });
+                    // Return true to stop further resolution — we already wrote the response
+                    return true;
+                }
+
+                tenantContext.Set(tenantBySubdomain.Id, storeName: tenantBySubdomain.StoreName);
+                _logger.LogDebug("Tenant resolved from subdomain: {Subdomain} → {TenantId}", subdomain, tenantBySubdomain.Id);
                 return true;
             }
         }
@@ -169,12 +172,11 @@ public sealed class TenantResolutionMiddleware
         return false;
     }
 
-    private static string NormalizeHost(string host)
-        => host.ToLowerInvariant().TrimEnd('.');
+    // ── Helpers ───────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Extracts subdomain from "subdomain.kromic.in" format.
-    /// Returns null for invalid formats or base domain.
+    /// Extracts the subdomain from "subdomain.kromic.in".
+    /// Returns null for the base domain or unrecognised patterns.
     /// </summary>
     private static string? ExtractSubdomain(string host)
     {
@@ -184,11 +186,11 @@ public sealed class TenantResolutionMiddleware
             return null;
 
         var parts = host.Split('.');
+        // Expect exactly "subdomain.kromic.in" (3 parts)
         if (parts.Length != 3)
-            return null; // Not in "subdomain.kromic.in" format
+            return null;
 
         var subdomain = parts[0];
         return string.IsNullOrWhiteSpace(subdomain) ? null : subdomain;
     }
 }
-

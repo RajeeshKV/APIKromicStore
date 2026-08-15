@@ -2,25 +2,23 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using KromicStore.API.Contracts.Customers;
+using KromicStore.API.Controllers.BaseControllers;
 using KromicStore.Application.Features.Customers.Queries.ExportCustomers;
 
 namespace KromicStore.API.Controllers;
 
 /// <summary>
-/// API endpoints for customer management.
-/// Tenants can view, search, and manage customer information and preferences.
+/// STRICT: Tenant Admin endpoints for customer management.
+/// Only TenantAdmin and StoreManager roles can access.
+/// SuperAdmin gets 403.
+/// Routes: /api/v1/tenant/customers/*
 /// </summary>
-[ApiController]
-[Route("api/v1/customers")]
-[Authorize(Roles = "TenantAdmin,StoreManager")]
-public class CustomerManagementController : ControllerBase
+[Route("customers")]
+public class CustomerManagementController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CustomerManagementController"/> class.
-    /// </summary>
-    public CustomerManagementController(IMediator mediator)
+    public CustomerManagementController(IMediator mediator, ILogger<CustomerManagementController> logger) : base(logger)
     {
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using KromicStore.API.Contracts.Catalog;
+using KromicStore.API.Controllers.BaseControllers;
 using GetProductsQuery = KromicStore.Application.Features.Catalog.Queries.GetProducts.GetProductsQuery;
 using GetProductByIdQuery = KromicStore.Application.Features.Catalog.Queries.GetProductById.GetProductByIdQuery;
 using CreateProductCommand = KromicStore.Application.Features.Catalog.Commands.CreateProduct.CreateProductCommand;
@@ -14,18 +15,19 @@ using BulkDeleteProductsCommand = KromicStore.Application.Features.Catalog.Comma
 namespace KromicStore.API.Controllers;
 
 /// <summary>
-/// API endpoints for product management.
+/// STRICT: Tenant Admin endpoints for product management.
+/// Only TenantAdmin and StoreManager roles can access these endpoints.
+/// SuperAdmin will get 403 Forbidden.
 /// </summary>
-[ApiController]
-[Route("api/v1/products")]
-public class ProductsController : ControllerBase
+[Route("products")]
+public class ProductsController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProductsController"/> class.
     /// </summary>
-    public ProductsController(IMediator mediator)
+    public ProductsController(IMediator mediator, ILogger<ProductsController> logger) : base(logger)
     {
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
@@ -69,7 +71,6 @@ public class ProductsController : ControllerBase
     /// <response code="409">SKU already exists.</response>
     /// <response code="500">Internal server error.</response>
     [HttpPost]
-    [Authorize(Roles = "TenantAdmin,StoreManager")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -145,7 +146,6 @@ public class ProductsController : ControllerBase
     /// <response code="409">Conflict (e.g., SKU already exists).</response>
     /// <response code="500">Internal server error.</response>
     [HttpPut("{id}")]
-    [Authorize(Roles = "TenantAdmin,StoreManager")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -190,7 +190,6 @@ public class ProductsController : ControllerBase
     /// <response code="404">Product not found.</response>
     /// <response code="500">Internal server error.</response>
     [HttpDelete("{id}")]
-    [Authorize(Roles = "TenantAdmin,StoreManager")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -214,7 +213,6 @@ public class ProductsController : ControllerBase
     /// <response code="404">Product not found.</response>
     /// <response code="500">Internal server error.</response>
     [HttpPost("{id}/restore")]
-    [Authorize(Roles = "TenantAdmin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

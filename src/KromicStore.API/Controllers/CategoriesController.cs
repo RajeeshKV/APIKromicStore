@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using KromicStore.API.Contracts.Catalog;
+using KromicStore.API.Controllers.BaseControllers;
 using GetCategoriesQuery = KromicStore.Application.Features.Catalog.Queries.GetCategories.GetCategoriesQuery;
 using GetCategoryByIdQuery = KromicStore.Application.Features.Catalog.Queries.GetCategoryById.GetCategoryByIdQuery;
 using CreateCategoryCommand = KromicStore.Application.Features.Catalog.Commands.CreateCategory.CreateCategoryCommand;
@@ -12,18 +13,19 @@ using RestoreCategoryCommand = KromicStore.Application.Features.Catalog.Commands
 namespace KromicStore.API.Controllers;
 
 /// <summary>
-/// API endpoints for product category management.
+/// STRICT: Tenant Admin endpoints for category management.
+/// Only TenantAdmin and StoreManager roles can access these endpoints.
+/// SuperAdmin will get 403 Forbidden.
 /// </summary>
-[ApiController]
-[Route("api/v1/categories")]
-public class CategoriesController : ControllerBase
+[Route("categories")]
+public class CategoriesController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CategoriesController"/> class.
     /// </summary>
-    public CategoriesController(IMediator mediator)
+    public CategoriesController(IMediator mediator, ILogger<CategoriesController> logger) : base(logger)
     {
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }

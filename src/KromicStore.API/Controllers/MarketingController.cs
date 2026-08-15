@@ -1,24 +1,22 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
+using KromicStore.API.Controllers.BaseControllers;
 
 namespace KromicStore.API.Controllers;
 
 /// <summary>
-/// API endpoints for marketing campaigns and email.
-/// Tenants can create and manage marketing campaigns, newsletters, and automations.
+/// STRICT: Tenant Admin endpoints for marketing campaigns.
+/// Only TenantAdmin and StoreManager roles can access.
+/// SuperAdmin gets 403.
+/// Routes: /api/v1/tenant/marketing/*
 /// </summary>
-[ApiController]
-[Route("api/v1/marketing")]
-[Authorize(Roles = "TenantAdmin,StoreManager")]
-public class MarketingController : ControllerBase
+[Route("marketing")]
+public class MarketingController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MarketingController"/> class.
-    /// </summary>
-    public MarketingController(IMediator mediator)
+    public MarketingController(IMediator mediator, ILogger<MarketingController> logger) : base(logger)
     {
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using KromicStore.API.Contracts.ThemeBuilder;
+using KromicStore.API.Controllers.BaseControllers;
 using GetThemesQuery = KromicStore.Application.Features.Tenants.Queries.GetThemes.GetThemesQuery;
 using ThemeQueryDto = KromicStore.Application.Features.Tenants.Queries.GetThemes.ThemeDto;
 using KromicStore.Application.Features.Tenants.Commands.CreateTheme;
@@ -12,20 +13,17 @@ using KromicStore.Domain.Tenants;
 namespace KromicStore.API.Controllers;
 
 /// <summary>
-/// API endpoints for theme builder.
-/// Tenants can create, customize, and publish store themes without coding.
+/// STRICT: Tenant Admin endpoints for theme builder.
+/// Only TenantAdmin and StoreManager roles can access.
+/// SuperAdmin gets 403.
+/// Routes: /api/v1/tenant/themes/*
 /// </summary>
-[ApiController]
-[Route("api/v1/themes")]
-[Authorize(Roles = "TenantAdmin")]
-public class ThemeBuilderController : ControllerBase
+[Route("themes")]
+public class ThemeBuilderController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ThemeBuilderController"/> class.
-    /// </summary>
-    public ThemeBuilderController(IMediator mediator)
+    public ThemeBuilderController(IMediator mediator, ILogger<ThemeBuilderController> logger) : base(logger)
     {
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }

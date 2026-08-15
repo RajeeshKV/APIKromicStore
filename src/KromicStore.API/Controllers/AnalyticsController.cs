@@ -2,25 +2,23 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using KromicStore.API.Contracts.Analytics;
+using KromicStore.API.Controllers.BaseControllers;
 using GetStoreAnalyticsQuery = KromicStore.Application.Features.Tenants.Queries.GetStoreAnalytics.GetStoreAnalyticsQuery;
 
 namespace KromicStore.API.Controllers;
 
 /// <summary>
-/// API endpoints for analytics and reporting.
-/// Tenants can access detailed analytics, reports, and export data.
+/// STRICT: Tenant Admin endpoints for analytics and reporting.
+/// Only TenantAdmin and StoreManager roles can access.
+/// SuperAdmin gets 403.
+/// Routes: /api/v1/tenant/analytics/*
 /// </summary>
-[ApiController]
-[Route("api/v1/analytics")]
-[Authorize(Roles = "TenantAdmin,StoreManager")]
-public class AnalyticsController : ControllerBase
+[Route("analytics")]
+public class AnalyticsController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AnalyticsController"/> class.
-    /// </summary>
-    public AnalyticsController(IMediator mediator)
+    public AnalyticsController(IMediator mediator, ILogger<AnalyticsController> logger) : base(logger)
     {
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }

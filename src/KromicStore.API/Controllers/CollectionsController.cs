@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using KromicStore.API.Contracts.Catalog;
+using KromicStore.API.Controllers.BaseControllers;
 using GetCollectionsQuery = KromicStore.Application.Features.Catalog.Queries.GetCollections.GetCollectionsQuery;
 using GetCollectionByIdQuery = KromicStore.Application.Features.Catalog.Queries.GetCollectionById.GetCollectionByIdQuery;
 using CreateCollectionCommand = KromicStore.Application.Features.Catalog.Commands.CreateCollection.CreateCollectionCommand;
@@ -11,18 +12,19 @@ using DeleteCollectionCommand = KromicStore.Application.Features.Catalog.Command
 namespace KromicStore.API.Controllers;
 
 /// <summary>
-/// API endpoints for product collection management.
+/// STRICT: Tenant Admin endpoints for product collection management.
+/// Only TenantAdmin and StoreManager roles can access these endpoints.
+/// SuperAdmin will get 403 Forbidden.
 /// </summary>
-[ApiController]
-[Route("api/v1/collections")]
-public class CollectionsController : ControllerBase
+[Route("collections")]
+public class CollectionsController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CollectionsController"/> class.
     /// </summary>
-    public CollectionsController(IMediator mediator)
+    public CollectionsController(IMediator mediator, ILogger<CollectionsController> logger) : base(logger)
     {
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }

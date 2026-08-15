@@ -2,25 +2,26 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using KromicStore.API.Contracts.Catalog;
+using KromicStore.API.Controllers.BaseControllers;
 using GetInventoryQuery = KromicStore.Application.Features.Catalog.Queries.GetInventory.GetInventoryQuery;
 using AdjustInventoryCommand = KromicStore.Application.Features.Catalog.Commands.AdjustInventory.AdjustInventoryCommand;
 
 namespace KromicStore.API.Controllers;
 
 /// <summary>
-/// API endpoints for inventory management.
+/// STRICT: Tenant Admin endpoints for inventory management.
+/// Only TenantAdmin and StoreManager roles can access these endpoints.
+/// SuperAdmin will get 403 Forbidden.
 /// </summary>
-[ApiController]
-[Route("api/v1/inventory")]
-[Authorize(Roles = "TenantAdmin,StoreManager")]
-public class InventoryController : ControllerBase
+[Route("inventory")]
+public class InventoryController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="InventoryController"/> class.
     /// </summary>
-    public InventoryController(IMediator mediator)
+    public InventoryController(IMediator mediator, ILogger<InventoryController> logger) : base(logger)
     {
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }

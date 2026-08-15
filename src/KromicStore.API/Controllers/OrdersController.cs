@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
+using KromicStore.API.Controllers.BaseControllers;
 using KromicStore.Application.Features.Orders.Commands.ConfirmOrder;
 using KromicStore.Application.Features.Orders.Commands.RejectOrder;
 using KromicStore.Application.Features.Orders.Commands.CancelOrder;
@@ -15,17 +16,16 @@ using GetProductsQuery = KromicStore.Application.Features.Catalog.Queries.GetPro
 namespace KromicStore.API.Controllers;
 
 /// <summary>
-/// API endpoints for order management - both customer and tenant operations.
-/// Customers can place, view, and track orders.
-/// Tenants can confirm, reject, and update order status.
+/// STRICT: Tenant Admin endpoints for order management.
+/// Only TenantAdmin and StoreManager roles can access these endpoints.
+/// SuperAdmin will get 403 Forbidden.
 /// </summary>
-[ApiController]
-[Route("api/v1/orders")]
-public class OrdersController : ControllerBase
+[Route("orders")]
+public class OrdersController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
 
-    public OrdersController(IMediator mediator)
+    public OrdersController(IMediator mediator, ILogger<OrdersController> logger) : base(logger)
     {
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }

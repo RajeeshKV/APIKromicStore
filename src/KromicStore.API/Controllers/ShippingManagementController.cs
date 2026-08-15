@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using KromicStore.API.Contracts.Shipping;
+using KromicStore.API.Controllers.BaseControllers;
 using CreateShippingZoneCommand = KromicStore.Application.Features.Shipping.Commands.CreateShippingZone.CreateShippingZoneCommand;
 using AddShippingMethodCommand = KromicStore.Application.Features.Shipping.Commands.AddShippingMethod.AddShippingMethodCommand;
 using CalculateShippingCostCommand = KromicStore.Application.Features.Shipping.Commands.CalculateShippingCost.CalculateShippingCostCommand;
@@ -9,20 +10,20 @@ using CalculateShippingCostCommand = KromicStore.Application.Features.Shipping.C
 namespace KromicStore.API.Controllers;
 
 /// <summary>
-/// API endpoints for shipping zone and method management.
-/// Tenants can configure shipping zones, methods, and rates.
+/// STRICT: Tenant Admin endpoints for shipping zone and method management.
+/// Only TenantAdmin and StoreManager roles can access.
+/// SuperAdmin gets 403.
+/// Routes: /api/v1/tenant/shipping/*
 /// </summary>
-[ApiController]
-[Route("api/v1/shipping")]
-[Authorize(Roles = "TenantAdmin,StoreManager")]
-public class ShippingManagementController : ControllerBase
+[Route("shipping")]
+public class ShippingManagementController : TenantAdminBaseController
 {
     private readonly IMediator _mediator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ShippingManagementController"/> class.
     /// </summary>
-    public ShippingManagementController(IMediator mediator)
+    public ShippingManagementController(IMediator mediator, ILogger<ShippingManagementController> logger) : base(logger)
     {
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
