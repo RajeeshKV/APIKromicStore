@@ -7,6 +7,7 @@ using KromicStore.Domain.Exceptions;
 using KromicStore.Domain.Identity;
 using KromicStore.Domain.Tenants;
 using KromicStore.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using DomainRefreshToken = KromicStore.Domain.Identity.RefreshToken;
@@ -84,7 +85,9 @@ public sealed class RegisterCommandHandlerTests
         result.User.LastName.Should().Be("Smith");
         result.User.IsEmailVerified.Should().BeFalse();
 
-        var user = _dbContext.Users.First(u => u.Id == result.User.Id);
+        var user = ((KromicStore.Infrastructure.Persistence.KromicStoreDbContext)_dbContext).UserSet
+            .IgnoreQueryFilters()
+            .First(u => u.Id == result.User.Id);
         user.Email.Should().Be("alice@example.com");
         user.PasswordHash.Should().Be(hashedPassword);
         user.IsActive.Should().BeTrue();
@@ -239,7 +242,9 @@ public sealed class RegisterCommandHandlerTests
 
         // Assert
         result.User.Email.Should().Be("grace@example.com");
-        var user = _dbContext.Users.First(u => u.Id == result.User.Id);
+        var user = ((KromicStore.Infrastructure.Persistence.KromicStoreDbContext)_dbContext).UserSet
+            .IgnoreQueryFilters()
+            .First(u => u.Id == result.User.Id);
         user.Email.Should().Be("grace@example.com");
     }
 }
