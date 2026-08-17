@@ -1,6 +1,5 @@
 using MediatR;
 using KromicStore.Application.Features.Catalog.Abstractions;
-using KromicStore.Application.Common.Abstractions;
 using Microsoft.Extensions.Logging;
 
 namespace KromicStore.Application.Features.Catalog.Queries.GetCollections;
@@ -8,16 +7,13 @@ namespace KromicStore.Application.Features.Catalog.Queries.GetCollections;
 public sealed class GetCollectionsQueryHandler : IRequestHandler<GetCollectionsQuery, GetCollectionsResponse>
 {
     private readonly ICollectionRepository _collectionRepository;
-    private readonly ITenantContext _tenantContext;
     private readonly ILogger<GetCollectionsQueryHandler> _logger;
 
     public GetCollectionsQueryHandler(
         ICollectionRepository collectionRepository,
-        ITenantContext tenantContext,
         ILogger<GetCollectionsQueryHandler> logger)
     {
         _collectionRepository = collectionRepository ?? throw new ArgumentNullException(nameof(collectionRepository));
-        _tenantContext = tenantContext ?? throw new ArgumentNullException(nameof(tenantContext));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -28,10 +24,10 @@ public sealed class GetCollectionsQueryHandler : IRequestHandler<GetCollectionsQ
         _logger.LogInformation("Retrieving collections: Skip={Skip}, Take={Take}, IsActive={IsActive}",
             query.Skip, query.Take, query.IsActive);
 
+        // EF global query filter already scopes results to the current tenant.
         var allCollections = await _collectionRepository.GetAllAsync(cancellationToken);
 
         var collections = allCollections
-            .Where(c => c.TenantId == _tenantContext.TenantId)
             .Where(c => !c.IsDeleted)
             .Where(c => query.IsActive == null || (query.IsActive.Value && c.Status == 0) || (!query.IsActive.Value && c.Status != 0))
             .Skip(query.Skip)
@@ -51,7 +47,7 @@ public sealed class GetCollectionsQueryHandler : IRequestHandler<GetCollectionsQ
             Name: collection.Name,
             Description: collection.Description,
             Slug: collection.Name.ToLower().Replace(" ", "-"),
-            IsActive: collection.Status == 0, // CollectionStatus.Active
+            IsActive: collection.Status == 0,
             ProductCount: collection.ProductMappings?.Count ?? 0,
             CreatedAtUtc: collection.CreatedOnUtc);
     }

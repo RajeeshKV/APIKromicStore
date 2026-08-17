@@ -312,7 +312,8 @@ public class PromotionsController : TenantAdminBaseController
     }
 
     /// <summary>
-    /// Applies a coupon code to a cart or order (customer operation).
+    /// Applies a coupon code to a cart or order (tenant admin validation endpoint).
+    /// For customer-facing coupon apply, use POST /api/v1/storefront/coupons/{couponCode}/apply
     /// </summary>
     /// <param name="couponCode">The coupon code to apply.</param>
     /// <returns>Application result with discount amount.</returns>
@@ -321,7 +322,6 @@ public class PromotionsController : TenantAdminBaseController
     /// <response code="404">Coupon not found.</response>
     /// <response code="500">Internal server error.</response>
     [HttpPost("coupons/{couponCode}/apply")]
-    [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -455,13 +455,12 @@ public class PromotionsController : TenantAdminBaseController
     }
 
     /// <summary>
-    /// Gets all active campaigns (customer-facing).
+    /// Gets all campaigns for the tenant's store (admin view).
     /// </summary>
-    /// <returns>List of active campaigns.</returns>
+    /// <returns>List of campaigns.</returns>
     /// <response code="200">Returns active campaigns.</response>
     /// <response code="500">Internal server error.</response>
     [HttpGet("campaigns")]
-    [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public Task<ActionResult<IEnumerable<CampaignDto>>> GetActiveCampaigns(CancellationToken cancellationToken = default)

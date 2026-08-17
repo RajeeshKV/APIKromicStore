@@ -39,8 +39,7 @@ public class CollectionsController : TenantAdminBaseController
     /// <response code="400">Invalid parameters.</response>
     /// <response code="500">Internal server error.</response>
     [HttpGet]
-    [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IEnumerable<CollectionDto>>> GetCollections(
@@ -95,8 +94,7 @@ public class CollectionsController : TenantAdminBaseController
     /// <response code="404">Collection not found.</response>
     /// <response code="500">Internal server error.</response>
     [HttpGet("{id}")]
-    [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CollectionDto>> GetCollection(Guid id, CancellationToken cancellationToken = default)
@@ -176,4 +174,5 @@ public class CollectionsController : TenantAdminBaseController
         return NoContent();
     }
 }
+
 

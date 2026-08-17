@@ -40,8 +40,8 @@ public sealed class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, 
             products = await _productRepository.GetAllAsync(cancellationToken);
         }
 
+        // EF global query filter already scopes to the current tenant — no in-memory re-filter needed.
         var productList = products
-            .Where(p => p.TenantId == _tenantContext.TenantId)
             .Where(p => !p.IsDeleted)
             .Where(p => query.Status == null || (int)p.Status == query.Status)
             .OrderByDescending(p => p.CreatedOnUtc)

@@ -1,6 +1,5 @@
 using MediatR;
 using KromicStore.Application.Features.Catalog.Abstractions;
-using KromicStore.Application.Common.Abstractions;
 using Microsoft.Extensions.Logging;
 
 namespace KromicStore.Application.Features.Catalog.Queries.GetProductById;
@@ -8,16 +7,13 @@ namespace KromicStore.Application.Features.Catalog.Queries.GetProductById;
 public sealed class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery, GetProductByIdResponse>
 {
     private readonly IProductRepository _productRepository;
-    private readonly ITenantContext _tenantContext;
     private readonly ILogger<GetProductByIdQueryHandler> _logger;
 
     public GetProductByIdQueryHandler(
         IProductRepository productRepository,
-        ITenantContext tenantContext,
         ILogger<GetProductByIdQueryHandler> logger)
     {
         _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
-        _tenantContext = tenantContext ?? throw new ArgumentNullException(nameof(tenantContext));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -27,18 +23,15 @@ public sealed class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQ
     {
         _logger.LogInformation("Retrieving product detail: {ProductId}", query.ProductId);
 
+        // EF global query filter already scopes to the current tenant — a product
+        // belonging to a different tenant simply won't be found (returns null), which
+        // is the correct behaviour for both admin and storefront calls.
         var product = await _productRepository.GetByIdAsync(query.ProductId, cancellationToken);
 
         if (product == null || product.IsDeleted)
         {
             _logger.LogWarning("Product not found or deleted: {ProductId}", query.ProductId);
             return new GetProductByIdResponse(null);
-        }
-
-        if (product.TenantId != _tenantContext.TenantId)
-        {
-            _logger.LogWarning("Unauthorized access to product: {ProductId}", query.ProductId);
-            throw new UnauthorizedAccessException($"Not authorized to access this resource.");
         }
 
         var productDto = MapToProductDetailDto(product);
@@ -49,7 +42,6 @@ public sealed class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQ
 
     private static ProductDetailDto MapToProductDetailDto(dynamic product)
     {
-        // Map variants
         var variants = new List<VariantDto>();
         if (product.Variants != null && product.Variants.Count > 0)
         {
@@ -61,15 +53,14 @@ public sealed class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQ
                     Sku: v.Sku,
                     Name: v.Name,
                     Price: priceAdjustment > 0 ? product.Price + priceAdjustment : null,
-                    CostPrice: null, // Not available in variant data
+                    CostPrice: null,
                     Attributes: v.Attributes != null ? BuildAttributesDictionary(v.Attributes) : new Dictionary<string, string>(),
                     QuantityOnHand: v.StockQuantity ?? 0,
                     IsAvailable: (v.IsActive ?? false) && (v.StockQuantity ?? 0) > 0,
-                    CreatedAtUtc: DateTime.UtcNow)); // Note: ProductVariant doesn't track CreatedAtUtc; using current time
+                    CreatedAtUtc: DateTime.UtcNow));
             }
         }
 
-        // Map images
         var images = new List<ProductImageDto>();
         if (product.Images != null && product.Images.Count > 0)
         {
@@ -77,9 +68,7 @@ public sealed class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQ
             foreach (var i in product.Images)
             {
                 if (!(i.IsDeleted ?? false))
-                {
                     imagesToAdd.Add((i, i.DisplayOrder ?? 0));
-                }
             }
 
             foreach (var (i, _) in imagesToAdd.OrderBy(x => x.order))
@@ -90,15 +79,9 @@ public sealed class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQ
                     AltText: i.AltText,
                     DisplayOrder: i.DisplayOrder ?? 0,
                     IsPrimary: i.IsPrimary ?? false,
-                    CreatedAtUtc: DateTime.UtcNow)); // Note: ProductImage doesn't track CreatedAtUtc; using current time
+                    CreatedAtUtc: DateTime.UtcNow));
             }
         }
-
-        // Map attributes
-        var attributes = BuildAttributesDictionary(product.Attributes);
-
-        // Map tags
-        var tags = BuildTagsList(product.Tags);
 
         return new ProductDetailDto(
             Id: product.Id,
@@ -109,14 +92,14 @@ public sealed class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQ
             CostPrice: product.CostPrice,
             CurrencyCode: "USD",
             IsAvailable: product.IsAvailable ?? false,
-            QuantityOnHand: 0, // Will be populated from inventory tracking when available
-            ReorderLevel: 0, // Will be populated from inventory when available
+            QuantityOnHand: 0,
+            ReorderLevel: 0,
             CategoryId: product.CategoryId,
-            CategoryName: "", // Will be populated from category relationship when available
+            CategoryName: "",
             Variants: variants,
             Images: images,
-            Attributes: attributes,
-            Tags: tags,
+            Attributes: BuildAttributesDictionary(product.Attributes),
+            Tags: BuildTagsList(product.Tags),
             Slug: product.Slug,
             MetaDescription: product.MetaDescription ?? product.Description,
             CreatedAtUtc: product.CreatedOnUtc,
@@ -129,9 +112,7 @@ public sealed class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQ
         if (attributes != null)
         {
             foreach (var a in attributes)
-            {
                 result[a.Name] = a.Value;
-            }
         }
         return result;
     }
@@ -142,9 +123,7 @@ public sealed class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQ
         if (tags != null)
         {
             foreach (var t in tags)
-            {
                 result.Add(t.TagValue ?? string.Empty);
-            }
         }
         return result;
     }

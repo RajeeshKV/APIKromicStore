@@ -4,10 +4,12 @@ using MediatR;
 using KromicStore.API.Contracts.Catalog;
 using KromicStore.Application.Features.Storefront.Queries.GetStoreInfo;
 using KromicStore.Application.Features.Storefront.Queries.ListFeaturedProducts;
+using KromicStore.Application.Features.Promotions.Commands.ApplyCoupon;
 using GetProductsQuery = KromicStore.Application.Features.Catalog.Queries.GetProducts.GetProductsQuery;
 using GetCategoriesQuery = KromicStore.Application.Features.Catalog.Queries.GetCategories.GetCategoriesQuery;
 using GetProductByIdQuery = KromicStore.Application.Features.Catalog.Queries.GetProductById.GetProductByIdQuery;
 using SearchProductsQuery = KromicStore.Application.Features.Catalog.Queries.SearchProducts.SearchProductsQuery;
+using GetThemesQuery = KromicStore.Application.Features.Tenants.Queries.GetThemes.GetThemesQuery;
 
 namespace KromicStore.API.Controllers;
 
@@ -493,6 +495,81 @@ KromicStore began with a simple mission: to make quality products accessible to 
 Have questions? We'd love to hear from you! Contact us at info@kromicstore.com or call +1-800-KROMIC-1.
 ";
     }
+
+    // ── Theme ──────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Gets the active published theme for this store.
+    /// Call on storefront load to apply branding and layout configuration.
+    /// Tenant is resolved automatically from Host header (mystore.kromic.in).
+    /// </summary>
+    /// <response code="200">Returns active theme.</response>
+    /// <response code="404">No published theme found for this store.</response>
+    [HttpGet("theme")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<StorefrontThemeDto>> GetActiveTheme(CancellationToken cancellationToken = default)
+    {
+        var query = new GetThemesQuery { PublishedOnly = true, Skip = 0, Take = 1 };
+        var result = await _mediator.Send(query, cancellationToken);
+
+        var theme = result.Themes.FirstOrDefault();
+        if (theme is null)
+            return NotFound(new { message = "No published theme found for this store." });
+
+        return Ok(new StorefrontThemeDto(
+            ThemeId:         theme.Id,
+            Name:            theme.Name,
+            Slug:            theme.Slug,
+            Description:     theme.Description,
+            PreviewImageUrl: theme.PreviewImageUrl,
+            IsPublished:     theme.IsPublished));
+    }
+
+    // ── Promotions (customer-facing) ───────────────────────────────────────────
+
+    /// <summary>
+    /// Gets all active promotional campaigns visible to customers.
+    /// </summary>
+    /// <response code="200">Returns active campaigns.</response>
+    [HttpGet("campaigns")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public Task<ActionResult<IEnumerable<StorefrontCampaignDto>>> GetActiveCampaigns(
+        CancellationToken cancellationToken = default)
+    {
+        // TODO: wire to GetActiveCampaignsQuery when implemented
+        return Task.FromResult<ActionResult<IEnumerable<StorefrontCampaignDto>>>(
+            Ok(Enumerable.Empty<StorefrontCampaignDto>()));
+    }
+
+    /// <summary>
+    /// Validates and applies a coupon code at checkout.
+    /// No auth required — customer-facing.
+    /// </summary>
+    /// <param name="couponCode">The coupon code to validate.</param>
+    /// <response code="200">Coupon is valid.</response>
+    /// <response code="400">Coupon is invalid or expired.</response>
+    [HttpPost("coupons/{couponCode}/apply")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> ApplyCoupon(
+        string couponCode,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(couponCode))
+            return BadRequest(new { message = "Coupon code is required." });
+
+        var command = new KromicStore.Application.Features.Promotions.Commands.ApplyCoupon.ApplyCouponCommand
+        {
+            CouponCode = couponCode
+        };
+        var response = await _mediator.Send(command, cancellationToken);
+
+        if (!response.IsValid)
+            return BadRequest(new { message = "Coupon code is invalid or expired.", code = couponCode });
+
+        return Ok(new { message = "Coupon applied.", discountAmount = response.DiscountAmount, code = couponCode });
+    }
 }
 
 public record StorePoliciesDto(
@@ -526,3 +603,20 @@ public record StoreFaqDto(
 public record FaqItemDto(
     string Question,
     string Answer);
+
+public record StorefrontThemeDto(
+    Guid    ThemeId,
+    string  Name,
+    string  Slug,
+    string? Description,
+    string? PreviewImageUrl,
+    bool    IsPublished);
+
+public record StorefrontCampaignDto(
+    Guid     CampaignId,
+    string   Name,
+    string?  Description,
+    decimal? DiscountAmount,
+    string?  CouponCode,
+    DateTime StartDate,
+    DateTime EndDate);

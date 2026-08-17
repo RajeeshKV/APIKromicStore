@@ -1,6 +1,5 @@
 using MediatR;
 using KromicStore.Application.Features.Catalog.Abstractions;
-using KromicStore.Application.Common.Abstractions;
 using Microsoft.Extensions.Logging;
 
 namespace KromicStore.Application.Features.Catalog.Queries.SearchProducts;
@@ -8,16 +7,13 @@ namespace KromicStore.Application.Features.Catalog.Queries.SearchProducts;
 public sealed class SearchProductsQueryHandler : IRequestHandler<SearchProductsQuery, SearchProductsResponse>
 {
     private readonly IProductRepository _productRepository;
-    private readonly ITenantContext _tenantContext;
     private readonly ILogger<SearchProductsQueryHandler> _logger;
 
     public SearchProductsQueryHandler(
         IProductRepository productRepository,
-        ITenantContext tenantContext,
         ILogger<SearchProductsQueryHandler> logger)
     {
         _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
-        _tenantContext = tenantContext ?? throw new ArgumentNullException(nameof(tenantContext));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -34,13 +30,11 @@ public sealed class SearchProductsQueryHandler : IRequestHandler<SearchProductsQ
             return new SearchProductsResponse([]);
         }
 
-        // Note: Full-text search will be implemented when SearchService is injected into Application layer
+        // EF global query filter already scopes results to the current tenant.
         var allProducts = await _productRepository.GetAllAsync(cancellationToken);
-
         var normalizedSearch = query.SearchText.Trim().ToLowerInvariant();
 
         var searchResults = allProducts
-            .Where(p => p.TenantId == _tenantContext.TenantId)
             .Where(p => !p.IsDeleted)
             .Where(p => query.CategoryId == null || p.CategoryId == query.CategoryId)
             .Where(p =>
@@ -59,24 +53,22 @@ public sealed class SearchProductsQueryHandler : IRequestHandler<SearchProductsQ
 
     private static ProductSearchResultDto MapToProductSearchResultDto(dynamic product, string searchText = "")
     {
-        // Note: Tags will be mapped when tag relationship is available
         var tags = new List<string>();
-        
-        // Calculate basic relevance score based on search text match position
+
         float relevanceScore = 1.0f;
         if (!string.IsNullOrEmpty(searchText))
         {
             var normalized = searchText.ToLower();
-            if (product.Name.ToLower().StartsWith(normalized)) 
+            if (product.Name.ToLower().StartsWith(normalized))
                 relevanceScore = 3.0f;
-            else if (product.Name.ToLower().Contains(normalized)) 
+            else if (product.Name.ToLower().Contains(normalized))
                 relevanceScore = 2.5f;
-            else if (product.Description?.ToLower().Contains(normalized) == true) 
+            else if (product.Description?.ToLower().Contains(normalized) == true)
                 relevanceScore = 2.0f;
-            else if (product.Sku.ToLower().Contains(normalized)) 
+            else if (product.Sku.ToLower().Contains(normalized))
                 relevanceScore = 1.5f;
         }
-        
+
         return new ProductSearchResultDto(
             Id: product.Id,
             Name: product.Name,
@@ -86,7 +78,7 @@ public sealed class SearchProductsQueryHandler : IRequestHandler<SearchProductsQ
             Sku: product.Sku,
             BasePrice: product.Price,
             CurrencyCode: "USD",
-            CategoryName: "", // Will be populated from category relationship when available
+            CategoryName: "",
             Tags: tags,
             IsAvailable: product.IsAvailable ?? false,
             RelevanceScore: relevanceScore);

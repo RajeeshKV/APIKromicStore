@@ -37,8 +37,7 @@ public class CategoriesController : TenantAdminBaseController
     /// <response code="200">Returns the list of categories.</response>
     /// <response code="500">Internal server error.</response>
     [HttpGet]
-    [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategories(
         [FromQuery] int skip = 0,
@@ -95,8 +94,7 @@ public class CategoriesController : TenantAdminBaseController
     /// <response code="404">Category not found.</response>
     /// <response code="500">Internal server error.</response>
     [HttpGet("{id}")]
-    [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CategoryDto>> GetCategory(Guid id, CancellationToken cancellationToken = default)
@@ -207,4 +205,5 @@ public class CategoriesController : TenantAdminBaseController
         return Ok(result);
     }
 }
+
 

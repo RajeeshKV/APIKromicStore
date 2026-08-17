@@ -118,6 +118,17 @@ public sealed class Tenant : AuditableEntity
 
     public void Activate() => Status = TenantStatus.Active;
 
+    /// <summary>
+    /// Updates the platform slug (subdomain identifier).
+    /// Call this when the tenant changes their subdomain.
+    /// </summary>
+    public void UpdateSlug(string newSlug)
+    {
+        if (string.IsNullOrWhiteSpace(newSlug))
+            throw new ArgumentException("Slug is required.", nameof(newSlug));
+        Slug = NormalizeSlug(newSlug);
+    }
+
     public void Suspend()
     {
         if (Status == TenantStatus.Archived)

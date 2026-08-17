@@ -1,6 +1,5 @@
 using MediatR;
 using KromicStore.Application.Features.Catalog.Abstractions;
-using KromicStore.Application.Common.Abstractions;
 using Microsoft.Extensions.Logging;
 
 namespace KromicStore.Application.Features.Catalog.Queries.SearchCategories;
@@ -8,16 +7,13 @@ namespace KromicStore.Application.Features.Catalog.Queries.SearchCategories;
 public sealed class SearchCategoriesQueryHandler : IRequestHandler<SearchCategoriesQuery, SearchCategoriesResponse>
 {
     private readonly ICategoryRepository _categoryRepository;
-    private readonly ITenantContext _tenantContext;
     private readonly ILogger<SearchCategoriesQueryHandler> _logger;
 
     public SearchCategoriesQueryHandler(
         ICategoryRepository categoryRepository,
-        ITenantContext tenantContext,
         ILogger<SearchCategoriesQueryHandler> logger)
     {
         _categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
-        _tenantContext = tenantContext ?? throw new ArgumentNullException(nameof(tenantContext));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -33,12 +29,11 @@ public sealed class SearchCategoriesQueryHandler : IRequestHandler<SearchCategor
             return new SearchCategoriesResponse([]);
         }
 
+        // EF global query filter already scopes results to the current tenant.
         var allCategories = await _categoryRepository.GetAllAsync(cancellationToken);
-
         var normalizedSearch = query.SearchText.Trim().ToLowerInvariant();
 
         var searchResults = allCategories
-            .Where(c => c.TenantId == _tenantContext.TenantId)
             .Where(c => !c.IsDeleted)
             .Where(c =>
                 c.Name.ToLower().Contains(normalizedSearch) ||
@@ -59,9 +54,9 @@ public sealed class SearchCategoriesQueryHandler : IRequestHandler<SearchCategor
             Description: category.Description,
             ParentCategoryId: category.ParentCategoryId,
             DisplayOrder: category.DisplayOrder,
-            IsActive: category.Status == 0, // CategoryStatus.Active
+            IsActive: category.Status == 0,
             Slug: category.Slug,
-            ProductCount: 0, // Will be populated from Category.Products relationship when available
+            ProductCount: 0,
             CreatedAtUtc: category.CreatedOnUtc,
             ModifiedAtUtc: category.ModifiedOnUtc);
     }

@@ -18,6 +18,7 @@ using KromicStore.Application.Features.Tenants.Commands.UpdatePaymentSettings;
 using KromicStore.Application.Features.Tenants.Commands.AddCustomDomain;
 using KromicStore.Application.Features.Tenants.Commands.RemoveCustomDomain;
 using KromicStore.Application.Features.Tenants.Commands.VerifyCustomDomain;
+using KromicStore.Application.Features.Tenants.Commands.UpdateSubdomain;
 
 namespace KromicStore.API.Controllers;
 
@@ -336,6 +337,36 @@ public class TenantDashboardController : TenantAdminBaseController
         var result = await _mediator.Send(new VerifyCustomDomainCommand(tenantId, request.CustomDomain), cancellationToken);
         return Ok(result);
     }
+
+    // ── Subdomain ─────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Updates the store's platform subdomain (e.g. mystore → newname).
+    /// The new subdomain must be available. After saving, the store URL changes to
+    /// https://newname.kromic.in — inform the user they must use the new URL.
+    /// </summary>
+    /// <response code="200">Subdomain updated. Returns new store URL.</response>
+    /// <response code="400">Validation error (format, reserved, etc.).</response>
+    /// <response code="401">Unauthorized.</response>
+    /// <response code="409">Subdomain already taken.</response>
+    [HttpPatch("subdomain")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<UpdateSubdomainResponse>> UpdateSubdomain(
+        [FromBody] UpdateSubdomainRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        if (tenantId == Guid.Empty) return Unauthorized();
+
+        var result = await _mediator.Send(
+            new UpdateSubdomainCommand(tenantId, request.NewSubdomain),
+            cancellationToken);
+
+        return Ok(result);
+    }
 }
 
 // ── DTOs ──────────────────────────────────────────────────────────────────────
@@ -353,4 +384,7 @@ public record UpdatePaymentSettingsRequest(string ApiKey, string ApiSecret);
 public record AddDomainRequest(string CustomDomain, bool SetPrimary = false);
 public record RemoveDomainRequest(string CustomDomain);
 public record VerifyDomainRequest(string CustomDomain);
+
+/// <summary>Request body for PATCH /api/v1/tenant/dashboard/subdomain</summary>
+public record UpdateSubdomainRequest(string NewSubdomain);
 

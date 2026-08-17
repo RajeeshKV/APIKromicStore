@@ -43,7 +43,6 @@ public class ProductsController : TenantAdminBaseController
     /// <response code="400">Invalid parameters.</response>
     /// <response code="500">Internal server error.</response>
     [HttpGet]
-    [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -117,7 +116,6 @@ public class ProductsController : TenantAdminBaseController
     /// <response code="404">Product not found.</response>
     /// <response code="500">Internal server error.</response>
     [HttpGet("{id}")]
-    [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
