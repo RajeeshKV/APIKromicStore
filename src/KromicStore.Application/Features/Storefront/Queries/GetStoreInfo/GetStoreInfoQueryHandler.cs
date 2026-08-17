@@ -27,8 +27,19 @@ public sealed class GetStoreInfoQueryHandler : IRequestHandler<GetStoreInfoQuery
     {
         if (!_tenantContext.TenantId.HasValue)
         {
-            _logger.LogWarning("Tenant not resolved from request");
-            throw new InvalidOperationException("No tenant context available");
+            _logger.LogWarning("Storefront info requested but no tenant resolved from Host header");
+            // Return a safe empty response — the storefront should show a "store not found" page
+            return new GetStoreInfoResponse(
+                TenantId: Guid.Empty,
+                StoreName: "Store Not Found",
+                Description: null,
+                LogoUrl: null,
+                FaviconUrl: null,
+                StoreEmail: null,
+                SupportEmail: null,
+                PhoneNumber: null,
+                CurrencyCode: "USD",
+                IsPublished: false);
         }
 
         _logger.LogInformation("Retrieving store info for tenant {TenantId}", _tenantContext.TenantId);

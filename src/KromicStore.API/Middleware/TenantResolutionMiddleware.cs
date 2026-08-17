@@ -39,20 +39,24 @@ public sealed class TenantResolutionMiddleware
 
     public async Task InvokeAsync(HttpContext httpContext, TenantContext tenantContext, KromicStoreDbContext dbContext)
     {
-        // 1. Try subdomain / custom domain first (storefront and storefront-api calls)
+        // 1. Try subdomain / custom domain from Host header (storefront: mystore.kromic.in → API: mystore.kromic.in)
         if (!await ResolveTenantFromHostAsync(httpContext, tenantContext, dbContext))
         {
-            // 2. Try JWT tenantId claim — covers admin panel calls (admin.kromic.in)
-            //    where host is not a tenant subdomain
-            if (!await ResolveTenantFromJwtAsync(httpContext, tenantContext, dbContext))
+            // 2. Try X-Kromic-TenantSubdomain header — sent by storefronts that call the shared API domain
+            //    (e.g. storefront on melo.kromic.in calling storeapi.kromic.in includes this header)
+            if (!await ResolveTenantFromSubdomainHeaderAsync(httpContext, tenantContext, dbContext))
             {
-                // 3. Development fallback: explicit header for local testing without DNS
-                if (_environment.IsDevelopment() &&
-                    httpContext.Request.Headers.TryGetValue(DevelopmentTenantHeader, out var value) &&
-                    Guid.TryParse(value, out var devTenantId))
+                // 3. Try JWT tenantId claim — covers admin panel calls (admin.kromic.in)
+                if (!await ResolveTenantFromJwtAsync(httpContext, tenantContext, dbContext))
                 {
-                    tenantContext.Set(devTenantId);
-                    _logger.LogInformation("Tenant resolved via dev header: {TenantId}", devTenantId);
+                    // 4. Development fallback: X-Kromic-TenantId header (raw GUID, local testing)
+                    if (_environment.IsDevelopment() &&
+                        httpContext.Request.Headers.TryGetValue(DevelopmentTenantHeader, out var value) &&
+                        Guid.TryParse(value, out var devTenantId))
+                    {
+                        tenantContext.Set(devTenantId);
+                        _logger.LogInformation("Tenant resolved via dev header: {TenantId}", devTenantId);
+                    }
                 }
             }
         }
@@ -61,6 +65,40 @@ public sealed class TenantResolutionMiddleware
     }
 
     // ── Resolution strategies ─────────────────────────────────────────────────
+
+    /// <summary>
+    /// Resolves tenant from the X-Kromic-TenantSubdomain header.
+    /// Storefronts hosted on melo.kromic.in call the shared API at storeapi.kromic.in.
+    /// The Host header the API sees is storeapi.kromic.in — not the store subdomain.
+    /// The frontend sends X-Kromic-TenantSubdomain: melo so the API knows which store.
+    /// </summary>
+    private async Task<bool> ResolveTenantFromSubdomainHeaderAsync(
+        HttpContext httpContext,
+        TenantContext tenantContext,
+        KromicStoreDbContext dbContext)
+    {
+        if (!httpContext.Request.Headers.TryGetValue("X-Kromic-TenantSubdomain", out var headerValue))
+            return false;
+
+        var subdomain = headerValue.ToString().Trim().ToLowerInvariant();
+        if (string.IsNullOrEmpty(subdomain))
+            return false;
+
+        var tenant = await dbContext.TenantSet
+            .IgnoreQueryFilters()
+            .Where(t => !t.IsDeleted && t.Domains.Any(d => d.Subdomain == subdomain))
+            .FirstOrDefaultAsync();
+
+        if (tenant is null || !tenant.Status.IsActive())
+        {
+            _logger.LogWarning("Tenant not found or inactive for subdomain header: {Subdomain}", subdomain);
+            return false;
+        }
+
+        tenantContext.Set(tenant.Id, storeName: tenant.StoreName);
+        _logger.LogDebug("Tenant resolved from X-Kromic-TenantSubdomain header: {Subdomain} → {TenantId}", subdomain, tenant.Id);
+        return true;
+    }
 
     /// <summary>
     /// Resolves tenant from the JWT tenantId claim with database ownership check.
